@@ -1,0 +1,8 @@
+{
+  "plugins.builtin_heading": ["Built-in plugins", "内置插件"],
+  "plugins.external_heading": ["External plugins", "外部插件"],
+  "plugins.none_installed": ["None installed", "暂未安装"],
+  "plugins.id_header": ["Plugin ID", "插件 ID"],
+  "plugins.platform_header": ["Platforms", "适用平台"],
+  "plugins.cross_platform": ["Cross-platform", "跨平台"]
+}

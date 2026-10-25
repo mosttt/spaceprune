@@ -1,0 +1,629 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CleanupSizeAccounting": {
+      "description": "How a handler's completed selections contribute to a human-facing cleanup summary.",
+      "oneOf": [
+        {
+          "description": "Processed content has a byte estimate; missing estimates remain unknown.",
+          "enum": [
+            "processed_bytes"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Snapshot groups share storage and must be counted separately from byte estimates.",
+          "enum": [
+            "snapshot_groups"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "GroupExecutionReport": {
+      "description": "一个计划组的执行报告。",
+      "properties": {
+        "error": {
+          "description": "Handler 调用整体失败说明。",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Original structured handler failure; `error` retains the existing display text."
+        },
+        "handler_id": {
+          "description": "Handler ID。",
+          "type": "string"
+        },
+        "module_id": {
+          "description": "模块 ID。",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/HandlerCleanResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Handler 返回的清理结果；调用整体失败时为 `None`。"
+        },
+        "size_accounting": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/CleanupSizeAccounting"
+            }
+          ],
+          "default": "processed_bytes",
+          "description": "Registered handler accounting, retained with the report for later display."
+        },
+        "task_id": {
+          "description": "任务 ID。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handler_id",
+        "module_id",
+        "task_id"
+      ],
+      "type": "object"
+    },
+    "HandlerCleanResult": {
+      "description": "Aggregate and per-selection cleanup results from one handler invocation.",
+      "properties": {
+        "attempted": {
+          "description": "尝试清理的项目数。",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "failures": {
+          "description": "各清理项失败信息。",
+          "items": {
+            "$ref": "#/definitions/ItemFailure"
+          },
+          "type": "array"
+        },
+        "outcomes": {
+          "default": [],
+          "description": "Per-selection outcomes, including partial effects and not-attempted work.",
+          "items": {
+            "$ref": "#/definitions/ItemExecution"
+          },
+          "type": "array"
+        },
+        "reclaimed_bytes": {
+          "description": "Known processed-size subtotal, not measured freed disk space.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "space_changes": {
+          "description": "Volume observations around distinct, non-overlapping cleanup batches. A shared batch is reported once, not once per selected item or task.",
+          "items": {
+            "$ref": "#/definitions/VolumeSpaceChange"
+          },
+          "type": "array"
+        },
+        "succeeded": {
+          "description": "成功清理的项目数。",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "unknown_reclaimed_items": {
+          "default": null,
+          "description": "Items with confirmed or uncertain effects whose processed-size estimate is unknown. None means the handler did not report size completeness (including older plugins).",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "attempted",
+        "failures",
+        "reclaimed_bytes",
+        "succeeded"
+      ],
+      "type": "object"
+    },
+    "IoFailure": {
+      "additionalProperties": false,
+      "description": "A portable classification plus the unmodified native error code.",
+      "properties": {
+        "kind": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IoFailureKind"
+            }
+          ],
+          "description": "Machine-readable category; display text is never used for authorization decisions."
+        },
+        "os_code": {
+          "description": "Original OS error when available.",
+          "format": "int32",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "IoFailureKind": {
+      "description": "Structured filesystem/process failure class.",
+      "oneOf": [
+        {
+          "description": "The exact resource is absent.",
+          "enum": [
+            "not_found"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "OS access rights were insufficient.",
+          "enum": [
+            "access_denied"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Another process holds an incompatible handle.",
+          "enum": [
+            "sharing_violation"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The underlying volume is read-only.",
+          "enum": [
+            "read_only_volume"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "An OS policy prevents the requested operation.",
+          "enum": [
+            "policy_blocked"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The operation was cancelled.",
+          "enum": [
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The operation exceeded its deadline.",
+          "enum": [
+            "timed_out"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The selected identity or its containing boundary changed.",
+          "enum": [
+            "target_changed"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A symbolic link, reparse point, or mount violates the allowed traversal boundary.",
+          "enum": [
+            "boundary_violation"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A resource budget was exhausted.",
+          "enum": [
+            "resource_limit"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A backend/protocol operation is unsupported.",
+          "enum": [
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "An error with no more specific portable classification.",
+          "enum": [
+            "other"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "ItemExecution": {
+      "description": "Exact per-selection execution evidence used by reports and execution journals.",
+      "properties": {
+        "failure": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ItemFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Failure or interruption that prevented full completion."
+        },
+        "item_id": {
+          "description": "Original selected item identity within its task.",
+          "type": "string"
+        },
+        "reclaimed_estimate": {
+          "description": "Known estimate of actual processed content; None means unknown, not zero.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "reclaimed_lower_bound": {
+          "default": 0,
+          "description": "Known processed-size subtotal when the complete estimate is unknown; otherwise zero.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ItemExecutionStatus"
+            }
+          ],
+          "description": "Observable outcome of this selected unit."
+        }
+      },
+      "required": [
+        "item_id",
+        "status"
+      ],
+      "type": "object"
+    },
+    "ItemExecutionStatus": {
+      "description": "Handler 的清理结果。 Outcome of one originally selected unit; this is distinct from the operation's terminal state.",
+      "oneOf": [
+        {
+          "description": "All eligible work in the selected unit completed.",
+          "enum": [
+            "succeeded"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The selected resource had already disappeared; its additional estimate is zero.",
+          "enum": [
+            "already_absent"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Some effects occurred before a failure or cancellation.",
+          "enum": [
+            "partially_applied"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "An attempted operation failed before any known effects.",
+          "enum": [
+            "failed"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Work was dispatched but its effects could not be confirmed; never retry without reconciliation.",
+          "enum": [
+            "uncertain"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "No destructive work was attempted, for example after cancellation.",
+          "enum": [
+            "not_attempted"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "ItemFailure": {
+      "description": "单个清理项的执行失败。",
+      "properties": {
+        "authorization": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PermissionOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Result of an authorization attempt for this item, distinct from its original IO failure."
+        },
+        "io_failure": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IoFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured native failure; display strings are not retry decisions."
+        },
+        "item_id": {
+          "description": "任务内清理项 ID。",
+          "type": "string"
+        },
+        "message": {
+          "description": "失败说明。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "message"
+      ],
+      "type": "object"
+    },
+    "OperationStopReason": {
+      "description": "Why an operation stopped before finishing its requested scope.",
+      "oneOf": [
+        {
+          "description": "The caller explicitly requested cancellation.",
+          "enum": [
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The original operation's execution deadline was reached.",
+          "enum": [
+            "deadline_exceeded"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "PermissionOutcome": {
+      "description": "Stable outcomes reported by a native backend, without interpreting localized messages.",
+      "oneOf": [
+        {
+          "description": "An actual operation or backend handshake established the capability.",
+          "enum": [
+            "granted"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The native backend explicitly reported refusal.",
+          "enum": [
+            "denied"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The caller cancelled the operation.",
+          "enum": [
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The authorization deadline elapsed.",
+          "enum": [
+            "timed_out"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The OS requires an explicit change in system settings.",
+          "enum": [
+            "needs_system_settings"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The installed helper could not be found.",
+          "enum": [
+            "helper_missing"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The helper identity or installation permissions are not trusted.",
+          "enum": [
+            "helper_untrusted"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The installed helper predates the required scoped identity protocol.",
+          "enum": [
+            "helper_outdated"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Authorization did not complete; the native error does not establish a narrower cause.",
+          "enum": [
+            "authorization_unavailable"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "This operation needs an interactive authorization context.",
+          "enum": [
+            "needs_authorization"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The backend or protocol cannot perform this operation.",
+          "enum": [
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A system policy prevents the operation.",
+          "enum": [
+            "policy_blocked"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The target volume cannot be modified.",
+          "enum": [
+            "read_only_volume"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "PluginError": {
+      "description": "Handler 调用失败。",
+      "properties": {
+        "authorization": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PermissionOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Native authorization result, when this failure came from an authorization attempt."
+        },
+        "code": {
+          "description": "适合程序判断的稳定错误代码。",
+          "type": "string"
+        },
+        "io_failure": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IoFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured native error, when the failure comes from an OS operation."
+        },
+        "message": {
+          "description": "面向用户的英文错误说明。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "VolumeSpaceChange": {
+      "description": "Observed volume free-space change, separate from per-item processed-size estimates. Concurrent filesystem activity can contribute to this change.",
+      "properties": {
+        "error": {
+          "description": "Why measurement was unavailable; this does not change the deletion outcome.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "freeBytesAfter": {
+          "description": "Free bytes on the same filesystem after the batch command has exited.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "freeBytesBefore": {
+          "description": "Free filesystem bytes immediately before the batch, including reserved free blocks.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scope": {
+          "description": "Human-readable operation scope, such as a snapshot configuration name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "一次清理计划的执行报告。",
+  "properties": {
+    "cancelled": {
+      "description": "是否因协作式取消提前结束。",
+      "type": "boolean"
+    },
+    "groups": {
+      "description": "各任务组执行结果。",
+      "items": {
+        "$ref": "#/definitions/GroupExecutionReport"
+      },
+      "type": "array"
+    },
+    "operation_failures": {
+      "description": "Operation-wide finalization failures, separate from already committed item/group results.",
+      "items": {
+        "$ref": "#/definitions/PluginError"
+      },
+      "type": "array"
+    },
+    "stop_reason": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/OperationStopReason"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Cause of interrupted execution, preserving completed per-item effects."
+    }
+  },
+  "required": [
+    "cancelled",
+    "groups"
+  ],
+  "title": "ExecutionReport",
+  "type": "object"
+}

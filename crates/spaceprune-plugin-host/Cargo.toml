@@ -1,0 +1,23 @@
+[package]
+name = "spaceprune-plugin-host"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "External process plugin host for SpacePrune"
+
+[dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-config = { path = "../spaceprune-config" }
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+spaceprune-engine = { path = "../spaceprune-engine" }
+spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
+serde.workspace = true
+serde_json.workspace = true
+semver.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+[lints]
+workspace = true

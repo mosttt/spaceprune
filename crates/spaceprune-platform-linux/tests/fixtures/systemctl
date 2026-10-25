@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+root=$SPACEPRUNE_AUTOMATION_TEST_ROOT
+state=$root/scheduler
+units=$XDG_CONFIG_HOME/systemd/user
+mkdir -p "$state"
+printf '%s\n' "$*" >> "$root/systemctl.log"
+action=$2
+case "$action" in
+show)
+    if [ -f "$units/spaceprune-daily.timer" ]; then
+        printf 'LoadState=loaded\n'
+        if [ -f "$state/enabled" ]; then printf 'UnitFileState=enabled\n'; elif [ -f "$state/enabled-runtime" ]; then printf 'UnitFileState=enabled-runtime\n'; else printf 'UnitFileState=disabled\n'; fi
+    else
+        printf 'LoadState=not-found\nUnitFileState=\n'
+    fi
+    if [ -f "$state/active" ]; then printf 'ActiveState=active\n'; else printf 'ActiveState=inactive\n'; fi
+    ;;
+enable) if [ "$3" = --runtime ]; then : > "$state/enabled-runtime"; else : > "$state/enabled"; fi ;;
+restart|start)
+    : > "$state/active"
+    cp "$units/spaceprune-daily.timer" "$state/effective.timer"
+    ;;
+stop) rm -f "$state/active" "$state/effective.timer" ;;
+disable)
+    case "$*" in *--runtime*) rm -f "$state/enabled-runtime";; *) rm -f "$state/enabled";; esac
+    case "$*" in *--now*) rm -f "$state/active" "$state/effective.timer";; esac
+    ;;
+daemon-reload) ;;
+*) exit 90 ;;
+esac
+fault=$action
+if [ "$action" = disable ] && [ "$3" = --runtime ]; then fault=disable-runtime; fi
+if [ -s "$root/fail-actions" ] && { [ "$(head -n 1 "$root/fail-actions")" = "$action" ] || [ "$(head -n 1 "$root/fail-actions")" = "$fault" ]; }; then
+    tail -n +2 "$root/fail-actions" > "$root/fail-actions.next"
+    mv "$root/fail-actions.next" "$root/fail-actions"
+    printf 'injected %s failure\n' "$fault" >&2
+    exit 23
+fi
+exit 0

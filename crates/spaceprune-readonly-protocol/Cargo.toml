@@ -1,0 +1,35 @@
+[package]
+name = "spaceprune-readonly-protocol"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "SpacePrune 只读权限 Helper 协议"
+
+[dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+base64.workspace = true
+getrandom.workspace = true
+rustix.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+spaceprune-windows-elevation = { path = "../spaceprune-windows-elevation" }
+
+[target.'cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))'.dependencies]
+spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
+spaceprune-plugin-filesystem = { path = "../../plugins/filesystem" }
+[target.'cfg(target_os = "linux")'.dependencies]
+spaceprune-plugin-snapper = { path = "../../plugins/snapper" }
+spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
+
+[target.'cfg(unix)'.dependencies]
+rustix = { workspace = true, features = ["process"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = "0.2.189"
+
+[lints]
+workspace = true

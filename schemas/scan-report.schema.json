@@ -1,0 +1,522 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CleanupItem": {
+      "description": "Handler 扫描产生的一个清理项。",
+      "properties": {
+        "id": {
+          "description": "任务内唯一 ID。",
+          "type": "string"
+        },
+        "location": {
+          "description": "路径或领域资源的可读位置。",
+          "type": "string"
+        },
+        "logical_bytes": {
+          "description": "逻辑占用字节数；无法计量时为 `None`。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "logical_size_applicability": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SizeApplicability"
+            }
+          ],
+          "description": "Domain applicability of logical size. Older reports default to ordinary measurement."
+        },
+        "modified_at": {
+          "description": "Unix 时间戳形式的最后活动时间。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "显示名称。",
+          "type": "string"
+        },
+        "opaque": {
+          "description": "由同一 Handler 在清理时解释的私有数据。"
+        },
+        "parent_id": {
+          "description": "可选的父项 ID，用于构建展示树。",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "description": "推荐、可选或不可用的原因。",
+          "type": "string"
+        },
+        "reclaimable_bytes": {
+          "description": "预计可释放字节数；无法可靠估计时为 `None`。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "recommendation": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Recommendation"
+            }
+          ],
+          "description": "当前推荐状态。"
+        },
+        "tags": {
+          "description": "用于过滤和展示的标签。",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "location",
+        "name",
+        "opaque",
+        "reason",
+        "recommendation",
+        "tags"
+      ],
+      "type": "object"
+    },
+    "HandlerIssue": {
+      "description": "Handler 报告的一个问题。",
+      "properties": {
+        "code": {
+          "description": "Stable diagnostic code, independent of display text.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "io_failure": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IoFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured native failure, used by access retry policies."
+        },
+        "level": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IssueLevel"
+            }
+          ],
+          "description": "问题严重程度。"
+        },
+        "location": {
+          "description": "可选的路径或资源位置。",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "description": "英文问题说明。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "level",
+        "message"
+      ],
+      "type": "object"
+    },
+    "IoFailure": {
+      "additionalProperties": false,
+      "description": "A portable classification plus the unmodified native error code.",
+      "properties": {
+        "kind": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IoFailureKind"
+            }
+          ],
+          "description": "Machine-readable category; display text is never used for authorization decisions."
+        },
+        "os_code": {
+          "description": "Original OS error when available.",
+          "format": "int32",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "IoFailureKind": {
+      "description": "Structured filesystem/process failure class.",
+      "oneOf": [
+        {
+          "description": "The exact resource is absent.",
+          "enum": [
+            "not_found"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "OS access rights were insufficient.",
+          "enum": [
+            "access_denied"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Another process holds an incompatible handle.",
+          "enum": [
+            "sharing_violation"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The underlying volume is read-only.",
+          "enum": [
+            "read_only_volume"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "An OS policy prevents the requested operation.",
+          "enum": [
+            "policy_blocked"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The operation was cancelled.",
+          "enum": [
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The operation exceeded its deadline.",
+          "enum": [
+            "timed_out"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The selected identity or its containing boundary changed.",
+          "enum": [
+            "target_changed"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A symbolic link, reparse point, or mount violates the allowed traversal boundary.",
+          "enum": [
+            "boundary_violation"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A resource budget was exhausted.",
+          "enum": [
+            "resource_limit"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "A backend/protocol operation is unsupported.",
+          "enum": [
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "An error with no more specific portable classification.",
+          "enum": [
+            "other"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "IssueLevel": {
+      "description": "扫描或执行过程中的问题严重程度。",
+      "oneOf": [
+        {
+          "description": "不阻止其他结果使用的问题。",
+          "enum": [
+            "warning"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "当前任务或动作失败。",
+          "enum": [
+            "error"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "ModuleReport": {
+      "description": "一个模块的扫描报告。",
+      "properties": {
+        "description": {
+          "description": "模块说明。",
+          "type": "string"
+        },
+        "id": {
+          "description": "模块 ID。",
+          "type": "string"
+        },
+        "name": {
+          "description": "模块显示名称。",
+          "type": "string"
+        },
+        "tasks": {
+          "description": "任务报告。",
+          "items": {
+            "$ref": "#/definitions/TaskReport"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "description",
+        "id",
+        "name",
+        "tasks"
+      ],
+      "type": "object"
+    },
+    "OperationStopReason": {
+      "description": "Why an operation stopped before finishing its requested scope.",
+      "oneOf": [
+        {
+          "description": "The caller explicitly requested cancellation.",
+          "enum": [
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The original operation's execution deadline was reached.",
+          "enum": [
+            "deadline_exceeded"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "Recommendation": {
+      "description": "清理项的推荐状态。",
+      "oneOf": [
+        {
+          "description": "默认勾选，并由 `--clean` 清理。",
+          "enum": [
+            "recommended"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "默认不勾选，但用户可以手动选择。",
+          "enum": [
+            "optional"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "仅用于展示，不能进入清理计划。",
+          "enum": [
+            "unavailable"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "SizeApplicability": {
+      "description": "Whether a size concept applies to an observed item, independently of measurement success.",
+      "oneOf": [
+        {
+          "description": "A missing measurement is unknown; a measured zero remains zero.",
+          "enum": [
+            "applicable"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The domain explicitly declares this size concept inapplicable.",
+          "enum": [
+            "not_applicable"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "TaskReport": {
+      "description": "一个任务的扫描报告。",
+      "properties": {
+        "error": {
+          "description": "阻止当前任务扫描的错误。",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "handler_id": {
+          "description": "Handler ID。",
+          "type": "string"
+        },
+        "issues": {
+          "description": "Handler 报告的警告或错误级问题。",
+          "items": {
+            "$ref": "#/definitions/HandlerIssue"
+          },
+          "type": "array"
+        },
+        "items": {
+          "description": "扫描得到的清理项。",
+          "items": {
+            "$ref": "#/definitions/CleanupItem"
+          },
+          "type": "array"
+        },
+        "module_id": {
+          "description": "模块 ID。",
+          "type": "string"
+        },
+        "name": {
+          "description": "任务显示名称。",
+          "type": "string"
+        },
+        "request": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TaskRequest"
+            }
+          ],
+          "description": "传递给 Handler 的完整任务请求。"
+        },
+        "task_id": {
+          "description": "任务 ID。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handler_id",
+        "issues",
+        "items",
+        "module_id",
+        "name",
+        "request",
+        "task_id"
+      ],
+      "type": "object"
+    },
+    "TaskRequest": {
+      "description": "传递给 Handler 的已解析任务。",
+      "properties": {
+        "handler_id": {
+          "description": "完整 Handler ID。",
+          "type": "string"
+        },
+        "module_id": {
+          "description": "所属模块 ID。",
+          "type": "string"
+        },
+        "name": {
+          "description": "任务显示名称。",
+          "type": "string"
+        },
+        "options": {
+          "description": "扫描与执行选项。"
+        },
+        "recommend": {
+          "description": "推荐规则。"
+        },
+        "tags": {
+          "description": "任务标签。",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "task_id": {
+          "description": "任务 ID。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handler_id",
+        "module_id",
+        "name",
+        "options",
+        "recommend",
+        "tags",
+        "task_id"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "一次 SpacePrune 扫描的完整报告。",
+  "properties": {
+    "cancelled": {
+      "description": "是否因协作式取消提前结束。",
+      "type": "boolean"
+    },
+    "config_name": {
+      "description": "清理方案名称。",
+      "type": "string"
+    },
+    "config_source": {
+      "description": "配置来源。",
+      "type": "string"
+    },
+    "modules": {
+      "description": "实际扫描的模块。",
+      "items": {
+        "$ref": "#/definitions/ModuleReport"
+      },
+      "type": "array"
+    },
+    "scan_id": {
+      "description": "Unique identity of this observed scan, preserved in snapshots.",
+      "type": "string"
+    },
+    "stop_reason": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/OperationStopReason"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Cause of an incomplete operation; absent in older serialized reports."
+    }
+  },
+  "required": [
+    "cancelled",
+    "config_name",
+    "config_source",
+    "modules",
+    "scan_id"
+  ],
+  "title": "ScanReport",
+  "type": "object"
+}

@@ -1,0 +1,58 @@
+[package]
+name = "spaceprune-access"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Native operation, authorization and filesystem primitives shared by SpacePrune hosts"
+
+[dependencies]
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+tempfile.workspace = true
+uuid = { version = "1.18.1", features = ["v4"] }
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1.1.4", features = ["fs", "process", "time", "thread"] }
+
+[target.'cfg(windows)'.dependencies]
+spaceprune-windows-elevation = { path = "../spaceprune-windows-elevation" }
+socket2 = "0.6.5"
+windows-sys = { version = "0.61.2", features = ["Wdk_Foundation", "Wdk_Storage_FileSystem", "Win32_System_IO", "Win32_Foundation", "Win32_Storage_FileSystem", "Win32_Security", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Registry", "Win32_System_Performance", "Win32_Graphics_Gdi", "Win32_System_RemoteDesktop", "Win32_System_LibraryLoader", "Win32_UI_WindowsAndMessaging", "Win32_Security_Authentication_Identity", "Win32_Networking_WinSock"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = "5.19.0"
+async-io = "2.6.0"
+futures-lite = "2.6.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = "0.2.189"
+mach2 = "0.7.0"
+core-foundation = "0.10.1"
+security-framework = { version = "3.7.0", default-features = false }
+security-framework-sys = { version = "2.17.0", default-features = false }
+objc2 = "0.6.4"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSWorkspace"] }
+block2 = "0.6.2"
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["std", "NSString", "NSError", "NSProcessInfo", "NSNotification", "NSOperation", "block2"] }
+
+[target.'cfg(unix)'.dev-dependencies]
+rustix = { version = "1.1.4", features = ["net"] }
+libc = "0.2.189"
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "deny"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+zbus = { version = "5.19.0", features = ["p2p", "bus-impl"] }
+
+[[test]]
+name = "go_cache_worker"
+path = "tests/go_cache_worker.rs"
+harness = false

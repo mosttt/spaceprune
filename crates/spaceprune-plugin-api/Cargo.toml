@@ -1,0 +1,14 @@
+[package]
+name = "spaceprune-plugin-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Public plugin protocol for SpacePrune"
+
+[dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+
+[lints]
+workspace = true

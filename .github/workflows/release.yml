@@ -1,0 +1,326 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  ci:
+    name: Run CI
+    uses: ./.github/workflows/ci.yml
+
+  validate:
+    name: Validate release tag
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+
+      - name: Verify tag matches Cargo version
+        shell: bash
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          package_id="$(cargo pkgid --locked -p spaceprune-cli)"
+          package_version="${package_id##*#}"
+          if [[ "$GITHUB_REF_NAME" == "$tag_version" || "$tag_version" != "$package_version" ]]; then
+            printf 'Release tag %s must equal v%s\n' "$GITHUB_REF_NAME" "$package_version"
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            system_packages: ""
+            linker_variable: ""
+            linker: ""
+            artifact_path: dist/*.tar.gz
+          - os: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            system_packages: gcc-aarch64-linux-gnu
+            linker_variable: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER
+            linker: aarch64-linux-gnu-gcc
+            artifact_path: dist/*.tar.gz
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+            system_packages: musl-tools
+            linker_variable: CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER
+            linker: musl-gcc
+            artifact_path: dist/*.tar.gz
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            system_packages: ""
+            linker_variable: ""
+            linker: ""
+            artifact_path: dist/*.tar.gz
+          - os: macos-15
+            target: aarch64-apple-darwin
+            system_packages: ""
+            linker_variable: ""
+            linker: ""
+            artifact_path: dist/*.tar.gz
+          - os: windows-2025
+            target: x86_64-pc-windows-msvc
+            system_packages: ""
+            linker_variable: ""
+            linker: ""
+            artifact_path: dist/*.zip
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install system linker
+        if: matrix.system_packages != ''
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ${{ matrix.system_packages }}
+          printf '%s=%s\n' '${{ matrix.linker_variable }}' '${{ matrix.linker }}' >> "$GITHUB_ENV"
+
+      - name: Install Rust target
+        run: |
+          rustup toolchain install
+          rustup target add "${{ matrix.target }}"
+
+      - name: Restore Cargo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-release-${{ matrix.target }}-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-release-${{ matrix.target }}-
+
+      - name: Prepare macOS signing credentials
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          SPACEPRUNE_MACOS_TEAM_ID: ${{ vars.SPACEPRUNE_MACOS_TEAM_ID }}
+          SPACEPRUNE_MACOS_SIGNING_IDENTITY: ${{ vars.SPACEPRUNE_MACOS_SIGNING_IDENTITY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SPACEPRUNE_MACOS_TEAM_ID"
+          test -n "$SPACEPRUNE_MACOS_SIGNING_IDENTITY"
+          python3 scripts/macos-ci.py keychain-create "$RUNNER_TEMP/spaceprune-keychain.json"
+          printf 'SPACEPRUNE_MACOS_TEAM_ID=%s\n' "$SPACEPRUNE_MACOS_TEAM_ID" >> "$GITHUB_ENV"
+          printf 'SPACEPRUNE_MACOS_SIGNING_IDENTITY=%s\n' "$SPACEPRUNE_MACOS_SIGNING_IDENTITY" >> "$GITHUB_ENV"
+          if [[ '${{ matrix.target }}' == x86_64-* ]]; then
+            echo 'MACOSX_DEPLOYMENT_TARGET=10.13' >> "$GITHUB_ENV"
+          else
+            echo 'MACOSX_DEPLOYMENT_TARGET=11.0' >> "$GITHUB_ENV"
+          fi
+
+      - name: Build binary
+        if: runner.os != 'Windows'
+        run: cargo build --release --locked --package spaceprune-cli --target "${{ matrix.target }}"
+
+      - name: Build native permission components
+        if: runner.os == 'Linux'
+        run: cargo build --release --locked --package spaceprune-readonly-helper --target "${{ matrix.target }}"
+
+      - name: Build signed Windows package and pinned portable CLI
+        if: runner.os == 'Windows'
+        env:
+          SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1: ${{ vars.SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 }}
+        shell: pwsh
+        run: |
+          if ($env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 -notmatch '^[a-fA-F0-9]{40}$') {
+            throw 'Configure the Windows signing certificate in the runner certificate store before publishing'
+          }
+          dotnet tool install --global wix --version 4.0.6
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $signTool = Get-ChildItem "${env:ProgramFiles(x86)}/Windows Kits/10/bin/*/x64/signtool.exe" | Sort-Object FullName | Select-Object -Last 1
+          if (-not $signTool) { throw 'Windows SDK signtool was not found' }
+          $env:SPACEPRUNE_WINDOWS_SIGNTOOL = $signTool.FullName
+          python scripts/windows-native-package.py build --target '${{ matrix.target }}' --output target/windows-native-package --with-cli
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build and sign macOS native components
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/macos-native-package.py build --distribution cli \
+            --target '${{ matrix.target }}' --output target/macos-package/SpacePruneAuthorization.app
+          python3 scripts/macos-native-package.py sign-cli --distribution cli \
+            --output 'target/${{ matrix.target }}/release/spaceprune'
+
+      - name: Stage Unix binary
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="spaceprune-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          mkdir -p "dist/$package/docs"
+          cp "target/${{ matrix.target }}/release/spaceprune" "dist/$package/spaceprune"
+          if [[ "${{ runner.os }}" == Linux ]]; then
+            for helper in spaceprune-readonly-helper spaceprune-cleanup-helper spaceprune-helper-installer; do
+              cp "target/${{ matrix.target }}/release/$helper" "dist/$package/"
+            done
+          fi
+          if [[ "${{ runner.os }}" == macOS ]]; then
+            ditto target/macos-package/SpacePruneAuthorization.app "dist/$package/SpacePruneAuthorization.app"
+          fi
+          cp README.md LICENSE \
+            licenses/rust/THIRD-PARTY-LICENSES-RUST.txt \
+            licenses/rust/THIRD-PARTY-LICENSES-RUST-STDLIB.html \
+            "dist/$package/"
+          if [[ "${{ matrix.target }}" == *-musl ]]; then
+            test -r /usr/share/doc/musl/copyright
+            cp -L /usr/share/doc/musl/copyright "dist/$package/THIRD-PARTY-LICENSES-MUSL.txt"
+          fi
+          cp -R docs/. "dist/$package/docs/"
+
+      - name: Notarize macOS CLI package
+        if: runner.os == 'macOS'
+        env:
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_PRIVATE_KEY: ${{ secrets.APPLE_API_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="spaceprune-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          ditto -c -k --keepParent "dist/$package" "dist/$package.notary.zip"
+          python3 scripts/macos-ci.py notarize "dist/$package.notary.zip"
+          xcrun stapler staple "dist/$package/SpacePruneAuthorization.app"
+          xcrun stapler validate "dist/$package/SpacePruneAuthorization.app"
+          rm "dist/$package.notary.zip"
+
+      - name: Archive Unix binary
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="spaceprune-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          tar -C dist -czf "dist/$package.tar.gz" "$package"
+          rm -rf "dist/$package"
+
+      - name: Package Windows binary
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $package = "spaceprune-$env:GITHUB_REF_NAME-${{ matrix.target }}"
+          New-Item -ItemType Directory -Force "dist/$package/docs" | Out-Null
+          Copy-Item target/windows-native-package/spaceprune.exe, target/windows-native-package/SpacePruneNative.msi, target/windows-native-package/package-identity.json "dist/$package/"
+          Copy-Item README.md, LICENSE, licenses/rust/THIRD-PARTY-LICENSES-RUST.txt, licenses/rust/THIRD-PARTY-LICENSES-RUST-STDLIB.html "dist/$package/"
+          Copy-Item docs/* -Recurse "dist/$package/docs/"
+          Compress-Archive -Path "dist/$package" -DestinationPath "dist/$package.zip"
+          Remove-Item -Recurse -Force "dist/$package"
+
+      - name: Remove temporary macOS signing credentials
+        if: always() && runner.os == 'macOS'
+        run: python3 scripts/macos-ci.py keychain-delete "$RUNNER_TEMP/spaceprune-keychain.json"
+
+      - name: Upload release package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: spaceprune-release-${{ matrix.target }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: spaceprune-release-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum spaceprune-* > SHA256SUMS
+          sha256sum --check SHA256SUMS
+
+      - name: Create immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          created=false
+          published=false
+          cleanup() {
+            exit_status=$?
+            if [[ "$exit_status" -ne 0 && "$created" == true && "$published" == false ]]; then
+              draft="$(gh release view "$GITHUB_REF_NAME" \
+                --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null || true)"
+              if [[ "$draft" == true ]]; then
+                gh release delete "$GITHUB_REF_NAME" \
+                  --repo "$GITHUB_REPOSITORY" --yes || true
+              else
+                echo "release is not a confirmed draft; refusing cleanup" >&2
+              fi
+            fi
+            return "$exit_status"
+          }
+          trap cleanup EXIT
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release already exists; refusing to replace immutable assets" >&2
+            exit 1
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            --draft \
+            --generate-notes \
+            --title "SpacePrune $GITHUB_REF_NAME" \
+            --verify-tag \
+            --repo "$GITHUB_REPOSITORY"
+          created=true
+          for asset in dist/*; do
+            gh release upload "$GITHUB_REF_NAME" "$asset" \
+              --repo "$GITHUB_REPOSITORY"
+          done
+          gh release edit "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft=false
+          published=true

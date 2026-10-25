@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "definitions": {
+    "FileIdentity": {
+      "additionalProperties": false,
+      "description": "Stable native identity data; obtaining or checking it belongs to the access implementation.",
+      "properties": {
+        "birth": {
+          "description": "Stable creation marker when available.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "device": {
+          "description": "Filesystem device or Windows volume identifier.",
+          "pattern": "^[0-9a-f]{16}$",
+          "type": "string"
+        },
+        "high": {
+          "description": "Upper 64 bits of a Windows file ID; zero on Unix.",
+          "pattern": "^[0-9a-f]{16}$",
+          "type": "string"
+        },
+        "inode": {
+          "description": "Unix inode or the lower 64 bits of a Windows file ID.",
+          "pattern": "^[0-9a-f]{16}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "device",
+        "high",
+        "inode"
+      ],
+      "type": "object"
+    },
+    "ObjectBinding": {
+      "additionalProperties": false,
+      "description": "A one-shot selection which must not silently bind a replacement or another device.",
+      "properties": {
+        "host_id": {
+          "description": "Originating machine identity.",
+          "type": "string"
+        },
+        "identity": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FileIdentity"
+            }
+          ],
+          "description": "Identity captured by the trusted host from an actual observation."
+        },
+        "relative": {
+          "description": "Exact relative selection under the configured root, or empty for an exact file root.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "host_id",
+        "identity",
+        "relative"
+      ],
+      "type": "object"
+    },
+    "RootSpec": {
+      "anyOf": [
+        {
+          "description": "An explicit configuration path or variable expression, resolved by the existing resolver.",
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A validated relative location under the current user's home on the task's platform.",
+          "properties": {
+            "user_home": {
+              "description": "Normal relative components, without separators, traversal, or empty components.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "user_home"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An observed absolute location bound to its originating machine.",
+          "properties": {
+            "host_id": {
+              "description": "Originating machine identity. Another machine must explicitly rebind the rule.",
+              "type": "string"
+            },
+            "local_absolute": {
+              "description": "Exact local absolute path; never guessed from a drive letter or similar filename.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "host_id",
+            "local_absolute"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "A persistent location expression. It never stores a session's opaque evidence identifier."
+    }
+  },
+  "description": "Typed built-in filesystem root declaration. Third-party handler options remain extensible.",
+  "properties": {
+    "bindings": {
+      "description": "Required object bindings for saved one-shot selections; absent for recurring rules.",
+      "items": {
+        "$ref": "#/definitions/ObjectBinding"
+      },
+      "type": "array"
+    },
+    "exclude": {
+      "default": [],
+      "description": "Hard protections, independent of default recommendation thresholds.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "include": {
+      "default": [
+        "*"
+      ],
+      "description": "Include predicates relative to this root.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "path": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/RootSpec"
+        }
+      ],
+      "description": "Stable location expression."
+    },
+    "scope": {
+      "default": "directory_subtree",
+      "description": "Enumeration or exact selection semantics.",
+      "enum": [
+        "directory_children",
+        "directory_subtree",
+        "exact_file"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "path"
+  ],
+  "title": "FilesystemRoot",
+  "type": "object"
+}

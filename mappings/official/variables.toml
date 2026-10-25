@@ -1,0 +1,87 @@
+schema-version = 2
+
+[variables.HOME]
+environment = "HOME"
+
+[variables.TEMP_HOME]
+environment = "TMPDIR"
+fallback = "/tmp"
+
+[platforms.linux.variables.CONFIG_HOME]
+environment = "XDG_CONFIG_HOME"
+fallback = "${HOME}/.config"
+
+[platforms.linux.variables.CACHE_HOME]
+environment = "XDG_CACHE_HOME"
+fallback = "${HOME}/.cache"
+
+[platforms.linux.variables.DATA_HOME]
+environment = "XDG_DATA_HOME"
+fallback = "${HOME}/.local/share"
+
+[platforms.linux.variables.STATE_HOME]
+environment = "XDG_STATE_HOME"
+fallback = "${HOME}/.local/state"
+
+[platforms.macos.variables.CONFIG_HOME]
+value = "${HOME}/Library/Application Support"
+
+[platforms.macos.variables.CACHE_HOME]
+value = "${HOME}/Library/Caches"
+
+[platforms.macos.variables.DATA_HOME]
+value = "${HOME}/Library/Application Support"
+
+[platforms.macos.variables.STATE_HOME]
+value = "${HOME}/Library/Application Support"
+
+[platforms.windows.variables.HOME]
+environment = "USERPROFILE"
+
+[platforms.windows.variables.CONFIG_HOME]
+environment = "APPDATA"
+fallback = "${HOME}/AppData/Roaming"
+
+[platforms.windows.variables.CACHE_HOME]
+environment = "LOCALAPPDATA"
+fallback = "${HOME}/AppData/Local"
+
+[platforms.windows.variables.DATA_HOME]
+environment = "LOCALAPPDATA"
+fallback = "${HOME}/AppData/Local"
+
+[platforms.windows.variables.STATE_HOME]
+environment = "LOCALAPPDATA"
+fallback = "${HOME}/AppData/Local"
+
+[platforms.windows.variables.TEMP_HOME]
+environment = "TEMP"
+fallback = "${CACHE_HOME}/Temp"
+
+[platforms.android.variables.CONFIG_HOME]
+environment = "XDG_CONFIG_HOME"
+fallback = "${HOME}/.config"
+
+[platforms.android.variables.CACHE_HOME]
+environment = "XDG_CACHE_HOME"
+fallback = "${HOME}/.cache"
+
+[platforms.android.variables.DATA_HOME]
+environment = "XDG_DATA_HOME"
+fallback = "${HOME}/.local/share"
+
+[platforms.android.variables.STATE_HOME]
+environment = "XDG_STATE_HOME"
+fallback = "${HOME}/.local/state"
+
+[platforms.ios.variables.CONFIG_HOME]
+value = "${HOME}/Library/Application Support"
+
+[platforms.ios.variables.CACHE_HOME]
+value = "${HOME}/Library/Caches"
+
+[platforms.ios.variables.DATA_HOME]
+value = "${HOME}/Library/Application Support"
+
+[platforms.ios.variables.STATE_HOME]
+value = "${HOME}/Library/Application Support"

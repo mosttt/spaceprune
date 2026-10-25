@@ -1,0 +1,32 @@
+SpacePrune Rust third-party licenses
+====================================
+
+This file is generated from Cargo.lock by cargo-about 0.9.2.
+It contains non-development runtime and build dependencies for the configured targets.
+
+Components
+----------
+
+{{#each crates}}
+Name: {{package.name}}
+Version: {{package.version}}
+License: {{license}}
+Source: {{#if package.repository}}{{package.repository}}{{else}}{{#if package.source}}{{package.source}}{{else}}local path dependency in this source distribution{{/if}}{{/if}}
+
+{{/each}}
+License texts
+-------------
+
+{{#each licenses}}
+License: {{id}} — {{name}}
+Text source: {{#if source_path}}bundled dependency license file{{else}}canonical SPDX license text{{/if}}
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}} ({{#if crate.repository}}{{crate.repository}}{{else}}{{#if crate.source}}{{crate.source}}{{else}}local path dependency in this source distribution{{/if}}{{/if}})
+{{/each}}
+
+{{text}}
+
+-------------------------------------------------------------------------------
+
+{{/each}}

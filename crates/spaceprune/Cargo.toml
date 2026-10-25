@@ -1,0 +1,43 @@
+[package]
+name = "spaceprune"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Configurable and extensible cleanup executor"
+
+[lib]
+name = "spaceprune"
+path = "src/lib.rs"
+
+[dependencies]
+spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
+spaceprune-plugin-developer-tools = { path = "../../plugins/developer-tools" }
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
+anyhow.workspace = true
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+spaceprune-config = { path = "../spaceprune-config" }
+spaceprune-engine = { path = "../spaceprune-engine" }
+spaceprune-platform = { path = "../spaceprune-platform" }
+spaceprune-plugin-filesystem = { path = "../../plugins/filesystem" }
+spaceprune-plugin-snapper = { path = "../../plugins/snapper" }
+spaceprune-plugin-host = { path = "../spaceprune-plugin-host" }
+semver.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+tempfile.workspace = true
+
+[target.'cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))'.dependencies]
+spaceprune-readonly-protocol = { path = "../spaceprune-readonly-protocol" }
+
+[target.'cfg(windows)'.dependencies]
+spaceprune-windows-elevation = { path = "../spaceprune-windows-elevation" }
+getrandom.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

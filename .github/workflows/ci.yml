@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    - cron: "23 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+  CARGO_AUDIT_VERSION: "0.22.2"
+  CARGO_ABOUT_VERSION: "0.9.2"
+  ACTIONLINT_VERSION: "1.7.12"
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+
+      - name: Restore Cargo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-quality-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-quality-
+
+      - name: Restore cargo-about
+        id: cargo-about-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cargo/bin/cargo-about
+          key: ${{ runner.os }}-${{ runner.arch }}-cargo-about-${{ env.CARGO_ABOUT_VERSION }}
+
+      - name: Install cargo-about
+        if: steps.cargo-about-cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-about --version "${{ env.CARGO_ABOUT_VERSION }}" --locked --features cli
+
+      - name: Check Rust license materials
+        run: |
+          scripts/rust-licenses.sh check
+          scripts/rust-stdlib-licenses.sh check
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Validate GitHub Actions workflows
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v${{ env.ACTIONLINT_VERSION }}
+
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Run tests
+        run: cargo test --workspace --all-targets --locked
+
+      - name: Check portable macOS package and signing lifecycle
+        run: python3 -m unittest discover -s scripts/tests
+
+      - name: Build documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps --locked
+
+      - name: Build release profile
+        run: cargo build --workspace --release --locked
+
+      - name: Check mobile library targets
+        env:
+          RUSTFLAGS: -D warnings
+        run: |
+          rustup target add aarch64-linux-android aarch64-apple-ios
+          cargo check --locked --target aarch64-linux-android -p spaceprune-plugin-api -p spaceprune-config -p spaceprune-engine -p spaceprune-plugin-filesystem -p spaceprune-platform
+          cargo check --locked --target aarch64-apple-ios -p spaceprune-plugin-api -p spaceprune-config -p spaceprune-engine -p spaceprune-plugin-filesystem -p spaceprune-platform
+
+  security:
+    name: Dependency security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+
+      - name: Restore cargo-audit
+        id: cargo-audit-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cargo/bin/cargo-audit
+          key: ${{ runner.os }}-${{ runner.arch }}-cargo-audit-${{ env.CARGO_AUDIT_VERSION }}
+
+      - name: Install cargo-audit
+        if: steps.cargo-audit-cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-audit --version "${{ env.CARGO_AUDIT_VERSION }}" --locked
+
+      - name: Audit dependencies
+        run: cargo audit --deny warnings
+
+  desktop-platforms:
+    name: ${{ matrix.name }}
+    if: github.event_name != 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS 15 ARM64
+            os: macos-15
+          - name: Windows Server 2025 x64
+            os: windows-2025
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+
+      - name: Restore Cargo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-desktop-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-desktop-
+
+      - name: Run platform Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Run platform tests
+        run: cargo test --workspace --all-targets --locked

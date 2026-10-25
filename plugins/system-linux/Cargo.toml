@@ -1,0 +1,22 @@
+[package]
+name = "spaceprune-plugin-system-linux"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Linux package and systemd lifecycle plugin"
+
+[dependencies]
+spaceprune-access = { path = "../../crates/spaceprune-access" }
+spaceprune-engine = { path = "../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+serde.workspace = true
+serde_json.workspace = true
+
+spaceprune-plugin-developer-tools = { path = "../developer-tools" }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

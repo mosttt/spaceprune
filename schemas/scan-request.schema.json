@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "一次扫描的范围请求。",
+  "properties": {
+    "module": {
+      "description": "可选模块 ID；`None` 表示全部启用模块。",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selectors": {
+      "default": [],
+      "description": "模块选择器 ID。",
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "tasks": {
+      "default": [],
+      "description": "只扫描这些任务 ID；空集合表示模块中的全部任务。",
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "title": "ScanRequest",
+  "type": "object"
+}

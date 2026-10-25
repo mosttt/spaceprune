@@ -1,0 +1,37 @@
+schema-version = 2
+name = "SpacePrune Minimal"
+
+[modules.cache]
+name = "Basic cache"
+description = "Common per-user cache and temporary files"
+order = 10
+
+[modules.cache.tasks.user-cache]
+name = "User cache"
+description = "Regenerable files in the platform user cache directory"
+handler = "builtin.filesystem/paths"
+platforms = ["linux", "macos", "android", "ios"]
+order = 10
+
+[modules.cache.tasks.user-cache.options]
+roots = [
+    { path = "${CACHE_HOME}", include = ["*"] },
+]
+
+[modules.cache.tasks.user-cache.recommend]
+older-than = "30d"
+
+[modules.cache.tasks.user-temporary]
+name = "User temporary files"
+description = "Files in the current user's temporary directory"
+handler = "builtin.filesystem/paths"
+platforms = ["windows"]
+order = 20
+
+[modules.cache.tasks.user-temporary.options]
+roots = [
+    { path = "${TEMP_HOME}", include = ["*"] },
+]
+
+[modules.cache.tasks.user-temporary.recommend]
+older-than = "7d"

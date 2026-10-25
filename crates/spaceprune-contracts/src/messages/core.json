@@ -1,0 +1,2186 @@
+{
+  "engine.skipping_disabled": [
+    "Skipping {p0}: plugin is disabled",
+    "跳过 {p0}：插件已禁用"
+  ],
+  "engine.scanning_task": [
+    "Scanning {p0}",
+    "正在扫描 {p0}"
+  ],
+  "engine.handler_disabled": [
+    "Plugin for handler `{p0}` is disabled",
+    "处理器 `{p0}` 所属插件已禁用"
+  ],
+  "engine.cleaning_items": [
+    "Cleaning {p0} items",
+    "正在清理 {p0} 项"
+  ],
+  "engine.handler_missing": [
+    "Handler `{p0}` is not registered",
+    "处理器 `{p0}` 未注册"
+  ],
+  "engine.journal_finalize": [
+    "Execution journal finalization failed: {error}",
+    "执行日志收尾失败：{error}"
+  ],
+  "engine.invalid_results": [
+    "Handler returned an invalid number of cleanup group results",
+    "处理器 返回的清理组结果数量无效"
+  ],
+  "filesystem.measure_failed": [
+    "Could not measure size: {error}",
+    "无法统计大小：{error}"
+  ],
+  "filesystem.identity_failed": [
+    "Could not bind candidate identity: {error}",
+    "无法绑定候选项目身份：{error}"
+  ],
+  "filesystem.matches_rules": [
+    "Matches the active recommendation rules",
+    "符合当前建议规则"
+  ],
+  "filesystem.recommendation_disabled": [
+    "Recommended cleanup is disabled by configuration",
+    "配置已禁用建议清理"
+  ],
+  "filesystem.recent": [
+    "Recently active",
+    "近期有活动"
+  ],
+  "filesystem.below_size": [
+    "Size is below the recommendation threshold",
+    "大小低于建议阈值"
+  ],
+  "filesystem.check_root": [
+    "Checking configured filesystem root {p0}",
+    "正在检查配置的文件系统根路径 {p0}"
+  ],
+  "filesystem.measure_candidate": [
+    "Measuring candidate metadata {p0}",
+    "正在统计候选项目元数据 {p0}"
+  ],
+  "native.reusing_metadata": [
+    "Reusing authorized metadata access for {p0}",
+    "正在为 {p0} 复用已授权的元数据访问"
+  ],
+  "native.requesting_metadata": [
+    "Requesting system authorization to inspect {p0}",
+    "正在请求系统授权以检查 {p0}"
+  ],
+  "native.metadata_declined": [
+    "Authorization was declined; readable results are retained. This operation will not prompt again.",
+    "授权被拒绝；可读取的结果已保留。本次操作不会再次提示授权。"
+  ],
+  "native.metadata_cancelled": [
+    "Metadata inspection was cancelled.",
+    "元数据检查已取消。"
+  ],
+  "native.metadata_timeout": [
+    "System authorization or metadata inspection timed out.",
+    "系统授权或元数据检查超时。"
+  ],
+  "native.metadata_foreground": [
+    "Metadata inspection needs foreground system authorization.",
+    "元数据检查需要前台系统授权。"
+  ],
+  "native.metadata_macos_policy": [
+    "macOS policy blocked this read. Review app access in Privacy & Security, then retry the original scan; opening settings does not grant access or bypass other system policies.",
+    "macOS 策略阻止了此次读取。请在“隐私与安全性”中检查应用访问权限，然后重试原扫描；打开设置不会授予访问权限或绕过其他系统策略。"
+  ],
+  "native.metadata_helper_missing": [
+    "The system metadata helper could not be prepared; check that the application bundle includes all permission components.",
+    "无法准备系统元数据辅助程序；请检查应用包是否包含全部权限组件。"
+  ],
+  "native.windows_components_not_bundled": [
+    "This development build has no signed Windows authorization components. Ordinary scan and cleanup remain available; protected locations require a build with a trusted code-signing certificate (see the Windows build guide).",
+    "此开发构建未包含已签名的 Windows 授权组件。普通扫描和清理仍可使用；访问受保护位置需使用可信代码签名证书重新构建，步骤见 Windows 构建指南。"
+  ],
+  "native.metadata_helper_untrusted": [
+    "The system metadata helper installation is not trusted; authorization was not requested.",
+    "系统元数据辅助程序安装不可信；未请求授权。"
+  ],
+  "native.metadata_helper_outdated": [
+    "The system metadata helper could not be updated; check that the application and bundled permission components are the same version.",
+    "无法更新系统元数据辅助程序；请检查应用与随包权限组件是否为同一版本。"
+  ],
+  "native.metadata_scope": [
+    "The metadata request could not be validated within its original scope.",
+    "无法确认元数据请求仍在原始范围内。"
+  ],
+  "native.metadata_unavailable": [
+    "System metadata authorization is unavailable; readable results are retained.",
+    "系统元数据授权不可用；可读取的结果已保留。"
+  ],
+  "engine.unknown_module": [
+    "Enabled module `{id}` was not found in the configuration",
+    "配置中未找到已启用的模块 `{id}`"
+  ],
+  "engine.unknown_selector": [
+    "Module `{module}` has no selector `--{selector}`",
+    "模块 `{module}` 没有选择器 `--{selector}`"
+  ],
+  "engine.unknown_task": [
+    "Module `{module}` has no enabled task `{task}` for the current platform",
+    "模块 `{module}` 在当前平台没有已启用的任务 `{task}`"
+  ],
+  "engine.plugin_disabled": [
+    "plugin-disabled: Plugin `{id}` is disabled on this device",
+    "plugin-disabled: 插件 `{id}` 已在本机禁用"
+  ],
+  "engine.plugin_policy_changed": [
+    "plugin-policy-changed: Plugin settings changed; reload and rescan before continuing",
+    "plugin-policy-changed: 插件设置已更改；继续前请重新加载并扫描"
+  ],
+  "engine.missing_handler": [
+    "Configuration {configuration}, module “{module}”: handler `{handler}` is not registered",
+    "配置 {configuration}，模块“{module}”：处理器 `{handler}` 未注册"
+  ],
+  "engine.duplicate_handler": [
+    "Handler `{id}` is already registered",
+    "处理器 `{id}` 已注册"
+  ],
+  "engine.handler_id_mismatch": [
+    "Handler descriptor ID `{actual}` does not match registered ID `{expected}`",
+    "处理器 描述 ID `{actual}` 与注册 ID `{expected}` 不一致"
+  ],
+  "engine.task_serialization": [
+    "Could not serialize task `{module}.{task}` configuration: {message}",
+    "无法序列化任务 `{module}.{task}` 配置：{message}"
+  ],
+  "engine.invalid_selection": [
+    "Selection contains an unknown or unavailable item: {id}",
+    "选择中包含未知或不可用的项目：{id}"
+  ],
+  "engine.incomplete_scan": [
+    "A cancelled scan cannot be used to create a cleanup plan",
+    "无法使用已取消的扫描创建清理计划"
+  ],
+  "engine.handler_failed": [
+    "Handler `{handler}` failed: {source}",
+    "处理器 `{handler}` 失败：{source}"
+  ],
+  "config.read": [
+    "Could not read configuration {path}: {source}",
+    "无法读取配置 {path}：{source}"
+  ],
+  "config.read_variables": [
+    "Could not read variable map {path}: {source}",
+    "无法读取变量映射 {path}：{source}"
+  ],
+  "config.invalid": [
+    "Configuration {source_name} is invalid: {message}",
+    "配置 {source_name} 无效：{message}"
+  ],
+  "config.invalid_variables": [
+    "Variable map {source_name} is invalid: {message}",
+    "变量映射 {source_name} 无效：{message}"
+  ],
+  "config.unknown_official": [
+    "Official configuration {id} does not exist",
+    "官方配置 {id} 不存在"
+  ],
+  "config.include_cycle": [
+    "Configuration include cycle: {id}",
+    "配置 include 循环：{id}"
+  ],
+  "store.io": [
+    "Could not {action} {path}: {source}",
+    "无法{action} {path}：{source}"
+  ],
+  "store.invalid": [
+    "{kind} {path} is invalid: {message}",
+    "{kind} {path} 无效：{message}"
+  ],
+  "store.unknown_recipe": [
+    "Recipe `{id}` does not exist under {directory}",
+    "方案 `{id}` 在 {directory} 下不存在"
+  ],
+  "store.active_recipe": [
+    "Recipe `{id}` is active and cannot be deleted",
+    "方案 `{id}` 正在使用，无法删除"
+  ],
+  "store.recipe_conflict": [
+    "Recipe `{id}` changed before the conditional commit",
+    "方案 `{id}` 在条件提交前已更改"
+  ],
+  "filesystem.resolve_root": [
+    "Could not resolve cleanup root `{value}`: {error}",
+    "无法解析清理根路径 `{value}`：{error}"
+  ],
+  "filesystem.invalid_options": [
+    "Filesystem options for task {p0} are invalid: {error}",
+    "任务 {p0} 的文件系统选项无效：{error}"
+  ],
+  "filesystem.invalid_recommend": [
+    "Recommendation rules for task {p0} are invalid: {error}",
+    "任务 {p0} 的建议规则无效：{error}"
+  ],
+  "filesystem.empty_include": [
+    "include must not be empty for root {p0}",
+    "根路径 {p0} 的 include 不能为空"
+  ],
+  "filesystem.root_scope": [
+    "Filesystem roots require a directory or exact-file scope",
+    "文件系统根路径需要目录或精确文件范围"
+  ],
+  "filesystem.children_include": [
+    "DirectoryChildren includes cannot expand enumeration into descendants",
+    "DirectoryChildren 的 include 不能将枚举范围扩展到更深层后代"
+  ],
+  "filesystem.empty_root": [
+    "root.path must not be empty",
+    "root.path 不能为空"
+  ],
+  "filesystem.rebind_identity": [
+    "scope_requires_rebinding: exact file selection has no observed identity",
+    "scope_requires_rebinding: 精确文件选择缺少已观察到的身份"
+  ],
+  "filesystem.rebind_host": [
+    "scope_requires_rebinding: selection belongs to another host",
+    "scope_requires_rebinding: 选择属于另一台主机"
+  ],
+  "filesystem.invalid_component": [
+    "Invalid bound selection component",
+    "绑定选择的路径分量无效"
+  ],
+  "filesystem.scope_type": [
+    "Saved selection type does not match its file or directory scope",
+    "已保存选择的类型与文件或目录范围不一致"
+  ],
+  "filesystem.children_binding": [
+    "DirectoryChildren cannot bind a deeper descendant",
+    "DirectoryChildren 不能绑定更深层后代"
+  ],
+  "filesystem.rebind_replaced": [
+    "scope_requires_rebinding: selected object was replaced",
+    "scope_requires_rebinding: 所选对象已被替换"
+  ],
+  "filesystem.invalid_glob": [
+    "Invalid {kind} glob `{pattern}`: {error}",
+    "{kind} glob `{pattern}` 无效：{error}"
+  ],
+  "filesystem.compile_rules": [
+    "Could not compile {kind} rules: {error}",
+    "无法编译 {kind} 规则：{error}"
+  ],
+  "filesystem.include_ancestor": [
+    "include ancestor",
+    "include 祖先"
+  ],
+  "filesystem.read_path": [
+    "Could not read path: {error}",
+    "无法读取路径：{error}"
+  ],
+  "filesystem.read_entry": [
+    "Could not read directory entry: {error}",
+    "无法读取目录项：{error}"
+  ],
+  "filesystem.read_directory": [
+    "Could not read directory: {error}",
+    "无法读取目录：{error}"
+  ],
+  "filesystem.read_metadata": [
+    "Could not read metadata: {error}",
+    "无法读取元数据：{error}"
+  ],
+  "filesystem.changed_during_measurement": [
+    "Candidate changed while measuring",
+    "候选项目在统计大小期间发生变化"
+  ],
+  "filesystem.exact_no_parent": [
+    "Exact root has no parent",
+    "精确根路径没有父目录"
+  ],
+  "filesystem.process_item": [
+    "Processing confirmed filesystem item {p0}",
+    "正在处理已确认的文件系统项目 {p0}"
+  ],
+  "filesystem.partially_applied": [
+    "Partially applied ({p0} entries removed): {error}",
+    "已部分执行（移除 {p0} 个目录项）：{error}"
+  ],
+  "filesystem.invalid_item": [
+    "Unavailable item or invalid handler",
+    "项目不可用或 处理器 无效"
+  ],
+  "filesystem.missing_path": [
+    "Rescan before cleanup: missing native path",
+    "清理前请重新扫描：缺少原生路径"
+  ],
+  "filesystem.wrong_platform": [
+    "Native path belongs to another platform",
+    "原生路径属于另一平台"
+  ],
+  "filesystem.path_identity": [
+    "Cleanup identity does not match the selected path",
+    "清理身份与所选路径不一致"
+  ],
+  "filesystem.missing_identity": [
+    "Rescan before cleanup: missing filesystem identity",
+    "清理前请重新扫描：缺少文件系统身份"
+  ],
+  "filesystem.missing_root_identity": [
+    "Rescan before cleanup: missing root identity",
+    "清理前请重新扫描：缺少根路径身份"
+  ],
+  "filesystem.missing_root_index": [
+    "Missing cleanup root index",
+    "缺少清理根路径索引"
+  ],
+  "filesystem.unknown_root": [
+    "Unknown cleanup root",
+    "未知清理根路径"
+  ],
+  "filesystem.outside_bindings": [
+    "Selected path is outside saved one-shot bindings",
+    "所选路径超出已保存的一次性绑定范围"
+  ],
+  "filesystem.missing_scope": [
+    "Rescan before cleanup: missing root scope",
+    "清理前请重新扫描：缺少根路径范围"
+  ],
+  "filesystem.exact_no_expand": [
+    "Exact root selection cannot expand",
+    "精确根路径选择不能扩展"
+  ],
+  "filesystem.exact_no_name": [
+    "Exact root has no name",
+    "精确根路径没有名称"
+  ],
+  "filesystem.outside_patterns": [
+    "Selected path is outside configured include/exclude boundaries",
+    "所选路径超出配置的 include/exclude 边界"
+  ],
+  "filesystem.readonly_only": [
+    "Only filesystem metadata scanning is allowed",
+    "仅允许扫描文件系统元数据"
+  ],
+  "filesystem.name": [
+    "Filesystem paths",
+    "文件系统路径"
+  ],
+  "filesystem.description": [
+    "Scan and remove files using root-specific include and exclude globs",
+    "按各根路径的 include/exclude glob 规则扫描和移除文件"
+  ],
+  "filesystem.invalid_elevation": [
+    "elevation must be auto, never, sudo, pkexec, uac, or native",
+    "elevation 必须为 auto、never、sudo、pkexec、uac 或 native"
+  ],
+  "filesystem.no_roots": [
+    "A filesystem task requires at least one root",
+    "文件系统任务至少需要一个根路径"
+  ],
+  "filesystem.no_types": [
+    "A filesystem task must enable files or directories",
+    "文件系统任务必须启用 files 或 directories"
+  ],
+  "native.invalid_inventory_scope": [
+    "Invalid Snapper inventory scope",
+    "Snapper 检查范围无效"
+  ],
+  "native.inspection_authorized": [
+    "Inspecting {p0} with authorized metadata access",
+    "正在使用已授权的只读访问检查 {p0}"
+  ],
+  "snapper.identify_host": [
+    "Could not identify this computer for an exact snapshot selection",
+    "无法识别此电脑以绑定精确快照选择"
+  ],
+  "snapper.invalid_host": [
+    "This computer does not have a valid machine identity",
+    "此电脑没有有效的机器身份"
+  ],
+  "snapper.revalidate_failed": [
+    "Could not revalidate selected snapshots: {error}",
+    "无法重新验证所选快照：{error}"
+  ],
+  "snapper.deleting_sync": [
+    "Deleting {p0} selected snapshots in {p1}; waiting for Btrfs synchronization (--sync)",
+    "正在删除 {p0} 个所选快照，配置 {p1}；等待 Btrfs 同步（--sync）"
+  ],
+  "snapper.delete_failed": [
+    "Could not execute snapper delete: {error}",
+    "无法执行 snapper delete：{error}"
+  ],
+  "snapper.delete_finished": [
+    "Finished snapshot deletion request for {p0}",
+    "已完成配置 {p0} 的快照删除请求"
+  ],
+  "snapper.remaining": [
+    "; {count} of {p0} selected snapshots remain",
+    "；所选的 {p0} 个快照中仍有 {count} 个存在"
+  ],
+  "snapper.config_disappeared": [
+    "Snapshot configuration disappeared after scanning",
+    "快照配置在扫描后已消失"
+  ],
+  "snapper.conflicting_identity": [
+    "Selected tasks contain conflicting or changed snapshot identities; scan again before cleaning",
+    "所选任务包含冲突或已更改的快照身份；清理前请重新扫描"
+  ],
+  "snapper.measure_config_missing": [
+    "Snapshot configuration is unavailable for space measurement",
+    "快照配置不可用，无法测量空间"
+  ],
+  "snapper.remaining_unverified": [
+    "; remaining snapshots could not be verified without additional authorization",
+    "；没有额外授权，无法确认剩余快照"
+  ],
+  "snapper.measure_logical": [
+    "Measuring logical file sizes for {p0} {config} snapshots; shared data is included",
+    "正在统计 {p0} 个 {config} 快照的文件逻辑大小；包含共享数据"
+  ],
+  "snapper.logical_measured": [
+    "Measured logical file sizes for {p0} {config} snapshots",
+    "已统计 {p0} 个 {config} 快照的文件逻辑大小"
+  ],
+  "snapper.logical_unknown": [
+    "Snapshot logical sizes are unknown because read-only measurement did not complete: {error}",
+    "只读统计未完成，快照逻辑大小未知：{error}"
+  ],
+  "snapper.invalid_du_record": [
+    "du returned an invalid size record",
+    "du 返回了无效的大小记录"
+  ],
+  "snapper.unexpected_du_path": [
+    "du returned an unexpected snapshot path",
+    "du 返回了非预期的快照路径"
+  ],
+  "snapper.duplicate_du_size": [
+    "du returned a duplicate snapshot size",
+    "du 返回了重复的快照大小"
+  ],
+  "snapper.incomplete_du": [
+    "du did not measure every requested snapshot",
+    "du 未测量全部请求的快照"
+  ],
+  "snapper.not_selectable": [
+    "Not selectable: {p0}",
+    "不可选择：{p0}"
+  ],
+  "snapper.config_not_in_output": [
+    "Snapper output does not contain configuration `{config}`",
+    "Snapper 输出不包含配置 `{config}`"
+  ],
+  "snapper.execute_failed": [
+    "Could not execute {program}: {error}",
+    "无法执行 {program}：{error}"
+  ],
+  "snapper.parse_failed": [
+    "Could not parse Snapper JSON: {error}",
+    "无法解析 Snapper JSON：{error}"
+  ],
+  "snapper.command": [
+    "Snapper command",
+    "Snapper 命令"
+  ],
+  "snapper.config_outside_scope": [
+    "Cleanup item references configuration `{config}` outside the task scope",
+    "清理项目引用了任务范围外的配置 `{config}`"
+  ],
+  "snapper.duplicate_number": [
+    "Cleanup item contains duplicate snapshot number #{number}",
+    "清理项目包含重复的快照编号 #{number}"
+  ],
+  "snapper.id_mismatch": [
+    "Cleanup item ID `{p0}` does not match `{expected_id}`",
+    "清理项目 ID `{p0}` 与 `{expected_id}` 不一致"
+  ],
+  "snapper.invalid_config": [
+    "Cleanup item has an invalid config",
+    "清理项目的配置无效"
+  ],
+  "snapper.invalid_numbers": [
+    "Cleanup item has invalid snapshot numbers",
+    "清理项目的快照编号无效"
+  ],
+  "snapper.invalid_number": [
+    "Cleanup item contains an invalid snapshot number",
+    "清理项目包含无效的快照编号"
+  ],
+  "snapper.numbers_outside_scope": [
+    "Cleanup item contains snapshot numbers outside the task scope",
+    "清理项目包含任务范围外的快照编号"
+  ],
+  "snapper.state_changed": [
+    "Snapshot state changed or was removed since scanning; scan again before cleaning",
+    "快照在扫描后状态已更改或被移除；清理前请重新扫描"
+  ],
+  "snapper.protected": [
+    "Current, default, or active snapshots cannot be removed",
+    "当前、默认或正在使用的快照不能移除"
+  ],
+  "snapper.bind_failed": [
+    "Could not bind the snapshot scan result",
+    "无法绑定快照扫描结果"
+  ],
+  "snapper.missing_fresh_identity": [
+    "This cleanup selection has no fresh snapshot identity; run the Recipe scan again before confirming cleanup",
+    "此清理选择没有新的快照身份；确认清理前请重新扫描方案"
+  ],
+  "snapper.invalid_scan_identity": [
+    "The snapshot scan identity is invalid; run the Recipe scan again",
+    "快照扫描身份无效；请重新扫描方案"
+  ],
+  "snapper.scan_identity_changed": [
+    "Snapshot identity or configuration changed after this scan; run the Recipe scan again before confirming cleanup",
+    "快照身份或配置在此次扫描后已更改；确认清理前请重新扫描方案"
+  ],
+  "snapper.filter_changed": [
+    "Selected snapshots no longer match this Recipe's type or cleanup algorithm filters; scan again",
+    "所选快照不再符合此方案的类型或清理算法筛选条件；请重新扫描"
+  ],
+  "snapper.exact_identity_required": [
+    "Explicit snapshot numbers require the original host identity and matching snapshot creation dates, types, and pair identities",
+    "显式快照编号需要原始主机身份，以及匹配的快照创建日期、类型和配对身份"
+  ],
+  "snapper.other_host": [
+    "These snapshot selections belong to another computer; analyze and select snapshots on this computer before cleaning",
+    "这些快照选择属于另一台电脑；清理前请在此电脑上分析并选择快照"
+  ],
+  "snapper.pinned_changed": [
+    "This Recipe pins specific snapshots that were removed or replaced; create a new reusable-rule Recipe, or explicitly replace the fixed rules in advanced configuration. Existing snapshot numbers are never expanded automatically",
+    "此方案固定的快照已被移除或替换；请新建可复用规则方案，或在高级配置中显式替换固定规则。现有快照编号不会自动扩展"
+  ],
+  "snapper.configuration": [
+    "Snapper configuration {config}",
+    "Snapper 配置 {config}"
+  ],
+  "snapper.scan_failed": [
+    "Could not scan snapshot #{p0}: {error}",
+    "无法扫描快照 #{p0}：{error}"
+  ],
+  "snapper.selection_gone": [
+    "Selected snapshots no longer exist; inspect the configuration again",
+    "所选快照已不存在；请重新检查配置"
+  ],
+  "snapper.pair_required": [
+    "A pre/post snapshot pair must be selected together",
+    "pre/post 快照对必须同时选择"
+  ],
+  "snapper.keep_latest": [
+    "Retained by the Recipe's keep-latest condition",
+    "按方案的 keep-latest 条件保留"
+  ],
+  "snapper.recommend_disabled": [
+    "No automatic recommendation is enabled; select snapshots explicitly",
+    "未启用自动建议；请显式选择快照"
+  ],
+  "snapper.too_recent": [
+    "Snapshot age is unknown or below the Recipe's minimum age",
+    "快照年龄未知或未达到方案规定的最短时间"
+  ],
+  "snapper.too_small": [
+    "Reported size is unknown or below the Recipe's minimum size",
+    "报告大小未知或低于方案规定的最小值"
+  ],
+  "snapper.recommended": [
+    "Snapshot matches the Recipe's explicit recommendation conditions",
+    "快照符合方案的显式建议条件"
+  ],
+  "snapper.scan_incomplete": [
+    "Snapshot scan did not complete",
+    "快照扫描未完成"
+  ],
+  "snapper.manual_selection": [
+    "Recent, important, manual, or paired pre/post snapshot; manual selection is allowed",
+    "近期、重要、手动或配对的 pre/post 快照；允许手动选择"
+  ],
+  "snapper.build_recommended": [
+    "Referenced Rust build artifacts meet the recommendation threshold",
+    "引用的 Rust 构建产物达到建议阈值"
+  ],
+  "snapper.build_disabled": [
+    "Recommended cleanup is disabled by configuration",
+    "配置已禁用建议清理"
+  ],
+  "snapper.build_below_threshold": [
+    "Referenced Rust build artifacts are below the recommendation threshold",
+    "引用的 Rust 构建产物低于建议阈值"
+  ],
+  "snapper.invalid_relative_path": [
+    "relative-path must stay inside the snapshot subvolume and must not contain `..`",
+    "relative-path 必须位于快照子卷内，且不能包含 `..`"
+  ],
+  "snapper.program_failed": [
+    "{program} failed",
+    "{program} 失败"
+  ],
+  "snapper.program_failed_detail": [
+    "{program} failed: {message}",
+    "{program} 失败：{message}"
+  ],
+  "snapper.command_exited": [
+    "{action} exited with {p0}",
+    "{action} 退出，状态为 {p0}"
+  ],
+  "snapper.command_failed_detail": [
+    "{action} failed: {detail}",
+    "{action} 失败：{detail}"
+  ],
+  "snapper.invalid_elevation": [
+    "elevation must be auto, never, sudo, or pkexec",
+    "elevation 必须为 auto、never、sudo 或 pkexec"
+  ],
+  "snapper.invalid_commands": [
+    "snapper, find, and du must not be empty, and max-depth must be greater than zero",
+    "snapper、find 和 du 不能为空，max-depth 必须大于零"
+  ],
+  "snapper.invalid_filters": [
+    "Snapshot type and cleanup algorithm filters must be valid unique values in snapshots mode",
+    "快照类型和清理算法筛选必须是在 snapshots 模式下有效且不重复的值"
+  ],
+  "snapper.invalid_mode": [
+    "scan-mode must be rust-targets or snapshots",
+    "scan-mode 必须为 rust-targets 或 snapshots"
+  ],
+  "snapper.invalid_exact_selection": [
+    "snapshot-ids requires snapshots mode, exactly one configuration, and unique nonzero snapshot numbers",
+    "snapshot-ids 要求 snapshots 模式、恰好一个配置，以及不重复的非零快照编号"
+  ],
+  "snapper.config_not_found": [
+    "Snapper configuration `{name}` was not found",
+    "未找到 Snapper 配置 `{name}`"
+  ],
+  "snapper.scanning_snapshot": [
+    "Scanning {config} snapshot {p0}",
+    "正在扫描 {config} 快照 {p0}"
+  ],
+  "snapper.before_cleanup": [
+    "Before cleanup: {error}",
+    "清理前：{error}"
+  ],
+  "snapper.after_cleanup": [
+    "After cleanup: {error}",
+    "清理后：{error}"
+  ],
+  "snapper.filesystem_changed": [
+    "The mounted filesystem changed during cleanup",
+    "挂载的文件系统在清理期间发生变化"
+  ],
+  "snapper.measure_linux_only": [
+    "Snapshot volume measurement is supported only on Linux",
+    "仅在 Linux 上支持快照卷空间测量"
+  ],
+  "snapper.access_check_failed": [
+    "Could not check Snapper service access: {error}",
+    "无法检查 Snapper 服务访问：{error}"
+  ],
+  "snapper.service_access_failed": [
+    "Snapper service access check failed: {error}",
+    "Snapper 服务访问检查失败：{error}"
+  ],
+  "snapper.access_budget": [
+    "Snapper access response exceeded the operation budget",
+    "Snapper 访问响应超出操作预算"
+  ],
+  "snapper.readonly_only": [
+    "Only registered Snapper metadata scanning is allowed",
+    "仅允许已注册的 Snapper 元数据扫描"
+  ],
+  "snapper.name": [
+    "Snapper snapshots",
+    "Snapper 快照"
+  ],
+  "snapper.description": [
+    "Inspect Snapper snapshot metadata or referenced build artifacts and remove selected snapshots with snapper delete --sync",
+    "检查 Snapper 快照元数据或引用的构建产物，并使用 snapper delete --sync 移除所选快照"
+  ],
+  "host.invalid_json": [
+    "Invalid plugin JSON: {error}",
+    "插件 JSON 无效：{error}"
+  ],
+  "host.invalid_envelope": [
+    "Invalid response envelope: {error}",
+    "响应封装无效：{error}"
+  ],
+  "host.invalid_progress": [
+    "Invalid progress event: {error}",
+    "进度事件无效：{error}"
+  ],
+  "host.invalid_outcome": [
+    "Invalid item outcome: {error}",
+    "项目结果无效：{error}"
+  ],
+  "host.invalid_cleanup": [
+    "Invalid cleanup result: {error}",
+    "清理结果无效：{error}"
+  ],
+  "host.invalid_result": [
+    "Invalid result: {error}",
+    "结果无效：{error}"
+  ],
+  "host.line_limit": [
+    "Plugin line exceeded limit",
+    "插件输出行超出限制"
+  ],
+  "host.incomplete_frame": [
+    "Incomplete plugin JSONL frame",
+    "插件 JSONL 帧不完整"
+  ],
+  "host.lock_poisoned": [
+    "Plugin process lock is poisoned",
+    "插件进程锁不可用"
+  ],
+  "host.session_stopped": [
+    "Plugin session has stopped",
+    "插件会话已停止"
+  ],
+  "host.idle_timeout": [
+    "Plugin response idle timeout",
+    "等待插件响应超时"
+  ],
+  "host.exited": [
+    "Plugin exited before responding",
+    "插件在响应前已退出"
+  ],
+  "host.caller_line_limit": [
+    "Plugin line exceeded the caller's limit",
+    "插件输出行超出调用方限制"
+  ],
+  "host.output_limit": [
+    "Plugin response exceeded total output limit",
+    "插件响应超出总输出限制"
+  ],
+  "host.protocol_unsupported": [
+    "Unsupported plugin protocol version",
+    "不支持此插件协议版本"
+  ],
+  "host.event_mismatch": [
+    "Plugin event does not match its active request",
+    "插件事件与当前请求不匹配"
+  ],
+  "host.missing_event_data": [
+    "Plugin event is missing data",
+    "插件事件缺少数据"
+  ],
+  "host.receipt_outside_cleanup": [
+    "Item receipt outside cleanup",
+    "在清理操作外收到项目回执"
+  ],
+  "host.unknown_event": [
+    "Unknown plugin event",
+    "未知插件事件"
+  ],
+  "host.response_mismatch": [
+    "Response ID or envelope does not match the request",
+    "响应 ID 或封装与请求不匹配"
+  ],
+  "host.missing_result": [
+    "Response is missing result",
+    "响应缺少结果"
+  ],
+  "host.request_limit": [
+    "Plugin request exceeded limit",
+    "插件请求超出限制"
+  ],
+  "host.receipt_unknown_item": [
+    "Plugin reported an unknown or duplicate selected item",
+    "插件报告了未知或重复的所选项目"
+  ],
+  "host.receipt_mismatch": [
+    "Plugin final result disagrees with its acknowledged item outcomes",
+    "插件最终结果与已确认的项目结果不一致"
+  ],
+  "host.descriptor_mismatch": [
+    "Handlers returned by describe do not match the manifest",
+    "describe 返回的处理器与清单不匹配"
+  ],
+  "host.package_symlinks": [
+    "Plugin packages must not contain symbolic links",
+    "插件包不能包含符号链接"
+  ],
+  "host.package_types": [
+    "Plugin packages may only contain regular files and directories",
+    "插件包只能包含普通文件和目录"
+  ],
+  "host.schema_unsupported": [
+    "Unsupported schema-version={p0}",
+    "不支持 schema-version={p0}"
+  ],
+  "host.protocol_version_unsupported": [
+    "Unsupported protocol-version={p0}",
+    "不支持 protocol-version={p0}"
+  ],
+  "host.invalid_version": [
+    "version must be valid SemVer: {error}",
+    "version 必须是有效的 SemVer：{error}"
+  ],
+  "host.unsupported_platform": [
+    "Unsupported plugin platform `{platform}`",
+    "不支持插件平台 `{platform}`"
+  ],
+  "host.duplicate_handler": [
+    "Duplicate handler ID `{id}`",
+    "处理器 ID `{id}` 重复"
+  ],
+  "host.invalid_id": [
+    "ID `{id}` contains unsupported characters",
+    "ID `{id}` 包含不支持的字符"
+  ],
+  "host.manifest_regular": [
+    "plugin.toml must be a regular file",
+    "plugin.toml 必须是普通文件"
+  ],
+  "host.executable_relative": [
+    "executable must be a relative path inside the plugin directory",
+    "executable 必须是插件目录内的相对路径"
+  ],
+  "host.executable_regular": [
+    "executable must be a regular file inside the plugin directory",
+    "executable 必须是插件目录内的普通文件"
+  ],
+  "host.executable_resolved": [
+    "executable must resolve inside the plugin directory",
+    "executable 解析后必须位于插件目录内"
+  ],
+  "host.empty_name": [
+    "name must not be empty",
+    "name 不能为空"
+  ],
+  "host.empty_handlers": [
+    "handlers and executable must not be empty",
+    "handlers 和 executable 不能为空"
+  ],
+  "host.user_data_unknown": [
+    "The user data directory could not be determined",
+    "无法确定用户数据目录"
+  ],
+  "plugins.not_installed": [
+    "Plugin `{id}` is not installed",
+    "插件 `{id}` 未安装"
+  ],
+  "plugins.unsupported_platform": [
+    "Plugin `{id}` does not support the current platform",
+    "插件 `{id}` 不支持当前平台"
+  ],
+  "plugins.filesystem_name": [
+    "Filesystem",
+    "文件系统"
+  ],
+  "plugins.filesystem_description": [
+    "Inspect and clean files and directories using reusable rules",
+    "使用可复用规则检查和清理文件与目录"
+  ],
+  "plugins.snapshots_name": [
+    "System snapshots",
+    "系统快照"
+  ],
+  "plugins.snapshots_description": [
+    "Inspect Snapper snapshots and clean selected snapshot groups",
+    "检查 Snapper 快照并清理所选快照组"
+  ],
+  "plugins.system_name": [
+    "Linux system resources",
+    "Linux 系统资源"
+  ],
+  "plugins.system_description": [
+    "Linux package caches, systemd journals, temporary files and crash dumps.",
+    "Linux 软件包缓存、systemd 日志、临时文件与崩溃转储。"
+  ],
+  "plugins.external_description": [
+    "Installed external process plugin",
+    "已安装的外部进程插件"
+  ],
+  "snapper.invalid_options": [
+    "Snapper options are invalid: {error}",
+    "Snapper 选项无效：{error}"
+  ],
+  "snapper.invalid_recommend": [
+    "Snapper recommendation rules are invalid: {error}",
+    "Snapper 建议规则无效：{error}"
+  ],
+  "host.io": [
+    "Could not access {path}: {source}",
+    "无法访问 {path}：{source}"
+  ],
+  "host.invalid_manifest": [
+    "Plugin manifest {path} is invalid: {message}",
+    "插件清单 {path} 无效：{message}"
+  ],
+  "host.protocol": [
+    "Plugin `{plugin}` protocol failed: {message}",
+    "插件 `{plugin}` 协议失败：{message}"
+  ],
+  "host.reserved_id": [
+    "Plugin ID `{id}` is reserved for a built-in capability",
+    "插件 ID `{id}` 为内置能力保留"
+  ],
+  "host.already_installed": [
+    "Plugin `{id}` is already installed",
+    "插件 `{id}` 已安装"
+  ],
+  "host.not_installed": [
+    "Plugin `{id}` is not installed",
+    "插件 `{id}` 未安装"
+  ],
+  "filesystem.authorization": [
+    "Reusing system authorization or requesting administrator access for {count} confirmed filesystem items",
+    "正在为 {count} 个已确认的文件系统项目复用系统授权或请求管理员访问"
+  ],
+  "filesystem.unconfirmed_authorized_cleanup": [
+    "{p0}; administrator cleanup did not return a confirmed result: {reason}. Rescan to check remaining files.",
+    "{p0}；管理员清理未返回已确认结果：{reason}。请重新扫描以检查剩余文件。"
+  ],
+  "filesystem.invalid_worker_result": [
+    "The cleanup worker returned an invalid result",
+    "清理 worker 返回了无效结果"
+  ],
+  "snapper.current_system_name": [
+    "{config} · Current system (#0)",
+    "{config} · 当前系统 (#0)"
+  ],
+  "snapper.current_system_reason": [
+    "The current system cannot be removed; logical size does not apply",
+    "当前系统不可清理；逻辑大小不适用"
+  ],
+  "linux.package_cache": [
+    "Package manager cache",
+    "软件包管理器缓存"
+  ],
+  "linux.journal": [
+    "systemd journal",
+    "systemd 日志"
+  ],
+  "linux.tmpfiles": [
+    "systemd temporary files",
+    "systemd 临时文件"
+  ],
+  "linux.coredumps": [
+    "Core dumps",
+    "核心转储"
+  ],
+  "linux.go_cache": [
+    "Go module cache",
+    "Go 模块缓存"
+  ],
+  "linux.handler_description": [
+    "Clean explicit system resources using distribution, systemd, or domain tools",
+    "使用发行版、systemd 或领域工具清理明确的系统资源"
+  ],
+  "linux.invalid_elevation": [
+    "elevation must be auto, never, sudo, or pkexec",
+    "elevation 必须为 auto、never、sudo 或 pkexec"
+  ],
+  "linux.unsupported_inspection": [
+    "Linux system cache inspection is unavailable on this platform",
+    "此平台不支持 Linux 系统缓存检查"
+  ],
+  "linux.action_unavailable": [
+    "This cleanup action is unavailable",
+    "此清理操作不可用"
+  ],
+  "linux.package_manager_missing": [
+    "No supported package manager was found",
+    "未找到受支持的软件包管理器"
+  ],
+  "linux.invalid_options": [
+    "Linux system options are invalid: {error}",
+    "Linux 系统选项无效：{error}"
+  ],
+  "linux.invalid_recommend": [
+    "Linux system recommendation rules are invalid: {error}",
+    "Linux 系统建议规则无效：{error}"
+  ],
+  "linux.action_mismatch": [
+    "Cleanup item `{item_id}` does not match action `{action}`",
+    "清理项目 `{item_id}` 与操作 `{action}` 不匹配"
+  ],
+  "linux.unsupported_package_manager": [
+    "Unsupported package manager `{manager}`",
+    "不支持的软件包管理器 `{manager}`"
+  ],
+  "linux.program_missing": [
+    "{program} was not found",
+    "未找到 {program}"
+  ],
+  "linux.invalid_source": [
+    "Cache inspection does not match the original discovered source",
+    "缓存检查与原先发现的来源不匹配"
+  ],
+  "linux.nested_mount": [
+    "Go cache contains a nested mount and cannot be cleaned as one directory",
+    "Go 缓存包含嵌套挂载，无法作为单个目录清理"
+  ],
+  "linux.recommended": [
+    "Recommended by the active configuration",
+    "当前配置建议清理"
+  ],
+  "linux.recommend_disabled": [
+    "Recommended cleanup is disabled by configuration",
+    "配置已禁用建议清理"
+  ],
+  "linux.measurement_incomplete": [
+    "Cache measurement did not complete; the total size is unknown",
+    "缓存测量未完成；总大小未知"
+  ],
+  "linux.inspect_cache": [
+    "Inspecting cache metadata at {path}",
+    "正在检查 {path} 的缓存元数据"
+  ],
+  "linux.go_identity_unavailable": [
+    "Go cache identity is unavailable: {error}",
+    "Go 缓存身份不可用：{error}"
+  ],
+  "linux.measurement_partial": [
+    "Cache measurement did not complete; observed at least {bytes} bytes, but the total size is unknown",
+    "缓存测量未完成；已观测到至少 {bytes} 字节，但总大小仍未知"
+  ],
+  "linux.running_command": [
+    "Running system cleanup command {program}",
+    "正在运行系统清理命令 {program}"
+  ],
+  "linux.command_unconfirmed": [
+    "Could not confirm {program}; reconcile system state before retry: {error}",
+    "无法确认 {program} 的执行结果；重试前请核对系统状态：{error}"
+  ],
+  "linux.command_exit": [
+    "{program} exited with {status}; reconcile system state before retry",
+    "{program} 退出，状态为 {status}；重试前请核对系统状态"
+  ],
+  "linux.command_failed": [
+    "{program} failed: {stderr}; reconcile system state before retry",
+    "{program} 执行失败：{stderr}；重试前请核对系统状态"
+  ],
+  "linux.trusted_program_required": [
+    "A trusted system {program} is required",
+    "需要受信任的系统程序 {program}"
+  ],
+  "linux.go_root_not_directory": [
+    "Go module cache root is not a directory",
+    "Go 模块缓存根路径不是目录"
+  ],
+  "linux.interrupted_contents": [
+    "Interrupted execution contents require inspection",
+    "需要检查执行中断后遗留的内容"
+  ],
+  "linux.go_root_filesystem": [
+    "Go cache cannot be a filesystem root",
+    "Go 缓存不能是文件系统根目录"
+  ],
+  "linux.go_changed": [
+    "Go cache changed during inspection; scan again",
+    "Go 缓存在检查期间发生变化；请重新扫描"
+  ],
+  "linux.go_invalid_binding": [
+    "Invalid native Go cache binding; scan again",
+    "Go 缓存原生绑定无效；请重新扫描"
+  ],
+  "linux.go_path_unknown": [
+    "Could not determine Go module cache path",
+    "无法确定 Go 模块缓存路径"
+  ],
+  "linux.go_selected_no_identity": [
+    "The selected Go cache has no directory identity; scan again",
+    "所选 Go 缓存缺少目录身份；请重新扫描"
+  ],
+  "linux.go_selected_unavailable": [
+    "The selected Go cache action is unavailable",
+    "所选 Go 缓存操作不可用"
+  ],
+  "linux.go_missing_identity": [
+    "Missing Go cache identity; scan again",
+    "缺少 Go 缓存身份；请重新扫描"
+  ],
+  "linux.go_check_identity": [
+    "Checking the confirmed Go cache identity and directory boundaries",
+    "正在检查已确认的 Go 缓存身份和目录边界"
+  ],
+  "linux.go_cache_remains": [
+    "New or protected contents remain in the captured Go cache; rescan before retrying",
+    "已锁定的 Go 缓存仍有新增或受保护内容；重试前请重新扫描"
+  ],
+  "linux.go_unsupported": [
+    "Linux Go cache cleanup is unavailable on this platform",
+    "此平台不支持 Linux Go 缓存清理"
+  ],
+  "linux.go_invalid_result": [
+    "Invalid Go cleanup result count",
+    "Go 清理结果数量无效"
+  ],
+  "linux.timer_not_file": [
+    "Automation timer is not a regular file",
+    "自动化 timer 不是普通文件"
+  ],
+  "linux.scheduling_disabled": [
+    "automatic scheduling disabled",
+    "已禁用自动调度"
+  ],
+  "linux.timer_state_unknown": [
+    "could not confirm the current timer activation state",
+    "无法确认 timer 当前的激活状态"
+  ],
+  "linux.missing_property": [
+    "missing {name}",
+    "缺少 {name}"
+  ],
+  "linux.timer_state_busy": [
+    "cannot change a timer in {state} state",
+    "无法修改处于 {state} 状态的 timer"
+  ],
+  "linux.unit_state_unpreserved": [
+    "cannot preserve unit-file state {state}",
+    "无法保留单元文件状态 {state}"
+  ],
+  "linux.load_state_unpreserved": [
+    "cannot preserve load state {state}",
+    "无法保留加载状态 {state}"
+  ],
+  "linux.disable_failed": [
+    "could not disable automatic scheduling: {error}",
+    "无法禁用自动调度：{error}"
+  ],
+  "linux.unknown_automation": [
+    "Enabled automation `{id}` was not found in the configuration",
+    "配置中未找到已启用的自动化 `{id}`"
+  ],
+  "linux.invalid_automation_id": [
+    "Automation ID `{id}` is invalid",
+    "自动化 ID `{id}` 无效"
+  ],
+  "linux.config_directory_missing": [
+    "The systemd user configuration directory could not be determined",
+    "无法确定 systemd 用户配置目录"
+  ],
+  "linux.access_failed": [
+    "Could not access {path}: {source}",
+    "无法访问 {path}：{source}"
+  ],
+  "linux.systemctl_failed": [
+    "systemctl --user {action} failed: {message}",
+    "systemctl --user {action} 执行失败：{message}"
+  ],
+  "linux.recovery_failed": [
+    "{operation}; restoring the previous schedule also failed: {recovery}",
+    "{operation}；恢复先前调度也失败：{recovery}"
+  ],
+  "config.one_shot_automation": [
+    "one_shot recipes cannot enable recurring automation",
+    "one_shot 方案不能启用周期性自动化"
+  ],
+  "config.empty_name": [
+    "Configuration name must not be empty",
+    "配置名称不能为空"
+  ],
+  "config.reserved_module": [
+    "Module ID `{module_id}` is reserved for a management command",
+    "模块 ID `{module_id}` 已保留给管理命令"
+  ],
+  "config.reserved_selector": [
+    "Selector ID `{selector_id}` is reserved for a fixed CLI option",
+    "选择器 ID `{selector_id}` 已保留给固定 CLI 选项"
+  ],
+  "config.invalid_task_root": [
+    "Task {module_id}.{task_id} root is invalid: {error}",
+    "任务 {module_id}.{task_id} 的根路径无效：{error}"
+  ],
+  "config.recurring_exact_selection": [
+    "Task {module_id}.{task_id}: recurring rules cannot store exact object selections",
+    "任务 {module_id}.{task_id}：周期性规则不能保存具体对象选择"
+  ],
+  "config.one_shot_identity": [
+    "Task {module_id}.{task_id}: one-shot selection requires an observed local identity; reobserve and confirm before saving",
+    "任务 {module_id}.{task_id}：一次性选择需要已观测的本地身份；请重新观测并确认后再保存"
+  ],
+  "config.handler_separator": [
+    "Task {module_id}.{task_id} handler must contain `/`",
+    "任务 {module_id}.{task_id} 的 handler 必须包含 `/`"
+  ],
+  "config.handler_separator_count": [
+    "Task {module_id}.{task_id} handler must contain one `/`",
+    "任务 {module_id}.{task_id} 的 handler 必须包含且仅包含一个 `/`"
+  ],
+  "config.unsupported_task_platform": [
+    "Task {module_id}.{task_id} uses unsupported platform `{platform}`",
+    "任务 {module_id}.{task_id} 使用了不支持的平台 `{platform}`"
+  ],
+  "config.automation_module_missing": [
+    "Automation `{automation_id}` references missing or disabled module `{module}`",
+    "自动化 `{automation_id}` 引用了不存在或已禁用的模块 `{module}`"
+  ],
+  "config.empty_plugin_version": [
+    "Plugin `{plugin_id}` version requirement must not be empty",
+    "插件 `{plugin_id}` 的版本要求不能为空"
+  ],
+  "config.invalid_id": [
+    "{kind} ID `{id}` must use lowercase ASCII letters or digits separated by single dots or hyphens",
+    "{kind} ID `{id}` 必须由小写 ASCII 字母或数字组成，并使用单个点或连字符分隔"
+  ],
+  "config.empty_kind_name": [
+    "{kind} `{id}` must have a non-empty name",
+    "{kind} `{id}` 的名称不能为空"
+  ],
+  "config.empty_unique_value": [
+    "{kind} in `{owner}` must not be empty",
+    "`{owner}` 中的{kind}不能为空"
+  ],
+  "config.duplicate_unique_value": [
+    "{kind} `{value}` is duplicated in `{owner}`",
+    "`{owner}` 中的{kind} `{value}` 重复"
+  ],
+  "config.kind_module": [
+    "module",
+    "模块"
+  ],
+  "config.kind_selector": [
+    "selector",
+    "选择器"
+  ],
+  "config.kind_task": [
+    "task",
+    "任务"
+  ],
+  "config.kind_plugin": [
+    "plugin",
+    "插件"
+  ],
+  "config.kind_handler": [
+    "handler",
+    "处理器"
+  ],
+  "config.kind_automation": [
+    "automation",
+    "自动化"
+  ],
+  "config.kind_selector_tag": [
+    "selector tag",
+    "选择器标签"
+  ],
+  "config.kind_task_tag": [
+    "task tag",
+    "任务标签"
+  ],
+  "config.kind_task_platform": [
+    "task platform",
+    "任务平台"
+  ],
+  "config.kind_automation_module": [
+    "automation module",
+    "自动化模块"
+  ],
+  "config.missing_schema": [
+    "Every configuration file, including included files, must declare schema-version = {SCHEMA_VERSION} as an integer",
+    "每个配置文件（包括被 include 的文件）都必须以整数声明 schema-version = {SCHEMA_VERSION}"
+  ],
+  "config.unsupported_schema": [
+    "Unsupported schema-version={version}",
+    "不支持 schema-version={version}"
+  ],
+  "config.include_field": [
+    "Conditional include does not support field `{field}`",
+    "条件 include 不支持字段 `{field}`"
+  ],
+  "config.include_platform": [
+    "Unsupported include platform `{platform}`",
+    "不支持 include 平台 `{platform}`"
+  ],
+  "config.root_table": [
+    "The configuration root must be a table",
+    "配置根节点必须是表"
+  ],
+  "config.include_array": [
+    "include must be an array of strings or conditional tables",
+    "include 必须是字符串或条件表组成的数组"
+  ],
+  "config.include_entry": [
+    "Each include must be a path string or a { path, platforms } table",
+    "每个 include 必须是路径字符串或 { path, platforms } 表"
+  ],
+  "config.include_path": [
+    "Conditional include requires a non-empty string path",
+    "条件 include 需要非空字符串 path"
+  ],
+  "config.platforms_array": [
+    "include.platforms must be an array of platform names",
+    "include.platforms 必须是平台名称数组"
+  ],
+  "config.platforms_strings": [
+    "include.platforms must contain only strings",
+    "include.platforms 只能包含字符串"
+  ],
+  "config.type_conflict": [
+    "Configuration type conflict at `{path}`: base is {base}, overlay is {overlay}",
+    "`{path}` 处的配置类型冲突：基础值为{base}，覆盖值为{overlay}"
+  ],
+  "config.type_string": [
+    "string",
+    "字符串"
+  ],
+  "config.type_integer": [
+    "integer",
+    "整数"
+  ],
+  "config.type_float": [
+    "float",
+    "浮点数"
+  ],
+  "config.type_boolean": [
+    "boolean",
+    "布尔值"
+  ],
+  "config.type_date_time": [
+    "date-time",
+    "日期时间"
+  ],
+  "config.type_array": [
+    "array",
+    "数组"
+  ],
+  "config.type_table": [
+    "table",
+    "表"
+  ],
+  "config.unsupported_schema_build": [
+    "Unsupported schema-version={version}; this build supports {supported}",
+    "不支持 schema-version={version}；当前版本支持 {supported}"
+  ],
+  "config.recipe_stable_id": [
+    "recipe must be a stable ID",
+    "recipe 必须是稳定 ID"
+  ],
+  "config.variable_map_root_only": [
+    "variable-map is allowed only in the recipe root configuration",
+    "variable-map 只能在方案根配置中声明"
+  ],
+  "config.embedded_variable_map": [
+    "An embedded configuration cannot reference a filesystem variable map",
+    "内嵌配置不能引用文件系统上的变量映射文件"
+  ],
+  "config.unknown_theme": [
+    "unknown theme `{id}`",
+    "未知主题 `{id}`"
+  ],
+  "config.include_escape": [
+    "Local include {path} escapes recipe root {root}",
+    "本地 include {path} 超出了方案根目录 {root}"
+  ],
+  "config.official_include": [
+    "Official configurations can only include `official:` resources, not {include}",
+    "官方配置只能 include `official:` 资源，不能引用 {include}"
+  ],
+  "config.variable_map_path": [
+    "variable-map must be a non-empty path",
+    "variable-map 必须是非空路径"
+  ],
+  "config.home_required": [
+    "Variable `HOME` is required to expand `~`",
+    "展开 `~` 需要变量 `HOME`"
+  ],
+  "config.variable_map_escape": [
+    "Variable map {path} escapes recipe root {root}",
+    "变量映射 {path} 超出了方案根目录 {root}"
+  ],
+  "config.mapping_platform": [
+    "Unsupported mapping platform `{platform}`",
+    "不支持变量映射平台 `{platform}`"
+  ],
+  "config.variable_name": [
+    "Variable `{name}` must start with an ASCII letter or underscore and contain only ASCII letters, digits, and underscores",
+    "变量 `{name}` 必须以 ASCII 字母或下划线开头，且只能包含 ASCII 字母、数字和下划线"
+  ],
+  "config.variable_environment": [
+    "Variable `{name}` has invalid environment name `{environment}`",
+    "变量 `{name}` 的环境变量名 `{environment}` 无效"
+  ],
+  "config.variable_fallback_value": [
+    "Variable `{name}` cannot use fallback with value",
+    "变量 `{name}` 不能同时使用 fallback 和 value"
+  ],
+  "config.variable_either": [
+    "Variable `{name}` must use either environment or value",
+    "变量 `{name}` 必须在 environment 和 value 之间选择一个"
+  ],
+  "config.variable_required": [
+    "Variable `{name}` requires environment or a non-empty value",
+    "变量 `{name}` 需要 environment 或非空 value"
+  ],
+  "config.variable_undefined": [
+    "Variable `{name}` is referenced but not defined",
+    "变量 `{name}` 被引用但未定义"
+  ],
+  "config.variable_unclosed": [
+    "Unclosed variable expression in `{value}`",
+    "`{value}` 中的变量表达式未闭合"
+  ],
+  "config.option_variable_unclosed": [
+    "Unclosed variable expression in option value `{value}`",
+    "选项值 `{value}` 中的变量表达式未闭合"
+  ],
+  "config.variable_unavailable": [
+    "Variable `{name}` is not available from the active variable map",
+    "当前变量映射中没有可用的变量 `{name}`"
+  ],
+  "config.variable_cycle": [
+    "Variable reference cycle: {cycle}",
+    "变量引用形成循环：{cycle}"
+  ],
+  "config.variable_expression": [
+    "Invalid variable expression `{expression}` in `{value}`",
+    "`{value}` 中的变量表达式 `{expression}` 无效"
+  ],
+  "config.option_variable_expression": [
+    "Invalid variable expression `{expression}` in option value `{value}`",
+    "选项值 `{value}` 中的变量表达式 `{expression}` 无效"
+  ],
+  "config.invalid_root": [
+    "Invalid root specification: {error}",
+    "根路径声明无效：{error}"
+  ],
+  "config.home_components": [
+    "user_home root must contain only normal relative components",
+    "user_home 根路径只能包含普通相对路径分量"
+  ],
+  "config.home_encoding": [
+    "Persistent root cannot represent this non-UTF-8 home",
+    "持久根路径无法表示此非 UTF-8 用户主目录"
+  ],
+  "config.absolute_root": [
+    "local_absolute root must be absolute",
+    "local_absolute 根路径必须是绝对路径"
+  ],
+  "config.root_other_host": [
+    "scope_requires_rebinding: local root belongs to another host",
+    "scope_requires_rebinding: 本地根路径属于另一台主机"
+  ],
+  "config.store_action_create_configuration_directory": [
+    "create configuration directory",
+    "创建配置目录"
+  ],
+  "config.store_action_open_configuration_lock": [
+    "open configuration lock",
+    "打开配置锁"
+  ],
+  "config.store_action_lock_configuration_store": [
+    "lock configuration store",
+    "锁定配置存储"
+  ],
+  "config.store_kind_application_configuration": [
+    "application configuration",
+    "应用配置"
+  ],
+  "config.store_action_read_configuration": [
+    "read configuration",
+    "读取配置"
+  ],
+  "config.store_action_write_configuration": [
+    "write configuration",
+    "写入配置"
+  ],
+  "config.store_action_create_recipe_directory": [
+    "create recipe directory",
+    "创建方案目录"
+  ],
+  "config.store_action_write_starter_recipe": [
+    "write starter recipe",
+    "写入初始方案"
+  ],
+  "config.store_action_install_configuration": [
+    "install configuration",
+    "安装配置"
+  ],
+  "config.store_action_prepare_configuration_replacement": [
+    "prepare configuration replacement",
+    "准备替换配置"
+  ],
+  "config.store_action_replace_configuration": [
+    "replace configuration",
+    "替换配置"
+  ],
+  "config.store_kind_recipe": [
+    "recipe",
+    "清理方案"
+  ],
+  "config.store_kind_recipe_bundle": [
+    "recipe bundle",
+    "方案包"
+  ],
+  "config.store_action_read_recipe_directory": [
+    "read recipe directory",
+    "读取方案目录"
+  ],
+  "config.store_action_inspect_recipe_path": [
+    "inspect recipe path",
+    "检查方案路径"
+  ],
+  "config.store_action_read_recipe": [
+    "read recipe",
+    "读取方案"
+  ],
+  "config.store_action_create_recipe_staging_directory": [
+    "create recipe staging directory",
+    "创建方案暂存目录"
+  ],
+  "config.store_action_create_recipe_bundle_directory": [
+    "create recipe bundle directory",
+    "创建方案包目录"
+  ],
+  "config.store_action_write_recipe_bundle_file": [
+    "write recipe bundle file",
+    "写入方案包文件"
+  ],
+  "config.store_action_delete_recipe_directory": [
+    "delete recipe directory",
+    "删除方案目录"
+  ],
+  "config.store_action_read_recipe_bundle": [
+    "read recipe bundle",
+    "读取方案包"
+  ],
+  "config.store_action_inspect_recipe_bundle": [
+    "inspect recipe bundle",
+    "检查方案包"
+  ],
+  "config.store_action_read_recipe_bundle_file": [
+    "read recipe bundle file",
+    "读取方案包文件"
+  ],
+  "config.store_action_prepare_recipe_bundle_replacement": [
+    "prepare recipe bundle replacement",
+    "准备替换方案包"
+  ],
+  "config.store_action_install_recipe_bundle": [
+    "install recipe bundle",
+    "安装方案包"
+  ],
+  "config.store_action_roll_back_recipe_bundle": [
+    "roll back recipe bundle",
+    "回滚方案包"
+  ],
+  "config.store_action_restore_recipe_bundle": [
+    "restore recipe bundle",
+    "恢复方案包"
+  ],
+  "config.store_kind_automation": [
+    "automation",
+    "自动化"
+  ],
+  "config.theme_table": [
+    "[theme] must be a table",
+    "[theme] 必须是表"
+  ],
+  "config.theme_id_string": [
+    "[theme].id must be a string",
+    "[theme].id 必须是字符串"
+  ],
+  "config.recipe_string": [
+    "recipe must be a string",
+    "recipe 必须是字符串"
+  ],
+  "config.invalid_recipe_id": [
+    "recipe `{id}` is not a stable ID",
+    "recipe `{id}` 不是稳定 ID"
+  ],
+  "config.invalid_toml": [
+    "invalid TOML: {error}",
+    "TOML 无效：{error}"
+  ],
+  "config.bundle_entry": [
+    "bundle requires entry `{entry_name}`",
+    "方案包需要入口文件 `{entry_name}`"
+  ],
+  "config.bundle_paths": [
+    "invalid paths: {message}",
+    "路径无效：{message}"
+  ],
+  "config.name_string": [
+    "name must be a string",
+    "name 必须是字符串"
+  ],
+  "config.regular_files_only": [
+    "only regular files and directories are supported",
+    "只支持普通文件和目录"
+  ],
+  "config.invalid_recipe_id_plain": [
+    "invalid recipe ID",
+    "方案 ID 无效"
+  ],
+  "config.entry_exists": [
+    "entry filename already exists",
+    "入口文件名已存在"
+  ],
+  "config.entry_missing": [
+    "entry file is missing",
+    "缺少入口文件"
+  ],
+  "config.invalid_automation_id": [
+    "invalid automation ID",
+    "自动化 ID 无效"
+  ],
+  "config.entry_invalid": [
+    "entry file is invalid",
+    "入口文件无效"
+  ],
+  "config.automations_table": [
+    "automations must be a table",
+    "automations 必须是表"
+  ],
+  "config.bundle_portable_path": [
+    "path must be a non-empty portable `/`-separated path",
+    "路径必须是非空、可移植且以 `/` 分隔的路径"
+  ],
+  "config.bundle_relative_path": [
+    "absolute paths, `.` and `..` are not allowed",
+    "不允许绝对路径、`.` 和 `..`"
+  ],
+  "config.bundle_windows_component": [
+    "path contains a Windows-reserved component",
+    "路径包含 Windows 保留分量"
+  ],
+  "config.bundle_case_conflict": [
+    "`{path}` conflicts with `{existing}` after case folding",
+    "忽略大小写后，`{path}` 与 `{existing}` 冲突"
+  ],
+  "config.bundle_file_directory": [
+    "`{path}` is both a file and a directory",
+    "`{path}` 同时是文件和目录"
+  ],
+  "config.daily_time": [
+    "daily time must use zero-padded HH:MM",
+    "每日时间必须使用补零的 HH:MM 格式"
+  ],
+  "platform.unknown_automation": [
+    "Enabled automation `{id}` was not found in the configuration",
+    "配置中未找到已启用的自动化 `{id}`"
+  ],
+  "platform.unsupported": [
+    "Automation management is not supported on platform `{platform}`",
+    "平台 `{platform}` 不支持自动化管理"
+  ],
+  "platform.invalid_automation": [
+    "Automation ID `{id}` is invalid",
+    "自动化 ID `{id}` 无效"
+  ],
+  "platform.directory_missing": [
+    "The platform automation directory could not be determined",
+    "无法确定平台自动化目录"
+  ],
+  "platform.application_config_required": [
+    "Automation installation requires an application config.toml; the current Recipe source is `{source}`",
+    "安装自动化需要应用 config.toml；当前方案来源为 `{source}`"
+  ],
+  "platform.access_failed": [
+    "Could not access {path}: {source}",
+    "无法访问 {path}：{source}"
+  ],
+  "platform.command_failed": [
+    "Platform command `{command}` failed: {message}",
+    "平台命令 `{command}` 执行失败：{message}"
+  ],
+  "platform.backend_failed": [
+    "Platform backend failed: {error}",
+    "平台后端失败：{error}"
+  ],
+  "platform.recovery_failed": [
+    "{operation}; restoring the previous schedule also failed: {recovery}; scheduling safety stop: {safety_stop}",
+    "{operation}；恢复先前调度也失败：{recovery}；调度安全停止结果：{safety_stop}"
+  ],
+  "platform.runner_invalid": [
+    "automation runner must be an existing absolute file",
+    "自动化 runner 必须是已存在文件的绝对路径"
+  ],
+  "platform.disabled_unloaded": [
+    "automatic scheduling disabled and unloaded",
+    "已禁用并卸载自动调度"
+  ],
+  "platform.succeeded": [
+    "succeeded",
+    "成功"
+  ],
+  "platform.safety_results": [
+    "disable: {disable}; unload: {unload}",
+    "禁用：{disable}；卸载：{unload}"
+  ],
+  "platform.command_exit": [
+    "{message} (exit {status})",
+    "{message}（退出状态 {status}）"
+  ],
+  "platform.launchd_state_unreadable": [
+    "Could not read launchd's disabled-service state",
+    "无法读取 launchd 的服务禁用状态"
+  ],
+  "platform.restore_definition_failed": [
+    "{unload}; restoring the persisted definition also failed: {persisted}",
+    "{unload}；恢复已保存的定义也失败：{persisted}"
+  ],
+  "platform.launchagent_definition_missing": [
+    "The original loaded LaunchAgent {label} had no persisted definition at {path}; it could not be reloaded",
+    "原已加载的 LaunchAgent {label} 在 {path} 没有已保存的定义，无法重新加载"
+  ],
+  "platform.empty_task": [
+    "Task Scheduler returned an empty task definition",
+    "任务计划程序返回了空任务定义"
+  ],
+  "platform.scheduling_disabled": [
+    "automatic scheduling disabled",
+    "已禁用自动调度"
+  ],
+  "platform.disable_failed": [
+    "could not disable automatic scheduling: {error}",
+    "无法禁用自动调度：{error}"
+  ],
+  "platform.removal_unconfirmed": [
+    "{error}; could not confirm task removal: {query}",
+    "{error}；无法确认任务已移除：{query}"
+  ],
+  "native.operation_cancelled": [
+    "Operation cancelled",
+    "操作已取消"
+  ],
+  "native.operation_deadline": [
+    "Operation deadline exceeded",
+    "操作已超时"
+  ],
+  "native.invalid_child_pid": [
+    "Invalid child PID",
+    "子进程 PID 无效"
+  ],
+  "native.output_deadline": [
+    "Process output deadline exceeded",
+    "等待进程输出超时"
+  ],
+  "native.output_byte_budget": [
+    "Process output exceeds byte budget",
+    "进程输出超过字节上限"
+  ],
+  "native.output_line_budget": [
+    "Process output exceeds line budget",
+    "进程输出超过单行字节上限"
+  ],
+  "native.artifact_new_operation": [
+    "Interrupted execution artifacts cannot be selected for a new operation",
+    "执行中断后的残留内容不能选入新操作"
+  ],
+  "native.artifact_cleanup": [
+    "Interrupted execution artifacts require inspection and cannot be cleanup selections",
+    "执行中断后的残留内容需要检查，不能选入清理"
+  ],
+  "native.mount_identity": [
+    "Native mount identity is unavailable",
+    "原生挂载身份不可用"
+  ],
+  "native.inspection_boundary": [
+    "Cache inspection cannot cross links or nested mounts",
+    "缓存检查不能跨越链接或嵌套挂载"
+  ],
+  "native.inspection_changed": [
+    "Cache directory changed during inspection; scan again",
+    "缓存目录在检查期间发生变化；请重新扫描"
+  ],
+  "native.selected_changed": [
+    "Selected filesystem item was replaced; rescan before cleaning",
+    "所选文件系统项目已被替换；请重新扫描后再清理"
+  ],
+  "native.cleanup_boundary": [
+    "Cleanup cannot cross links or mount boundaries",
+    "清理不能跨越链接或挂载边界"
+  ],
+  "native.creation_identity": [
+    "Creation identity cannot be verified",
+    "无法验证创建身份"
+  ],
+  "native.directory_boundary_changed": [
+    "Cleanup directory boundary is no longer a directory or contains a symbolic link; rescan before cleaning",
+    "清理目录边界已不再是目录或包含符号链接；请重新扫描后再清理"
+  ],
+  "native.exclusive_rename": [
+    "Atomic exclusive rename is unavailable",
+    "原子独占重命名不可用"
+  ],
+  "native.reparse_boundary": [
+    "Cleanup cannot cross a reparse point or volume boundary",
+    "清理不能跨越重解析点或卷边界"
+  ],
+  "native.ancestry_monitor": [
+    "Cleanup cannot monitor the selected item's directory ancestry on this system",
+    "此系统无法监视所选项目的目录祖先链，不能继续清理"
+  ],
+  "native.ancestry_generation_unavailable": [
+    "This volume does not provide a usable parent-folder change counter; the selected item was not deleted",
+    "当前卷无法提供有效的父目录变更计数，未删除所选项目"
+  ],
+  "native.ancestry_changed": [
+    "The selected item's parent folders changed during cleanup; rescan before cleaning",
+    "清理期间所选项目的父目录发生变化，请重新扫描后再清理"
+  ],
+  "native.capture_mount": [
+    "Cleanup cannot capture a mount point or cross a mount boundary",
+    "清理不能锁定挂载点或跨越挂载边界"
+  ],
+  "native.retained_location": [
+    "at {path}",
+    "位于 {path}"
+  ],
+  "native.retained_location_unknown": [
+    "in an execution directory whose current location is unavailable (original location: {path}; {error})",
+    "位于当前位置不可用的执行目录（原位置：{path}；{error}）"
+  ],
+  "native.surviving_contents": [
+    "Cleanup stopped; surviving content remains {location}: {error}",
+    "清理已停止；剩余内容{location}：{error}"
+  ],
+  "native.execution_contents": [
+    "Cleanup stopped; execution content remains {location}",
+    "清理已停止；执行内容仍{location}"
+  ],
+  "cleanup_access.requesting": [
+    "Requesting administrator authorization for this confirmed cleanup; subsequent protected steps reuse this session",
+    "正在为已确认的清理请求管理员授权；后续受保护步骤将复用此会话"
+  ],
+  "cleanup_access.login_unavailable": [
+    "Cleanup login state unavailable",
+    "清理登录状态不可用"
+  ],
+  "cleanup_access.shutdown_unavailable": [
+    "Cleanup shutdown state unavailable",
+    "清理关闭状态不可用"
+  ],
+  "cleanup_access.already_closed": [
+    "Cleanup session is already closed",
+    "清理会话已关闭"
+  ],
+  "cleanup_access.invalid_operation": [
+    "Invalid cleanup authorization operation",
+    "清理授权操作无效"
+  ],
+  "cleanup_access.state_unavailable": [
+    "Authorization state unavailable",
+    "授权状态不可用"
+  ],
+  "cleanup_access.expired": [
+    "Cleanup authorization expired",
+    "清理授权已过期"
+  ],
+  "cleanup_access.invalid_session": [
+    "Invalid cleanup authorization session",
+    "清理授权会话无效"
+  ],
+  "cleanup_access.session_unavailable": [
+    "Cleanup authorization session unavailable",
+    "清理授权会话不可用"
+  ],
+  "cleanup_access.task_outside_plan": [
+    "Cleanup task is outside the confirmed plan",
+    "清理任务不在已确认的计划中"
+  ],
+  "cleanup_access.item_outside_plan": [
+    "Cleanup item changed or is outside the confirmed selection",
+    "清理项目已变化或不在已确认的选择范围内"
+  ],
+  "cleanup_access.denied": [
+    "Administrator authorization was denied",
+    "管理员授权被拒绝"
+  ],
+  "cleanup_access.cancelled": [
+    "Administrator authorization was cancelled",
+    "管理员授权已取消"
+  ],
+  "cleanup_access.timed_out": [
+    "Administrator authorization timed out",
+    "管理员授权超时"
+  ],
+  "cleanup_access.interactive_required": [
+    "Interactive administrator authorization is required",
+    "需要交互式管理员授权"
+  ],
+  "cleanup_access.component_missing": [
+    "The system cleanup component could not be prepared; check that the application bundle is complete and current",
+    "无法准备系统清理组件；请检查应用包是否完整且为最新版本"
+  ],
+  "cleanup_access.component_untrusted": [
+    "The system cleanup component is not trusted; repair its installation before retrying",
+    "系统清理组件不受信任；请修复安装后再重试"
+  ],
+  "cleanup_access.startup_unavailable": [
+    "The cleanup authorization session could not be established",
+    "无法建立清理授权会话"
+  ],
+  "cleanup_access.invalid_request": [
+    "Invalid cleanup request",
+    "清理请求无效"
+  ],
+  "cleanup_access.request_budget": [
+    "Cleanup request exceeds the protocol budget",
+    "清理请求超出协议容量限制"
+  ],
+  "cleanup_access.request_delivery": [
+    "Cleanup request delivery failed; reconcile before retrying",
+    "清理请求发送失败；重试前请核对执行状态"
+  ],
+  "cleanup_access.worker_timeout": [
+    "Cleanup worker output timed out; rescan before retrying",
+    "等待清理 worker 输出超时；重试前请重新扫描"
+  ],
+  "cleanup_access.response_identity": [
+    "Cleanup response has a different operation identity",
+    "清理响应的操作身份不匹配"
+  ],
+  "cleanup_access.outcome_outside_selection": [
+    "Worker outcome is outside the dispatched selection",
+    "worker 结果不在已派发的选择范围内"
+  ],
+  "cleanup_access.receipt_delivery": [
+    "Cleanup outcome receipt could not be delivered",
+    "无法发送清理结果回执"
+  ],
+  "cleanup_access.result_unconfirmed": [
+    "Cleanup worker did not confirm its result; rescan before retrying",
+    "清理 worker 未确认执行结果；重试前请重新扫描"
+  ],
+  "cleanup_access.output_budget": [
+    "Cleanup output exceeded its resource budget",
+    "清理输出超出资源限额"
+  ],
+  "cleanup_access.input_unavailable": [
+    "Cleanup input unavailable",
+    "清理输入不可用"
+  ],
+  "cleanup_access.response_budget": [
+    "Cleanup response budget exceeded",
+    "清理响应超出容量限制"
+  ],
+  "cleanup_access.invalid_snapshot_options": [
+    "Invalid snapshot task options",
+    "快照任务选项无效"
+  ],
+  "cleanup_access.invalid_program": [
+    "Invalid system program",
+    "系统程序无效"
+  ],
+  "cleanup_access.custom_program": [
+    "Custom programs are not allowed in an authorized cleanup worker",
+    "已授权的清理 worker 不允许使用自定义程序"
+  ],
+  "cleanup_access.no_more_prompts": [
+    "{message} ({outcome}); no further authorization prompts will be shown for this cleanup",
+    "{message}（{outcome}）；本次清理不会再次弹出授权提示"
+  ],
+  "cleanup_access.stopped": [
+    "Cleanup stopped: {cause}; rescan to check remaining items",
+    "清理已停止：{cause}；请重新扫描以检查剩余项目"
+  ],
+  "cleanup_access.response_failed": [
+    "Cleanup worker response failed: {cause}; rescan before retrying",
+    "清理 worker 响应失败：{cause}；重试前请重新扫描"
+  ],
+  "cleanup_access.shutdown_unconfirmed": [
+    "Cleanup service shutdown was not confirmed: {outcome}; completed item results are preserved",
+    "未能确认清理服务已关闭：{outcome}；已完成项目的结果已保留"
+  ],
+  "cleanup_access.start_failed": [
+    "Could not start cleanup authorization: {cause}",
+    "无法启动清理授权：{cause}"
+  ],
+  "cleanup_access.startup_exit": [
+    "Cleanup authorization exited before the worker was ready (exit code: {code}); authorization was not established",
+    "清理授权在 worker 就绪前退出（退出码：{code}）；未建立授权"
+  ],
+  "cleanup_access.trusted_program": [
+    "A trusted system {name} is required",
+    "需要受信任的系统程序 {name}"
+  ],
+  "native.private_staging_unavailable": [
+    "This filesystem did not provide an owner-only cleanup workspace (0700); the selected item was not moved or deleted",
+    "此文件系统未提供仅执行用户可访问的清理暂存目录（0700）；所选项目未被移动或删除"
+  ],
+  "linux.go_worker_missing": [
+    "Read-only Go modules need the current cleanup component. Update the bundled component or integrate the ordinary Go cache worker entrypoint in this host.",
+    "清理只读 Go 模块需要当前清理组件。请更新随包组件，或在此宿主接入普通用户 Go 缓存 worker 入口。"
+  ],
+  "linux.go_worker_unconfirmed": [
+    "Go cache worker stopped without a confirmed result; inspect retained .spaceprune-execute-* contents before retrying: {error}",
+    "Go 缓存 worker 未能确认结果便已停止；重试前请检查保留的 .spaceprune-execute-* 内容：{error}"
+  ],
+  "linux.go_worker_stop_unconfirmed": [
+    "Go cache cancellation restoration could not be confirmed",
+    "无法确认 Go 缓存取消后的恢复结果"
+  ],
+  "linux.go_worker_exit": [
+    "Go cache worker exited before returning its result",
+    "Go 缓存 worker 未返回结果便已退出"
+  ],
+  "linux.go_namespace_unavailable": [
+    "Ordinary-user access to read-only Go modules is unavailable; administrator access may be required: {error}",
+    "无法以普通用户权限处理只读 Go 模块；可能需要管理员授权：{error}"
+  ],
+  "cleanup_access.bundle_missing": [
+    "The application bundle is missing a required native component. Reinstall the complete matching package; source builds should run scripts/run-cli.sh to build CLI and all helpers together.",
+    "应用随包缺少所需原生组件。请重新安装完整的匹配版本；源码运行请使用 scripts/run-cli.sh 同时构建 CLI 和所有 helper。"
+  ],
+  "cleanup_access.bundle_outdated": [
+    "The bundled native component does not support this cleanup. Update the complete application package; source builds should run scripts/run-cli.sh. Retrying authorization cannot update an old bundle.",
+    "应用随包的原生组件不支持本次清理。请更新完整应用包；源码运行请使用 scripts/run-cli.sh。重复授权不能更新旧的随包文件。"
+  ],
+  "cleanup_access.already_consumed": [
+    "This confirmed cleanup selection has already been attempted; rescan before retrying",
+    "此确认的清理选择已尝试执行；重试前请重新扫描"
+  ],
+  "plugins.developer_name": [
+    "Developer tools",
+    "开发工具"
+  ],
+  "plugins.developer_description": [
+    "Local Docker lifecycle and Linux Rust/Cargo, Go and npm caches, with explicit scope and rebuild/download consequences.",
+    "本机 Docker 生命周期与 Linux Rust/Cargo、Go、npm 缓存，明确范围及重新下载、构建的影响。"
+  ],
+  "developer.go_build_cache": [
+    "Go build cache",
+    "Go 构建缓存"
+  ],
+  "developer.cargo_registry_cache": [
+    "Cargo registry downloads",
+    "Cargo 软件包下载缓存"
+  ],
+  "developer.npm_cache": [
+    "npm package cache",
+    "npm 软件包缓存"
+  ],
+  "developer.go_mod_consequence": [
+    "Removes the selected Go module cache; future builds may download modules again.",
+    "清理选定的 Go 模块缓存；后续构建可能需要重新下载依赖。"
+  ],
+  "developer.go_build_consequence": [
+    "Removes the Go build cache; future builds recompile cached results.",
+    "清理 Go 构建缓存；后续构建需要重新编译缓存结果。"
+  ],
+  "developer.cargo_consequence": [
+    "Removes downloaded Cargo registry archives only; keeps sources, Git checkouts, toolchains and credentials. Offline builds may need downloads.",
+    "仅清理 Cargo 注册源的软件包下载缓存；保留源码、Git 检出、工具链与凭据。离线构建可能需要重新下载。"
+  ],
+  "developer.npm_consequence": [
+    "Removes npm content-addressed package cache only; keeps node_modules, configuration and credentials. Offline installs may need downloads.",
+    "仅清理 npm 内容寻址软件包缓存；保留 node_modules、配置与凭据。离线安装可能需要重新下载。"
+  ],
+  "developer.cache_unavailable": [
+    "This tool cache is not available in the current user environment.",
+    "当前用户环境中未找到可用的工具缓存。"
+  ],
+  "developer.discovery_ordinary_only": [
+    "Discover developer caches as the ordinary user before authorizing inspection.",
+    "请先以普通用户发现开发工具缓存，再授权检查。"
+  ],
+  "developer.cache_root_not_directory": [
+    "The cache root is not a regular directory.",
+    "缓存根路径不是普通目录。"
+  ],
+  "developer.cache_root_filesystem": [
+    "A filesystem root cannot be used as a tool cache.",
+    "不能将文件系统根目录作为工具缓存。"
+  ],
+  "developer.cache_changed": [
+    "The cache directory changed; scan again.",
+    "缓存目录已改变，请重新扫描。"
+  ],
+  "developer.cache_invalid_binding": [
+    "The selected cache has no valid directory identity.",
+    "选定缓存没有有效的目录身份。"
+  ],
+  "developer.cache_identity_unavailable": [
+    "Could not bind the cache directory: {error}",
+    "无法绑定缓存目录身份：{error}"
+  ],
+  "developer.cache_selected_unavailable": [
+    "The selected item does not match this cache capability.",
+    "选定项目与此缓存能力不匹配。"
+  ],
+  "developer.cache_check_identity": [
+    "Checking the selected cache identity before native cleanup",
+    "正在校验选定缓存的目录身份，随后执行原生清理"
+  ],
+  "developer.cache_unsupported": [
+    "Native tool-cache cleanup is not supported on this platform.",
+    "当前平台尚不支持原生工具缓存清理。"
+  ],
+  "developer.legacy_options_invalid": [
+    "Legacy Go cache options manager and vacuum-time must be strings.",
+    "旧 Go 缓存配置的 manager 和 vacuum-time 必须为字符串。"
+  ],
+  "docker.build_cache": [
+    "Docker build cache",
+    "Docker 构建缓存"
+  ],
+  "docker.dangling_images": [
+    "Docker dangling images",
+    "Docker 悬空镜像"
+  ],
+  "docker.unused_images": [
+    "Docker unused tagged images",
+    "Docker 未使用的有标签镜像"
+  ],
+  "docker.stopped_containers": [
+    "Docker stopped containers",
+    "Docker 已停止的容器"
+  ],
+  "docker.build_consequence": [
+    "Remove selected unused build-cache records from the local Engine default builder. Later builds may rebuild or download; rounded Docker sizes remain unknown. Shared layers do not predict disk space freed.",
+    "清理本机 Engine 默认构建器的选定闲置缓存。后续可能重新构建或下载；Docker 四舍五入的大小记为未知，共享层大小不代表可释放空间。"
+  ],
+  "docker.image_consequence": [
+    "Remove selected untagged images not referenced by any container. Do not remove parent images, containers or volumes. Shared layers make reclaimed space unknown.",
+    "清理未被任何容器引用的选定无标签镜像，不连带删除父镜像、容器或数据卷。共享层使实际释放空间未知。"
+  ],
+  "docker.unused_consequence": [
+    "Optional: remove selected tagged images not referenced by any container. Offline images may be lost and later use may require downloading or rebuilding. Volumes and containers are retained.",
+    "手动可选：清理未被任何容器引用的有标签镜像，可能失去离线镜像，后续需重新下载或构建。保留数据卷和容器。"
+  ],
+  "docker.container_consequence": [
+    "Optional: remove selected stopped containers and their writable layers. Unsaved container data and logs are lost. Do not stop running containers or remove volumes.",
+    "手动可选：删除选定的已停止容器及其可写层，未另存的容器数据与日志将丢失。不停止运行中的容器，不删除数据卷。"
+  ],
+  "docker.command_failed": [
+    "Docker could not complete this operation: {error}",
+    "Docker 无法完成此操作：{error}"
+  ],
+  "docker.unavailable": [
+    "Docker is unavailable; install/start Docker or check local Engine access: {error}",
+    "Docker 不可用；请安装或启动 Docker，或检查本机 Engine 访问权限：{error}"
+  ],
+  "docker.remote_endpoint": [
+    "Remote Docker endpoints are not supported. Select a local Docker Engine context and scan again.",
+    "不支持远程 Docker 端点。请选择本机 Docker Engine context 后重新扫描。"
+  ],
+  "docker.invalid_selection": [
+    "The Docker task or bound selection is invalid; scan again.",
+    "Docker 任务或绑定选择无效，请重新扫描。"
+  ],
+  "docker.desktop_only": [
+    "Docker cleanup supports Linux, Windows and macOS desktops, not Android or iOS.",
+    "Docker 清理适用于 Linux、Windows、macOS 桌面，不支持 Android 或 iOS。"
+  ],
+  "docker.engine_changed": [
+    "The Docker endpoint or Engine identity changed; scan again before cleanup.",
+    "Docker 端点或 Engine 身份已改变，请重新扫描后再清理。"
+  ],
+  "docker.object_changed": [
+    "The Docker object is no longer eligible or was not removed; scan again.",
+    "Docker 对象已不符合清理条件或未被删除，请重新扫描。"
+  ],
+  "developer.tool_missing": [
+    "The native {program} tool is not installed; this cache was not scanned.",
+    "未安装原生 {program} 工具，未扫描此缓存。"
+  ],
+  "docker.interface_unavailable": [
+    "The required Docker/Buildx interface is unavailable; objects were not scanned: {error}",
+    "所需 Docker/Buildx 接口不可用，未扫描对象：{error}"
+  ],
+  "docker.interface_unsupported": [
+    "This Docker/Buildx version lacks the required lifecycle interface; update it before scanning.",
+    "此 Docker/Buildx 版本缺少所需生命周期接口，请更新后再扫描。"
+  ],
+  "docker.access_denied": [
+    "Docker is installed, but local Engine access was denied. Check Docker socket or Docker Desktop permissions; no objects were scanned. Details: {error}",
+    "已安装 Docker，但无权访问本机 Engine。请检查 Docker socket 或 Docker Desktop 权限，未扫描对象。详情：{error}"
+  ],
+  "docker.daemon_unavailable": [
+    "Docker is installed, but its local Engine is not reachable. Start Docker or Docker Desktop, then scan again. Details: {error}",
+    "已安装 Docker，但无法连接本机 Engine。请启动 Docker 或 Docker Desktop 后重新扫描。详情：{error}"
+  ],
+  "docker.version_unsupported": [
+    "The Docker client and Engine API versions are incompatible; update the installation before scanning. Details: {error}",
+    "Docker 客户端与 Engine API 版本不兼容，请更新后再扫描。详情：{error}"
+  ],
+  "filesystem.authorized_cleanup_not_started": [
+    "{p0}; protected cleanup could not start: {reason}",
+    "{p0}；受保护内容的清理未能启动：{reason}"
+  ]
+}

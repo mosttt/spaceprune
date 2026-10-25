@@ -1,0 +1,21 @@
+[package]
+name = "spaceprune-platform"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Cross-platform integration for SpacePrune"
+
+[dependencies]
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+spaceprune-config = { path = "../spaceprune-config" }
+spaceprune-engine = { path = "../spaceprune-engine" }
+serde.workspace = true
+thiserror.workspace = true
+tempfile.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+spaceprune-platform-linux = { path = "../spaceprune-platform-linux" }
+
+[lints]
+workspace = true

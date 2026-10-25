@@ -1,0 +1,367 @@
+{
+  "cancelled": false,
+  "cleanup_size_summary": {
+    "reclaimed_bytes": 0,
+    "snapshot_group_count": 0,
+    "snapshot_space_changes": [],
+    "unknown_size_item_count": 0
+  },
+  "execution": {
+    "cancelled": false,
+    "groups": [
+      {
+        "error": null,
+        "handler_id": "builtin.filesystem/paths",
+        "module_id": "fixture",
+        "result": {
+          "attempted": 1,
+          "failures": [
+            {
+              "io_failure": {
+                "kind": "access_denied",
+                "os_code": 13
+              },
+              "item_id": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+              "message": "Permission denied (os error 13); administrator cleanup did not return a confirmed result: Interactive administrator authorization is required (NeedsAuthorization); no further authorization prompts will be shown for this cleanup. Rescan to check remaining files."
+            }
+          ],
+          "outcomes": [
+            {
+              "failure": {
+                "io_failure": {
+                  "kind": "access_denied",
+                  "os_code": 13
+                },
+                "item_id": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+                "message": "Permission denied (os error 13); administrator cleanup did not return a confirmed result: Interactive administrator authorization is required (NeedsAuthorization); no further authorization prompts will be shown for this cleanup. Rescan to check remaining files."
+              },
+              "item_id": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+              "reclaimed_estimate": 0,
+              "reclaimed_lower_bound": 0,
+              "status": "failed"
+            }
+          ],
+          "reclaimed_bytes": 0,
+          "succeeded": 0,
+          "unknown_reclaimed_items": 0
+        },
+        "size_accounting": "processed_bytes",
+        "task_id": "scope"
+      }
+    ]
+  },
+  "plan": {
+    "config_name": "Native execution scope fixture",
+    "digest": "bd39f874471a62a5fbb9bb074d97eb820ff145419bf89bfd24018341c65f7d79",
+    "groups": [
+      {
+        "handler_id": "builtin.filesystem/paths",
+        "items": [
+          {
+            "id": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+            "location": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+            "logical_bytes": 19,
+            "modified_at": 1792102884,
+            "name": "protected.cache",
+            "opaque": {
+              "exact-root": false,
+              "filesystem-identity": {
+                "birth": 1792102884556513550,
+                "device": "000000000000003c",
+                "high": "0000000000000000",
+                "inode": "0000000000e0a628"
+              },
+              "native-path": {
+                "encoding": "unix",
+                "units": [
+                  47,
+                  118,
+                  97,
+                  114,
+                  47,
+                  108,
+                  105,
+                  98,
+                  47,
+                  115,
+                  112,
+                  97,
+                  99,
+                  101,
+                  112,
+                  114,
+                  117,
+                  110,
+                  101,
+                  45,
+                  110,
+                  97,
+                  116,
+                  105,
+                  118,
+                  101,
+                  45,
+                  97,
+                  117,
+                  116,
+                  104,
+                  45,
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101,
+                  47,
+                  114,
+                  101,
+                  97,
+                  100,
+                  97,
+                  98,
+                  108,
+                  101,
+                  45,
+                  110,
+                  111,
+                  116,
+                  45,
+                  119,
+                  114,
+                  105,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  47,
+                  112,
+                  114,
+                  111,
+                  116,
+                  101,
+                  99,
+                  116,
+                  101,
+                  100,
+                  46,
+                  99,
+                  97,
+                  99,
+                  104,
+                  101
+                ]
+              },
+              "path": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+              "root-identity": {
+                "birth": 1792102884556513550,
+                "device": "000000000000003c",
+                "high": "0000000000000000",
+                "inode": "0000000000e0a627"
+              },
+              "root-index": 0
+            },
+            "parent_id": null,
+            "reason": "Matches the active recommendation rules",
+            "reclaimable_bytes": 19,
+            "recommendation": "recommended",
+            "tags": [
+              "file"
+            ]
+          }
+        ],
+        "module_id": "fixture",
+        "request": {
+          "handler_id": "builtin.filesystem/paths",
+          "module_id": "fixture",
+          "name": "Scope fixture",
+          "options": {
+            "directories": false,
+            "elevation": "auto",
+            "files": true,
+            "roots": [
+              {
+                "exclude": [],
+                "include": [
+                  "*.cache"
+                ],
+                "path": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable",
+                "scope": "directory_children"
+              }
+            ]
+          },
+          "recommend": {},
+          "tags": [],
+          "task_id": "scope"
+        },
+        "task_id": "scope"
+      }
+    ],
+    "plan_id": "79f141d9-226a-4ca2-b87e-48b1421a2de7",
+    "recipe_revision": "e7d3ace92a0c539ac9d14889946552db1d0a628ad16588902ae4d9d434ef10df",
+    "scan_id": "10d5b183-08f7-4f1b-a6a0-4ef7c21533f3"
+  },
+  "scan": {
+    "cancelled": false,
+    "config_name": "Native execution scope fixture",
+    "config_source": "/home/native-fixture/.config/spaceprune/recipes/native-fixture/native-fixture.toml",
+    "modules": [
+      {
+        "description": "",
+        "id": "fixture",
+        "name": "Fixture",
+        "tasks": [
+          {
+            "error": null,
+            "handler_id": "builtin.filesystem/paths",
+            "issues": [],
+            "items": [
+              {
+                "id": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+                "location": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+                "logical_bytes": 19,
+                "modified_at": 1792102884,
+                "name": "protected.cache",
+                "opaque": {
+                  "exact-root": false,
+                  "filesystem-identity": {
+                    "birth": 1792102884556513550,
+                    "device": "000000000000003c",
+                    "high": "0000000000000000",
+                    "inode": "0000000000e0a628"
+                  },
+                  "native-path": {
+                    "encoding": "unix",
+                    "units": [
+                      47,
+                      118,
+                      97,
+                      114,
+                      47,
+                      108,
+                      105,
+                      98,
+                      47,
+                      115,
+                      112,
+                      97,
+                      99,
+                      101,
+                      112,
+                      114,
+                      117,
+                      110,
+                      101,
+                      45,
+                      110,
+                      97,
+                      116,
+                      105,
+                      118,
+                      101,
+                      45,
+                      97,
+                      117,
+                      116,
+                      104,
+                      45,
+                      102,
+                      105,
+                      120,
+                      116,
+                      117,
+                      114,
+                      101,
+                      47,
+                      114,
+                      101,
+                      97,
+                      100,
+                      97,
+                      98,
+                      108,
+                      101,
+                      45,
+                      110,
+                      111,
+                      116,
+                      45,
+                      119,
+                      114,
+                      105,
+                      116,
+                      97,
+                      98,
+                      108,
+                      101,
+                      47,
+                      112,
+                      114,
+                      111,
+                      116,
+                      101,
+                      99,
+                      116,
+                      101,
+                      100,
+                      46,
+                      99,
+                      97,
+                      99,
+                      104,
+                      101
+                    ]
+                  },
+                  "path": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable/protected.cache",
+                  "root-identity": {
+                    "birth": 1792102884556513550,
+                    "device": "000000000000003c",
+                    "high": "0000000000000000",
+                    "inode": "0000000000e0a627"
+                  },
+                  "root-index": 0
+                },
+                "parent_id": null,
+                "reason": "Matches the active recommendation rules",
+                "reclaimable_bytes": 19,
+                "recommendation": "recommended",
+                "tags": [
+                  "file"
+                ]
+              }
+            ],
+            "module_id": "fixture",
+            "name": "Scope fixture",
+            "request": {
+              "handler_id": "builtin.filesystem/paths",
+              "module_id": "fixture",
+              "name": "Scope fixture",
+              "options": {
+                "directories": false,
+                "elevation": "auto",
+                "files": true,
+                "roots": [
+                  {
+                    "exclude": [],
+                    "include": [
+                      "*.cache"
+                    ],
+                    "path": "/var/lib/spaceprune-native-auth-fixture/readable-not-writable",
+                    "scope": "directory_children"
+                  }
+                ]
+              },
+              "recommend": {},
+              "tags": [],
+              "task_id": "scope"
+            },
+            "task_id": "scope"
+          }
+        ]
+      }
+    ],
+    "scan_id": "10d5b183-08f7-4f1b-a6a0-4ef7c21533f3"
+  },
+  "status": "needs_authorization"
+}

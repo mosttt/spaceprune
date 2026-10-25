@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "可同步的完整 Recipe bundle。\n\n`files` 的键统一使用 `/` 分隔的 bundle 内相对路径，值为 UTF-8 文件内容。",
+  "properties": {
+    "files": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "bundle 内全部文件。",
+      "type": "object"
+    },
+    "id": {
+      "description": "Recipe 稳定 ID，同时决定入口文件名 `<id>.toml`。",
+      "type": "string"
+    }
+  },
+  "required": [
+    "files",
+    "id"
+  ],
+  "title": "RecipeBundle",
+  "type": "object"
+}

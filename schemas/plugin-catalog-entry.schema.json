@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "InstalledPlugin": {
+      "description": "Discovered plugin metadata serialized by CLI and GUI hosts.",
+      "properties": {
+        "executable": {
+          "description": "Executable path used by the host.",
+          "type": "string"
+        },
+        "manifest": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PluginManifest"
+            }
+          ],
+          "description": "Plugin manifest."
+        },
+        "manifest_path": {
+          "description": "Absolute path to `plugin.toml`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "manifest",
+        "manifest_path"
+      ],
+      "type": "object"
+    },
+    "PluginKind": {
+      "description": "Installation origin; built-in capabilities cannot be removed separately from the application.",
+      "oneOf": [
+        {
+          "description": "Shipped with the application.",
+          "enum": [
+            "builtin"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Installed as an external process plugin.",
+          "enum": [
+            "external"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "PluginManifest": {
+      "additionalProperties": false,
+      "description": "An external plugin manifest, with its existing TOML/JSON field names.",
+      "properties": {
+        "executable": {
+          "description": "Executable filename or path relative to the manifest directory.",
+          "type": "string"
+        },
+        "handlers": {
+          "description": "Local handler identifiers exported by the plugin.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Globally unique plugin identifier.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human-readable plugin name.",
+          "type": "string"
+        },
+        "platforms": {
+          "default": [],
+          "description": "Supported platforms; an empty list means platform-neutral. Manifest input may omit this field, but serialized metadata always includes the array.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "protocol-version": {
+          "description": "JSON Lines protocol version.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "schema-version": {
+          "description": "Manifest format version.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "version": {
+          "description": "Semantic plugin version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "handlers",
+        "id",
+        "name",
+        "protocol-version",
+        "schema-version",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "A read-only catalog entry; enumerating it never starts a plugin process.",
+  "properties": {
+    "conflicts_with_builtin": {
+      "description": "Whether an external installation uses an ID reserved for a built-in capability.",
+      "type": "boolean"
+    },
+    "description": {
+      "description": "Capability description, not model instructions.",
+      "type": "string"
+    },
+    "enabled": {
+      "description": "Device-local preference; conflicting external installations are always disabled.",
+      "type": "boolean"
+    },
+    "handlers": {
+      "description": "Complete handler IDs, including the plugin prefix.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "description": "Stable plugin ID used by recipe handler references.",
+      "type": "string"
+    },
+    "installation": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/InstalledPlugin"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "External installation details; absent for built-in capabilities."
+    },
+    "kind": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/PluginKind"
+        }
+      ],
+      "description": "Built-in or separately installed origin."
+    },
+    "name": {
+      "description": "Display name.",
+      "type": "string"
+    },
+    "platforms": {
+      "description": "Supported platforms; an empty list means platform-neutral.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "supported": {
+      "description": "Whether the plugin declares compatibility with the current platform.",
+      "type": "boolean"
+    },
+    "version": {
+      "description": "Installed semantic version.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "conflicts_with_builtin",
+    "description",
+    "enabled",
+    "handlers",
+    "id",
+    "kind",
+    "name",
+    "platforms",
+    "supported",
+    "version"
+  ],
+  "title": "PluginCatalogEntry",
+  "type": "object"
+}

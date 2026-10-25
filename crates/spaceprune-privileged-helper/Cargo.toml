@@ -1,0 +1,42 @@
+[package]
+name = "spaceprune-readonly-helper"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "SpacePrune 独立只读权限 Helper"
+
+[[bin]]
+name = "spaceprune-readonly-helper"
+path = "src/main.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "spaceprune-cleanup-helper"
+path = "src/cleanup.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "spaceprune-helper-installer"
+path = "src/installer.rs"
+test = false
+bench = false
+
+[dependencies]
+spaceprune-readonly-protocol = { path = "../spaceprune-readonly-protocol" }
+
+[target.'cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))'.dependencies]
+spaceprune = { path = "../spaceprune" }
+spaceprune-access = { path = "../spaceprune-access" }
+
+[build-dependencies]
+embed-resource = "3.0.11"
+
+[dev-dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+tempfile.workspace = true
+
+[lints]
+workspace = true

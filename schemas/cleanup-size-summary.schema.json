@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "VolumeSpaceChange": {
+      "description": "Observed volume free-space change, separate from per-item processed-size estimates. Concurrent filesystem activity can contribute to this change.",
+      "properties": {
+        "error": {
+          "description": "Why measurement was unavailable; this does not change the deletion outcome.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "freeBytesAfter": {
+          "description": "Free bytes on the same filesystem after the batch command has exited.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "freeBytesBefore": {
+          "description": "Free filesystem bytes immediately before the batch, including reserved free blocks.",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scope": {
+          "description": "Human-readable operation scope, such as a snapshot configuration name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Display totals that keep shared-storage operations out of unknown byte counts.",
+  "properties": {
+    "reclaimed_bytes": {
+      "description": "Known processed bytes for byte-accounted handlers, not measured freed disk space.",
+      "format": "uint64",
+      "minimum": 0.0,
+      "type": "integer"
+    },
+    "snapshot_already_absent_group_count": {
+      "default": 0,
+      "description": "Completed snapshot selections already absent before this execution; they freed zero bytes.",
+      "format": "uint",
+      "minimum": 0.0,
+      "type": "integer"
+    },
+    "snapshot_group_count": {
+      "description": "Successfully processed snapshot selection units; a pre/post pair is one group.",
+      "format": "uint",
+      "minimum": 0.0,
+      "type": "integer"
+    },
+    "snapshot_space_changes": {
+      "default": [],
+      "description": "Distinct snapshot deletion batches, each measured once on its own volume.",
+      "items": {
+        "$ref": "#/definitions/VolumeSpaceChange"
+      },
+      "type": "array"
+    },
+    "unknown_size_item_count": {
+      "description": "Byte-accounted selections whose complete processed-size estimate is unknown.",
+      "format": "uint",
+      "minimum": 0.0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "reclaimed_bytes",
+    "snapshot_group_count",
+    "unknown_size_item_count"
+  ],
+  "title": "CleanupSizeSummary",
+  "type": "object"
+}

@@ -1,0 +1,26 @@
+[package]
+name = "spaceprune-engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Scan, planning, and execution core for SpacePrune"
+
+[dependencies]
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-config = { path = "../spaceprune-config" }
+spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
+humantime.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10.9"
+uuid = { version = "1.18.1", features = ["v4"] }
+thiserror.workspace = true
+walkdir.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

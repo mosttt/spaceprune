@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CleanupItem": {
+      "description": "Handler 扫描产生的一个清理项。",
+      "properties": {
+        "id": {
+          "description": "任务内唯一 ID。",
+          "type": "string"
+        },
+        "location": {
+          "description": "路径或领域资源的可读位置。",
+          "type": "string"
+        },
+        "logical_bytes": {
+          "description": "逻辑占用字节数；无法计量时为 `None`。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "logical_size_applicability": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SizeApplicability"
+            }
+          ],
+          "description": "Domain applicability of logical size. Older reports default to ordinary measurement."
+        },
+        "modified_at": {
+          "description": "Unix 时间戳形式的最后活动时间。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "显示名称。",
+          "type": "string"
+        },
+        "opaque": {
+          "description": "由同一 Handler 在清理时解释的私有数据。"
+        },
+        "parent_id": {
+          "description": "可选的父项 ID，用于构建展示树。",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "description": "推荐、可选或不可用的原因。",
+          "type": "string"
+        },
+        "reclaimable_bytes": {
+          "description": "预计可释放字节数；无法可靠估计时为 `None`。",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "recommendation": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Recommendation"
+            }
+          ],
+          "description": "当前推荐状态。"
+        },
+        "tags": {
+          "description": "用于过滤和展示的标签。",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "location",
+        "name",
+        "opaque",
+        "reason",
+        "recommendation",
+        "tags"
+      ],
+      "type": "object"
+    },
+    "PlanGroup": {
+      "description": "清理计划中交给一个 Handler 的项目组。",
+      "properties": {
+        "handler_id": {
+          "description": "Handler ID。",
+          "type": "string"
+        },
+        "items": {
+          "description": "要清理的叶子项目。",
+          "items": {
+            "$ref": "#/definitions/CleanupItem"
+          },
+          "type": "array"
+        },
+        "module_id": {
+          "description": "模块 ID。",
+          "type": "string"
+        },
+        "request": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TaskRequest"
+            }
+          ],
+          "description": "原始任务请求。"
+        },
+        "task_id": {
+          "description": "任务 ID。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handler_id",
+        "items",
+        "module_id",
+        "request",
+        "task_id"
+      ],
+      "type": "object"
+    },
+    "Recommendation": {
+      "description": "清理项的推荐状态。",
+      "oneOf": [
+        {
+          "description": "默认勾选，并由 `--clean` 清理。",
+          "enum": [
+            "recommended"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "默认不勾选，但用户可以手动选择。",
+          "enum": [
+            "optional"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "仅用于展示，不能进入清理计划。",
+          "enum": [
+            "unavailable"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "SizeApplicability": {
+      "description": "Whether a size concept applies to an observed item, independently of measurement success.",
+      "oneOf": [
+        {
+          "description": "A missing measurement is unknown; a measured zero remains zero.",
+          "enum": [
+            "applicable"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "The domain explicitly declares this size concept inapplicable.",
+          "enum": [
+            "not_applicable"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "TaskRequest": {
+      "description": "传递给 Handler 的已解析任务。",
+      "properties": {
+        "handler_id": {
+          "description": "完整 Handler ID。",
+          "type": "string"
+        },
+        "module_id": {
+          "description": "所属模块 ID。",
+          "type": "string"
+        },
+        "name": {
+          "description": "任务显示名称。",
+          "type": "string"
+        },
+        "options": {
+          "description": "扫描与执行选项。"
+        },
+        "recommend": {
+          "description": "推荐规则。"
+        },
+        "tags": {
+          "description": "任务标签。",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "task_id": {
+          "description": "任务 ID。",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handler_id",
+        "module_id",
+        "name",
+        "options",
+        "recommend",
+        "tags",
+        "task_id"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Serializable plan observation. It cannot authorize or execute cleanup.",
+  "properties": {
+    "config_name": {
+      "description": "清理方案名称。",
+      "type": "string"
+    },
+    "digest": {
+      "description": "Digest of the exact selection, rules and scan identity.",
+      "type": "string"
+    },
+    "groups": {
+      "description": "按 Handler 任务分组的清理项目。",
+      "items": {
+        "$ref": "#/definitions/PlanGroup"
+      },
+      "type": "array"
+    },
+    "plan_id": {
+      "description": "Identity of the frozen plan.",
+      "type": "string"
+    },
+    "recipe_revision": {
+      "description": "Digest of the selected task definitions at planning time.",
+      "type": "string"
+    },
+    "scan_id": {
+      "description": "Identity of the scan that issued this plan.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "config_name",
+    "digest",
+    "groups",
+    "plan_id",
+    "recipe_revision",
+    "scan_id"
+  ],
+  "title": "CleanupPlan",
+  "type": "object"
+}

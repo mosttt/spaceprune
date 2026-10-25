@@ -1,0 +1,20 @@
+[package]
+name = "spaceprune-plugin-developer-tools"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Identity-bound Rust, Go and Node cache lifecycle plugin"
+
+[dependencies]
+spaceprune-access = { path = "../../crates/spaceprune-access" }
+spaceprune-engine = { path = "../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

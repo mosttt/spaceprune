@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PluginManifest": {
+      "additionalProperties": false,
+      "description": "An external plugin manifest, with its existing TOML/JSON field names.",
+      "properties": {
+        "executable": {
+          "description": "Executable filename or path relative to the manifest directory.",
+          "type": "string"
+        },
+        "handlers": {
+          "description": "Local handler identifiers exported by the plugin.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Globally unique plugin identifier.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human-readable plugin name.",
+          "type": "string"
+        },
+        "platforms": {
+          "default": [],
+          "description": "Supported platforms; an empty list means platform-neutral. Manifest input may omit this field, but serialized metadata always includes the array.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "protocol-version": {
+          "description": "JSON Lines protocol version.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "schema-version": {
+          "description": "Manifest format version.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "version": {
+          "description": "Semantic plugin version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "handlers",
+        "id",
+        "name",
+        "protocol-version",
+        "schema-version",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Discovered plugin metadata serialized by CLI and GUI hosts.",
+  "properties": {
+    "executable": {
+      "description": "Executable path used by the host.",
+      "type": "string"
+    },
+    "manifest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/PluginManifest"
+        }
+      ],
+      "description": "Plugin manifest."
+    },
+    "manifest_path": {
+      "description": "Absolute path to `plugin.toml`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "executable",
+    "manifest",
+    "manifest_path"
+  ],
+  "title": "InstalledPlugin",
+  "type": "object"
+}

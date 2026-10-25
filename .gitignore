@@ -1,0 +1,26 @@
+/target/
+/dist/
+/.idea/
+/.vscode/
+/.playwright-mcp/
+/playwright-report/
+/test-results/
+/coverage/
+/spaceprune-final-browser.png
+/.env
+/.env.*
+!/.env.example
+*.log
+.DS_Store
+
+**/__pycache__/
+**/*.py[cod]
+
+# Local credentials and operating-system/editor files.
+/secrets/
+/signing/
+Thumbs.db
+Desktop.ini
+
+# Unpublished research/candidate archives are maintained outside this public repository.
+/candidates/

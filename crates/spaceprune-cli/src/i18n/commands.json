@@ -1,0 +1,606 @@
+{
+  "commands.language_about": [
+    "Inspect or change the shared application language",
+    "查看或更改共享应用语言"
+  ],
+  "commands.language_set_about": [
+    "Follow the system or select English / Simplified Chinese",
+    "跟随系统，或选择英文 / 简体中文"
+  ],
+  "commands.language_arguments": [
+    "language commands only accept --config, --output, --help, and --version",
+    "language 命令仅接受 --config、--output、--help 和 --version"
+  ],
+  "commands.config_path_unknown": [
+    "The user configuration path could not be determined; pass --config PATH",
+    "无法确定用户配置路径；请传入 --config PATH"
+  ],
+  "commands.language_current": [
+    "Language: {preference} (resolved: {resolved})",
+    "语言：{preference}（当前：{resolved}）"
+  ],
+  "commands.config_once": [
+    "--config can only be specified once",
+    "--config 只能指定一次"
+  ],
+  "commands.config_path": [
+    "--config requires a path",
+    "--config 需要一个路径"
+  ],
+  "commands.tasks": [
+    "Tasks:\n{p0}",
+    "任务：\n{p0}"
+  ],
+  "commands.mode_conflict": [
+    "scan and clean subcommands cannot be combined with --scan, --clean, or --select",
+    "scan 和 clean 子命令不能与 --scan、--clean 或 --select 同时使用"
+  ],
+  "commands.about": [
+    "Configurable and extensible cleanup executor",
+    "可配置、可扩展的清理工具"
+  ],
+  "commands.path_header": [
+    "PATH",
+    "路径"
+  ],
+  "commands.help_config": [
+    "Use an application config.toml file",
+    "使用指定的应用 config.toml 文件"
+  ],
+  "commands.help_scan": [
+    "Scan and display results only",
+    "仅扫描并显示结果"
+  ],
+  "commands.help_clean": [
+    "Clean recommended items",
+    "清理建议项目"
+  ],
+  "commands.help_select": [
+    "Select interactively; default when mode is omitted",
+    "交互选择；未指定模式时默认使用"
+  ],
+  "commands.help_yes": [
+    "Skip confirmation before cleanup (clean / --clean only)",
+    "跳过清理前的确认（仅用于 clean / --clean）"
+  ],
+  "commands.help_output": [
+    "Select human or JSON output",
+    "选择输出格式（默认 human；可选 human、json）"
+  ],
+  "commands.help_no_progress": [
+    "Disable progress output",
+    "关闭进度输出"
+  ],
+  "commands.help_clean_fixed": [
+    "Clean items selected by recommendation rules",
+    "清理建议规则选中的项目"
+  ],
+  "commands.help_authorization": [
+    "Inspect or install the system authorization components",
+    "检查或安装系统授权组件"
+  ],
+  "commands.help_auth_status": [
+    "Check installation without requesting authorization",
+    "检查安装状态，不请求授权"
+  ],
+  "commands.help_auth_install": [
+    "Install or update the bundled helper with system authorization",
+    "通过系统授权安装或更新随包提供的辅助程序"
+  ],
+  "commands.help_graphical": [
+    "Use the system authentication dialog instead of terminal sudo",
+    "使用系统认证对话框，而非终端 sudo"
+  ],
+  "commands.help_module": [
+    "Inspect configured modules",
+    "查看配置的模块"
+  ],
+  "commands.help_module_example": [
+    "Usage example:\n  spaceprune module list [--all]",
+    "使用示例：\n  spaceprune module list [--all]"
+  ],
+  "commands.help_module_list": [
+    "List enabled modules",
+    "列出已启用模块"
+  ],
+  "commands.help_all": [
+    "Include disabled modules",
+    "包含已禁用模块"
+  ],
+  "commands.help_plugin": [
+    "Manage built-in and external plugins",
+    "管理内置和外部插件"
+  ],
+  "commands.help_plugin_usage": [
+    "Usage:\n  spaceprune plugin <catalog|list|inspect|install|remove|enable|disable>",
+    "用法：\n  spaceprune plugin <catalog|list|inspect|install|remove|enable|disable>"
+  ],
+  "commands.help_plugin_list": [
+    "List installed plugins",
+    "列出已安装插件"
+  ],
+  "commands.help_catalog": [
+    "List built-in and installed plugins with enablement",
+    "列出内置和已安装插件及其启用状态"
+  ],
+  "commands.help_enable": [
+    "Enable a plugin for subsequent operations",
+    "为后续操作启用插件"
+  ],
+  "commands.help_disable": [
+    "Disable a plugin for subsequent operations",
+    "为后续操作禁用插件"
+  ],
+  "commands.help_inspect": [
+    "Inspect an installed plugin",
+    "查看已安装插件"
+  ],
+  "commands.help_install": [
+    "Install a local plugin directory",
+    "安装本地插件目录"
+  ],
+  "commands.help_remove": [
+    "Remove an installed plugin",
+    "移除已安装插件"
+  ],
+  "commands.help_automation": [
+    "Manage configured automation",
+    "管理配置的自动化"
+  ],
+  "commands.help_automation_usage": [
+    "Usage:\n  spaceprune automation <list|install|uninstall|run>",
+    "用法：\n  spaceprune automation <list|install|uninstall|run>"
+  ],
+  "commands.help_automation_list": [
+    "List configured automation",
+    "列出配置的自动化"
+  ],
+  "commands.help_automation_install": [
+    "Install configured automation",
+    "安装配置的自动化"
+  ],
+  "commands.help_automation_uninstall": [
+    "Uninstall configured automation",
+    "卸载配置的自动化"
+  ],
+  "commands.help_automation_run": [
+    "Run configured automation",
+    "运行配置的自动化"
+  ],
+  "commands.help_theme": [
+    "Manage terminal color themes",
+    "管理终端配色主题"
+  ],
+  "commands.help_theme_usage": [
+    "Usage:\n  spaceprune theme\n  spaceprune theme list\n  spaceprune theme set <theme-id>",
+    "用法：\n  spaceprune theme\n  spaceprune theme list\n  spaceprune theme set <theme-id>"
+  ],
+  "commands.help_theme_list": [
+    "List built-in terminal themes",
+    "列出内置终端主题"
+  ],
+  "commands.help_theme_set": [
+    "Set the active terminal theme by ID",
+    "按 ID 设置当前终端主题"
+  ],
+  "commands.help_theme_id": [
+    "Built-in theme ID",
+    "内置主题 ID：aurora、orbit、graphite、forest"
+  ],
+  "commands.help_recipe": [
+    "Manage local cleanup recipes",
+    "管理本地清理方案"
+  ],
+  "commands.help_recipe_usage": [
+    "Usage:\n  spaceprune recipe\n  spaceprune recipe list\n  spaceprune recipe set <recipe-id>",
+    "用法：\n  spaceprune recipe\n  spaceprune recipe list\n  spaceprune recipe set <recipe-id>"
+  ],
+  "commands.help_recipe_list": [
+    "List local cleanup recipes",
+    "列出本地清理方案"
+  ],
+  "commands.help_recipe_set": [
+    "Set the active cleanup recipe by ID",
+    "按 ID 设置当前清理方案"
+  ],
+  "commands.help_recipe_id": [
+    "Recipe directory and entry file ID",
+    "方案目录与入口文件的 ID"
+  ],
+  "commands.help_script_module": [
+    "Run exactly one configured module",
+    "仅运行指定的配置模块"
+  ],
+  "commands.help_script_selector": [
+    "Apply a module selector; may be repeated",
+    "应用模块选择器；可重复指定"
+  ],
+  "commands.help_script_task": [
+    "Scan exactly this task; may be repeated",
+    "仅扫描指定任务；可重复指定"
+  ],
+  "commands.config_unknown_theme": [
+    "Configuration {p0} contains unknown theme `{theme_id}`",
+    "配置 {p0} 包含未知主题 `{theme_id}`"
+  ],
+  "commands.unknown_theme": [
+    "Unknown theme `{theme_id}`",
+    "未知主题 `{theme_id}`"
+  ],
+  "commands.error_label": [
+    "Error:",
+    "错误："
+  ],
+  "commands.automation_arguments": [
+    "automation management commands do not accept cleanup modes or --yes",
+    "automation 管理命令不接受清理模式或 --yes"
+  ],
+  "commands.daily": [
+    "{p0}  {p1}  {p2}  daily at {p3}",
+    "{p0}  {p1}  {p2}  每天 {p3}"
+  ],
+  "commands.automation_installed": [
+    "Installed and enabled automation {id}.",
+    "已安装并启用自动化 {id}。"
+  ],
+  "commands.automation_uninstalled": [
+    "Uninstalled automation {id}.",
+    "已卸载自动化 {id}。"
+  ],
+  "commands.no_automations": [
+    "The active configuration has no automations.",
+    "当前配置没有自动化。"
+  ],
+  "commands.installed": [
+    "[installed]",
+    "[已安装]"
+  ],
+  "commands.not_installed": [
+    "[not installed]",
+    "[未安装]"
+  ],
+  "commands.module_arguments": [
+    "module management commands only accept --config, --output, --all, --help, and --version",
+    "module 管理命令仅接受 --config、--output、--all、--help 和 --version"
+  ],
+  "commands.no_modules": [
+    "The active configuration has no {p0}modules.",
+    "当前配置没有{p0}模块。"
+  ],
+  "commands.enabled_prefix": [
+    "enabled ",
+    "已启用的"
+  ],
+  "commands.name_header": [
+    "NAME",
+    "名称"
+  ],
+  "commands.status_header": [
+    "STATUS",
+    "状态"
+  ],
+  "commands.description_header": [
+    "DESCRIPTION",
+    "说明"
+  ],
+  "commands.enabled": [
+    "enabled",
+    "已启用"
+  ],
+  "commands.disabled": [
+    "disabled",
+    "已禁用"
+  ],
+  "commands.plugin_arguments": [
+    "plugin management commands only accept --output, --help, and --version",
+    "plugin 管理命令仅接受 --output、--help 和 --version"
+  ],
+  "commands.plugin_changed": [
+    "Plugin {p0} {p1}. Reload and rescan before the next cleanup.",
+    "插件 {p0} {p1}。下次清理前请重新加载并扫描。"
+  ],
+  "commands.plugin_not_found": [
+    "External plugin `{id}` was not found",
+    "未找到外部插件 `{id}`"
+  ],
+  "commands.plugin_installed": [
+    "Installed plugin {p0} {p1}: {p2}",
+    "已安装插件 {p0} {p1}：{p2}"
+  ],
+  "commands.plugin_removed": [
+    "Removed plugin {id}.",
+    "已移除插件 {id}。"
+  ],
+  "commands.id_conflict": [
+    "id conflict",
+    "ID 冲突"
+  ],
+  "commands.unsupported": [
+    "unsupported",
+    "不支持"
+  ],
+  "commands.plugin_label": [
+    "Plugin:",
+    "插件："
+  ],
+  "commands.name_label": [
+    "Name:",
+    "名称："
+  ],
+  "commands.version_label": [
+    "Version:",
+    "版本："
+  ],
+  "commands.protocol_label": [
+    "Protocol:",
+    "协议："
+  ],
+  "commands.handlers_label": [
+    "Handlers:",
+    "处理器："
+  ],
+  "commands.manifest_label": [
+    "Manifest:",
+    "清单："
+  ],
+  "commands.executable_label": [
+    "Executable:",
+    "可执行文件："
+  ],
+  "commands.recipe_arguments": [
+    "recipe management commands only accept --config, --output, --help, and --version",
+    "recipe 管理命令仅接受 --config、--output、--help 和 --version"
+  ],
+  "commands.recipes_not_found": [
+    "No recipes found under {p0}.",
+    "在 {p0} 下未找到清理方案。"
+  ],
+  "commands.active_recipe": [
+    "Active recipe: {p0} ({p1})",
+    "当前方案：{p0} ({p1})"
+  ],
+  "commands.saved_to": [
+    "Saved to {p0}",
+    "已保存至 {p0}"
+  ],
+  "commands.active": [
+    "active",
+    "当前"
+  ],
+  "commands.available": [
+    "available",
+    "可用"
+  ],
+  "commands.recipe_unchanged": [
+    "Recipe unchanged.",
+    "清理方案未更改。"
+  ],
+  "commands.theme_arguments": [
+    "theme management commands only accept --config, --output, --help, and --version",
+    "theme 管理命令仅接受 --config、--output、--help 和 --version"
+  ],
+  "commands.active_theme": [
+    "Active theme: {p0} ({p1})",
+    "当前主题：{p0} ({p1})"
+  ],
+  "commands.preview_header": [
+    "PREVIEW",
+    "预览"
+  ],
+  "commands.theme_unchanged": [
+    "Theme unchanged.",
+    "主题未更改。"
+  ],
+  "commands.authorization_arguments": [
+    "authorization commands only accept --config, --output, --help, --version and install --graphical",
+    "authorization 命令仅接受 --config、--output、--help、--version 和 install --graphical"
+  ],
+  "commands.authorization_linux": [
+    "Helper installation through this command is supported on Linux only",
+    "此命令仅支持在 Linux 上安装辅助程序"
+  ],
+  "commands.installing_helper": [
+    "Installing or updating {p0}. Approve through the operating system if requested.",
+    "正在安装或更新 {p0}。如系统请求授权，请在系统提示中批准。"
+  ],
+  "commands.source_missing": [
+    "The bundled helper is missing. Install the complete distribution, or build all components: cargo build --locked -p spaceprune-cli -p spaceprune-readonly-helper",
+    "缺少随包提供的辅助程序。请安装完整发行包，或构建全部组件：cargo build --locked -p spaceprune-cli -p spaceprune-readonly-helper"
+  ],
+  "commands.source_outdated": [
+    "The bundled helper is outdated. Rebuild all components or install the current distribution before retrying.",
+    "随包提供的辅助程序已过期。请重新构建全部组件或安装当前发行包后重试。"
+  ],
+  "commands.unsafe_destination": [
+    "The helper installation path has an untrusted directory or symbolic link. Repair the installation path before retrying.",
+    "辅助程序安装路径包含不可信目录或符号链接。请修复安装路径后重试。"
+  ],
+  "commands.installer_missing": [
+    "The bundled system component installer was not found.",
+    "未找到随包提供的系统组件安装器。"
+  ],
+  "commands.install_declined": [
+    "System helper installation was cancelled or declined.",
+    "系统辅助程序安装已取消或被拒绝。"
+  ],
+  "commands.install_needs_auth": [
+    "Installation requires authorization. Run this command in a terminal, or use install --graphical in a desktop session.",
+    "安装需要授权。请在终端运行此命令，或在桌面会话中使用 install --graphical。"
+  ],
+  "commands.install_timeout": [
+    "System helper installation timed out.",
+    "系统辅助程序安装超时。"
+  ],
+  "commands.install_verification": [
+    "System authorization or verification of the installed helper failed. Run authorization status for details.",
+    "系统授权或已安装辅助程序验证失败。请运行 authorization status 查看详情。"
+  ],
+  "commands.installer_failed": [
+    "The system installer failed; the helper has not been confirmed as ready.",
+    "系统安装器失败；尚未确认辅助程序可用。"
+  ],
+  "commands.root_examples": [
+    "Stable scripting:\n  spaceprune scan [--module <id>] [--selector <id>...] [--task <id>...]\n  spaceprune clean --yes [--module <id>] [--selector <id>...] [--task <id>...]\n\nManagement:\n  spaceprune authorization <status|install>\n  spaceprune module list [--all]\n  spaceprune plugin <catalog|list|inspect|install|remove|enable|disable>\n  spaceprune automation <list|install|uninstall|run>\n  spaceprune recipe [list|set <recipe-id>]\n  spaceprune theme [list|set <theme-id>]\n  spaceprune language [list|set <system|en|zh-CN>]",
+    "稳定脚本接口：\n  spaceprune scan [--module <id>] [--selector <id>...] [--task <id>...]\n  spaceprune clean --yes [--module <id>] [--selector <id>...] [--task <id>...]\n\n管理命令：\n  spaceprune authorization <status|install>\n  spaceprune module list [--all]\n  spaceprune plugin <catalog|list|inspect|install|remove|enable|disable>\n  spaceprune automation <list|install|uninstall|run>\n  spaceprune recipe [list|set <recipe-id>]\n  spaceprune theme [list|set <theme-id>]\n  spaceprune language [list|set <system|en|zh-CN>]"
+  ],
+  "commands.help_template": [
+    "{before-help}{about-with-newline}\nUsage: {usage}\n\n{all-args}{after-help}",
+    "{before-help}{about-with-newline}\n用法：{usage}\n\n{all-args}{after-help}"
+  ],
+  "commands.options": [
+    "Options",
+    "选项"
+  ],
+  "commands.arguments": [
+    "Arguments",
+    "参数"
+  ],
+  "commands.commands": [
+    "Commands",
+    "命令"
+  ],
+  "commands.print_help": [
+    "Print help",
+    "显示帮助"
+  ],
+  "commands.print_version": [
+    "Print version",
+    "显示版本"
+  ],
+  "commands.parse_hint": [
+    "Run spaceprune --help for usage.",
+    "运行 spaceprune --help 查看用法。"
+  ],
+  "commands.invalid_value": [
+    "Invalid value.",
+    "参数值无效。"
+  ],
+  "commands.unknown_argument": [
+    "Unknown argument or command.",
+    "未知参数或命令。"
+  ],
+  "commands.argument_conflict": [
+    "Arguments cannot be used together.",
+    "参数不能同时使用。"
+  ],
+  "commands.missing_argument": [
+    "A required argument or command is missing.",
+    "缺少必需的参数或命令。"
+  ],
+  "commands.value_count": [
+    "Incorrect number of values.",
+    "参数值数量不正确。"
+  ],
+  "commands.invalid_utf8": [
+    "Argument is not valid UTF-8.",
+    "参数不是有效的 UTF-8。"
+  ],
+  "commands.requires_equals": [
+    "Use = to provide this argument value.",
+    "请使用 = 提供此参数的值。"
+  ],
+  "commands.invalid_arguments": [
+    "Invalid arguments.",
+    "参数无效。"
+  ],
+  "commands.argument_label": [
+    "Argument:",
+    "参数："
+  ],
+  "commands.subcommand_label": [
+    "Command:",
+    "命令："
+  ],
+  "commands.value_label": [
+    "Value:",
+    "值："
+  ],
+  "commands.prior_argument_label": [
+    "Conflicts with:",
+    "冲突项："
+  ],
+  "commands.valid_values_label": [
+    "Accepted values:",
+    "可用值："
+  ],
+  "commands.valid_commands_label": [
+    "Accepted commands:",
+    "可用命令："
+  ],
+  "commands.expected_count_label": [
+    "Expected count:",
+    "预期数量："
+  ],
+  "commands.actual_count_label": [
+    "Actual count:",
+    "实际数量："
+  ],
+  "commands.minimum_count_label": [
+    "Minimum count:",
+    "最少数量："
+  ],
+  "commands.suggestion_label": [
+    "Suggestion:",
+    "建议："
+  ],
+  "commands.trailing_argument_label": [
+    "Trailing argument:",
+    "尾部参数："
+  ],
+  "commands.detail_label": [
+    "Detail:",
+    "详情："
+  ],
+  "commands.helper_ready": [
+    "ready",
+    "就绪"
+  ],
+  "commands.helper_missing": [
+    "helper_missing",
+    "未安装辅助程序"
+  ],
+  "commands.helper_outdated": [
+    "helper_outdated",
+    "辅助程序已过期"
+  ],
+  "commands.helper_untrusted": [
+    "helper_untrusted",
+    "辅助程序不可信"
+  ],
+  "commands.helper_unavailable": [
+    "unavailable",
+    "不可用"
+  ],
+  "commands.helper_ready_detail": [
+    "Read and cleanup components are ready. Each capability requests system authorization when needed.",
+    "读取和清理组件已就绪。各能力会在需要时请求系统授权。"
+  ],
+  "commands.helper_missing_detail": [
+    "Helper is not installed; authorization was not requested. Run: spaceprune authorization install",
+    "未安装辅助程序；未请求授权。请运行：spaceprune authorization install"
+  ],
+  "commands.helper_outdated_detail": [
+    "Helper protocol is outdated; authorization was not requested. Run: spaceprune authorization install",
+    "辅助程序协议已过期；未请求授权。请运行：spaceprune authorization install"
+  ],
+  "commands.helper_untrusted_detail": [
+    "Helper installation is not trusted; authorization was not requested. Run: spaceprune authorization install",
+    "辅助程序安装不可信；未请求授权。请运行：spaceprune authorization install"
+  ],
+  "commands.helper_unavailable_detail": [
+    "Helper verification failed; system authorization was not requested.",
+    "辅助程序验证失败；未请求系统授权。"
+  ],
+  "commands.language_values": [
+    "system, en, or zh-CN",
+    "system、en 或 zh-CN"
+  ],
+  "commands.language_list_about": [
+    "List supported languages and the system-following mode",
+    "列出支持的语言和跟随系统模式"
+  ],
+  "commands.follow_system": [
+    "Follow the system language",
+    "跟随系统语言"
+  ]
+}

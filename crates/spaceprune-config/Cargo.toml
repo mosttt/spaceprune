@@ -1,0 +1,23 @@
+[package]
+name = "spaceprune-config"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Configuration parsing and include merging for SpacePrune"
+
+[dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-contracts = { path = "../spaceprune-contracts" }
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+toml_edit.workspace = true
+
+sys-locale = "0.3.2"
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

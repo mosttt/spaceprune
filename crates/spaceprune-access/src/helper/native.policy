@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN" "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>SpacePrune</vendor>
+  <action id="com.spaceprune.native-6-4.metadata">
+    <description>Read protected file information in SpacePrune</description>
+    <message>Allow SpacePrune to read file information in protected locations to complete the scan. No files will be deleted.</message>
+    <description xml:lang="zh_CN">允许 SpacePrune 读取受保护位置的文件信息</description>
+    <message xml:lang="zh_CN">为完成扫描，请授权 SpacePrune 读取受保护位置的文件信息。本次授权不会删除文件。</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-readonly-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-readonly-session</annotate>
+  </action>
+  <action id="com.spaceprune.native-6-4.metadata.en">
+    <description>Read protected file information in SpacePrune</description>
+    <message>Allow SpacePrune to read file information in protected locations to complete the scan. No files will be deleted.</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-readonly-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-readonly-session-en</annotate>
+  </action>
+  <action id="com.spaceprune.native-6-4.metadata.zh-CN">
+    <description>允许 SpacePrune 读取受保护位置的文件信息</description>
+    <message>为完成扫描，请授权 SpacePrune 读取受保护位置的文件信息。本次授权不会删除文件。</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-readonly-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-readonly-session-zh-CN</annotate>
+  </action>
+  <action id="com.spaceprune.native-6-4.cleanup">
+    <description>Clean confirmed items in SpacePrune</description>
+    <message>Allow SpacePrune to clean the protected items you have selected and confirmed.</message>
+    <description xml:lang="zh_CN">允许 SpacePrune 清理已确认的项目</description>
+    <message xml:lang="zh_CN">请授权 SpacePrune 清理你已选择并确认的受保护项目。</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-cleanup-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-cleanup-session</annotate>
+  </action>
+  <action id="com.spaceprune.native-6-4.cleanup.en">
+    <description>Clean confirmed items in SpacePrune</description>
+    <message>Allow SpacePrune to clean the protected items you have selected and confirmed.</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-cleanup-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-cleanup-session-en</annotate>
+  </action>
+  <action id="com.spaceprune.native-6-4.cleanup.zh-CN">
+    <description>允许 SpacePrune 清理已确认的项目</description>
+    <message>请授权 SpacePrune 清理你已选择并确认的受保护项目。</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-cleanup-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-cleanup-session-zh-CN</annotate>
+  </action>
+</policyconfig>

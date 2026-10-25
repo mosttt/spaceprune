@@ -1,0 +1,33 @@
+[package]
+name = "spaceprune-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Command-line and terminal interface for SpacePrune"
+
+[[bin]]
+name = "spaceprune"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+crossterm.workspace = true
+ctrlc.workspace = true
+ratatui.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+spaceprune = { path = "../spaceprune" }
+unicode-width.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+spaceprune-access = { path = "../spaceprune-access" }
+spaceprune-readonly-protocol = { path = "../spaceprune-readonly-protocol" }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

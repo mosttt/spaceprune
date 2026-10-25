@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "One mounted local filesystem; aliases share a single capacity record.",
+  "properties": {
+    "availableBytes": {
+      "description": "Free capacity available to the current user.",
+      "format": "uint64",
+      "minimum": 0.0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "id": {
+      "description": "Native volume identity or device name.",
+      "type": "string"
+    },
+    "mountPoints": {
+      "description": "Mount locations for this filesystem, ordered with the shortest path first.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "name": {
+      "description": "Human-readable device or volume name.",
+      "type": "string"
+    },
+    "totalBytes": {
+      "description": "Filesystem capacity reported by the OS, or unknown if querying failed.",
+      "format": "uint64",
+      "minimum": 0.0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "usedBytes": {
+      "description": "Allocated capacity, excluding free blocks reserved by the OS.",
+      "format": "uint64",
+      "minimum": 0.0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "mountPoints",
+    "name"
+  ],
+  "title": "StorageVolume",
+  "type": "object"
+}
