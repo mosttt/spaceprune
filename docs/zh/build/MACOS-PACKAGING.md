@@ -77,4 +77,4 @@ tar -C dist -czf "dist/${package_name}.tar.gz" "$package_name"
 
 `spaceprune authorization status/install` 目前仅支持 Linux；macOS 没有对应手动命令，也没有用户可调用的完整原生服务卸载入口。删除 CLI／授权 App 文件不等于 ServiceManagement 注销，不能把手工删除文件记录为组件卸载成功。验证注销／卸载前应使用可恢复的测试环境，保留实际系统注册状态和返回结果。
 
-本轮证据包括可移植状态机/子进程/打包测试和 Darwin 双架构检查；没有真实 Apple 签名安装证据。签名、公证、旧版本升级、TCC/撤销/取消、跨账户及 APFS 必须在对应系统实测。CLI Terminal 模式现已接入系统 security 文本认证、凭证复核和终端控制权交接（授权代理 v6）；图形交互、可移植 PTY 或交叉检查均不能替代真实 macOS 文本终端验收，见 [实现与验证记录](MACOS-PACKAGING.md)。
+已有验证包括可移植状态机/子进程/打包测试和 Darwin 双架构检查；没有真实 Apple 签名安装证据。签名、公证、旧版本升级、TCC/撤销/取消、跨账户及 APFS 必须在对应系统实测。CLI Terminal 模式现已接入系统 security 文本认证、凭证复核和终端控制权交接（授权代理 v6）；图形交互、可移植 PTY 或交叉检查均不能替代真实 macOS 文本终端验收，见 [实现与验证记录](MACOS-PACKAGING.md)。

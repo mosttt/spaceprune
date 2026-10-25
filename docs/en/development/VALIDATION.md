@@ -1,6 +1,6 @@
 # Core/CLI validation status
 
-Separate existing evidence from native checks still required. Document cleanup does not change implementation or turn older tests into acceptance of a new installer. Select affected tests using [development](../build/DEVELOPMENT.md), without repeating unrelated suites.
+Separate existing evidence from native checks still required. Older tests do not establish acceptance of a new installer. Select affected tests using [development](../build/DEVELOPMENT.md), without repeating unrelated suites.
 
 ## Existing evidence
 
