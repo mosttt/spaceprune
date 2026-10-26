@@ -22,10 +22,6 @@ if (-not $cert.HasPrivateKey -or $cert.NotAfter -le (Get-Date)) {
 }
 $env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
 [Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
-$signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
-    Sort-Object FullName | Select-Object -Last 1
-if (-not $signTool) { throw 'Windows SDK signtool was not found' }
-$env:SPACEPRUNE_WINDOWS_SIGNTOOL = $signTool.FullName
 python scripts/windows-native-package.py build --target x86_64-pc-windows-msvc --output target/windows-native-package --with-cli
 if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 ```
@@ -39,6 +35,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 顺序为：构建两个 helper → SHA-256 Authenticode 签名并验证 → 计算签名后载荷身份 → 生成 WiX/MSI → 签名并验证 MSI → 写入最终包身份。`package-identity.json` 绑定最终 MSI 字节、两个签名 EXE、许可证材料及 Core revision。正式签名构建要求已跟踪源码与 HEAD 一致。跨架构构建不执行目标程序，结果中的 `nativeProbesExecuted` 如实标记。
 
 开发可显式选择 `--unsigned`，该产物无法通过正式运行时的签名信任检查。生成失败不会覆盖先前完成的输出；仅允许替换本工具标记的输出目录。
+
+构建前会检查 SignTool 和 WiX。SignTool 优先使用显式 `SPACEPRUNE_WINDOWS_SIGNTOOL`，否则从 PATH、`WindowsSdkDir` 和 Windows Kits 标准目录查找适用于构建机的工具，优先原生架构和较新的 SDK。找不到时安装 Windows SDK 的签名工具后重试；不需要重建证书。显式路径失效会报错，不会悄悄替换为另一份工具。
 
 ## 本机免费开发证书
 
@@ -64,7 +62,7 @@ $env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
 
 这是同一测试账号下的本机流程。UAC 若使用另一个管理员账号，或把包搬到另一台机器，该身份也必须明确受信任；不自动修改其他账号或整机信任库。正式公开分发的签名方式另行选择，不能要求普通用户导入开发证书。
 
-选定证书并设置上文的 `SPACEPRUNE_WINDOWS_SIGNTOOL` 后，在 Core 根目录构建并运行完整测试 CLI：
+选定证书并安装上文的 Windows SDK 后，在 Core 根目录构建并运行完整测试 CLI：
 
 ```powershell
 python scripts/windows-native-package.py build --target x86_64-pc-windows-msvc --profile debug --output target/windows-native-package --with-cli
@@ -122,6 +120,8 @@ CLI 的 `authorization status/install` 命令目前仅支持 Linux，不是 Wind
 helper 持有原宿主进程句柄，并在存活检查中重新查询该进程主 token 的账户、登录、AuthenticationId 与会话 ID。只读连接关闭先移除 session lease，再删除临时目录；即使无关残留文件使目录清理失败，也不能继续原请求。如果 lease 和目录都无法撤销，关闭返回失败，并仍等待工作线程真实结束。Windows UAC 提示尚未结束时，取消或超时只能停止后续业务并等待原生返回，不能提前显示已停止。
 
 ## 验证范围
+
+构建工具查找覆盖无 PATH 的 SDK 安装、显式路径失效、构建机架构和工具缺失时保留已有产物；缺失工具的命令行提示不会输出 Python 堆栈。
 
 可移植测试覆盖载荷变化、旧代次保留、固定安装布局、禁止自定义动作、最终 pin 往返、许可证不匹配与签名失败保留旧输出。Windows 专用测试覆盖句柄持有期间的写入/目录替换拒绝；这些测试需在 Windows 原生运行。
 

@@ -8,15 +8,17 @@ import platform
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from .layout import notice_paths, load_layout, prepare, write_pin
+from .tools import resolve_signtool, resolve_wix
 
 
-def sign(path: Path, certificate: str, timestamp: str, run=subprocess.run) -> None:
+def sign(path: Path, certificate: str, timestamp: str, run=subprocess.run, *, tool: str | None = None) -> None:
     if not re.fullmatch(r"[A-Fa-f0-9]{40}", certificate):
         raise ValueError("Provide a certificate SHA-1 selector from the Windows certificate store")
-    tool = os.environ.get("SPACEPRUNE_WINDOWS_SIGNTOOL", "signtool")
+    tool = tool or resolve_signtool()
     run([tool, "sign", "/sha1", certificate, "/fd", "SHA256", "/tr", timestamp, "/td", "SHA256", str(path)], check=True)
     run([tool, "verify", "/pa", "/all", str(path)], check=True)
 
@@ -25,6 +27,10 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
           timestamp: str, wix: str, include_cli: bool = False) -> dict:
     if platform.system() != "Windows":
         raise ValueError("MSI builds require Windows, its SDK and WiX 4 or newer")
+    signtool = resolve_signtool() if certificate else None
+    wix = resolve_wix(wix)
+    if signtool:
+        print(f"Windows signing tool: {signtool}", file=sys.stderr)
     if certificate:
         subprocess.run(["git", "diff", "--exit-code", "HEAD", "--", "."], cwd=core, check=True, stdout=subprocess.DEVNULL)
     if output.exists():
@@ -60,7 +66,7 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
         for name in ["spaceprune-readonly-helper.exe", "spaceprune-cleanup-helper.exe"]:
             shutil.copy2(binaries / name, payload / name)
             if certificate:
-                sign(payload / name, certificate, timestamp)
+                sign(payload / name, certificate, timestamp, tool=signtool)
         layout = load_layout(core, target, payload, notices)
         native = platform.machine().lower() in ({"amd64", "x86_64"} if layout["architecture"] == "x64" else {"arm64", "aarch64"})
         if native:
@@ -71,7 +77,7 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
         subprocess.run([wix, "build", "-arch", layout["architecture"], "-d", f"PayloadDir={payload}",
             "-d", f"LicenseDir={notices}", "-o", str(package), str(wxs)], check=True)
         if certificate:
-            sign(package, certificate, timestamp)
+            sign(package, certificate, timestamp, tool=signtool)
         write_pin(layout, package, revision, staged / "package-identity.json")
         if include_cli:
             host_environment = {**environment, "SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY": str(staged / "package-identity.json")}
@@ -80,7 +86,7 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
             executable = staged / "spaceprune.exe"
             shutil.copy2(binaries / "spaceprune.exe", executable)
             if certificate:
-                sign(executable, certificate, timestamp)
+                sign(executable, certificate, timestamp, tool=signtool)
         if output.exists():
             previous = Path(temporary) / "previous"
             output.rename(previous)

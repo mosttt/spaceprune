@@ -9,6 +9,7 @@ import shutil
 
 from windows_package.build import build
 from windows_package.layout import load_layout, notice_paths, prepare
+from windows_package.tools import BuildToolError
 
 
 def main():
@@ -43,8 +44,11 @@ def main():
     else:
         if not args.unsigned and not args.certificate_sha1:
             parser.error("Choose a signing certificate or explicitly --unsigned for development")
-        result = build(core, args.target, args.profile, output,
-            None if args.unsigned else args.certificate_sha1, args.timestamp_url, args.wix, args.with_cli)
+        try:
+            result = build(core, args.target, args.profile, output,
+                None if args.unsigned else args.certificate_sha1, args.timestamp_url, args.wix, args.with_cli)
+        except BuildToolError as error:
+            parser.exit(2, f"Windows packaging: {error}\n")
     print(json.dumps(result, indent=2))
 
 

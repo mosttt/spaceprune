@@ -22,10 +22,6 @@ if (-not $cert.HasPrivateKey -or $cert.NotAfter -le (Get-Date)) {
 }
 $env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
 [Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
-$signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
-    Sort-Object FullName | Select-Object -Last 1
-if (-not $signTool) { throw 'Windows SDK signtool was not found' }
-$env:SPACEPRUNE_WINDOWS_SIGNTOOL = $signTool.FullName
 python scripts/windows-native-package.py build --target x86_64-pc-windows-msvc --output target/windows-native-package --with-cli
 if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 ```
@@ -39,6 +35,8 @@ Skip WiX installation if 4.0.6 is already installed. The certificate must be val
 Build order: build both helpers → apply and verify SHA-256 Authenticode signatures → compute signed payload identity → generate WiX/MSI → sign and verify MSI → write final package identity. `package-identity.json` binds final MSI bytes, both signed EXEs, license materials, and Core revision. Official signed builds require tracked source to match HEAD. Cross-architecture builds do not execute target programs; `nativeProbesExecuted` reports this accurately.
 
 Development builds can explicitly use `--unsigned`, but those artifacts cannot pass official runtime signature-trust checks. Generation failures preserve completed prior output. Only output directories marked by this tool may be replaced.
+
+The build checks SignTool and WiX before compiling. An explicit `SPACEPRUNE_WINDOWS_SIGNTOOL` takes precedence; otherwise discovery checks PATH, `WindowsSdkDir` and standard Windows Kits directories, preferring a native host tool and newer SDK. If absent, install the Windows SDK signing tools and retry without recreating the certificate. An invalid explicit path fails rather than silently selecting another tool.
 
 ## Free local development certificate
 
@@ -64,7 +62,7 @@ The private key stays in the account's certificate store, not in source, the `.c
 
 This covers the same test account. A different UAC administrator or destination machine must also explicitly trust the identity; the build never changes other accounts or machine-wide trust automatically. Choose public-release signing separately rather than asking ordinary users to trust a development certificate.
 
-After setting `SPACEPRUNE_WINDOWS_SIGNTOOL` as above, build and run the complete test CLI from Core:
+After selecting a certificate and installing the Windows SDK above, build and run the complete test CLI from Core:
 
 ```powershell
 python scripts/windows-native-package.py build --target x86_64-pc-windows-msvc --profile debug --output target/windows-native-package --with-cli
@@ -72,7 +70,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 .\target\windows-native-package\spaceprune.exe
 ```
 
-Keep `spaceprune.exe` and `SpacePruneNative.msi` together. Protected operations verify and install components on demand, then request UAC; do not copy helpers into system folders or elevate the entire GUI. This resolves the reported `HelperMissing`, not every refusal: files held by another process or protected by system policy can still fail and must retain their real diagnostics without terminating processes or changing ACLs.
+Keep `spaceprune.exe` and `SpacePruneNative.msi` together. Protected operations verify and install components on demand, then request UAC; do not copy helpers into system folders or elevate the entire GUI. The signed package provides the trusted components for protected cleanup; files held by another process or protected by system policy can still fail and must retain their real diagnostics without terminating processes or changing ACLs.
 
 Ordinary accessible-file tests need no certificate: use the regular Cargo CLI or unsigned App `--debug --no-bundle` path. Development packages belong on isolated test machines. After testing and uninstalling the native components, remove only this exact certificate's Root/TrustedPublisher trust using Certificate Manager if no longer needed; do not bulk-delete certificates.
 
@@ -123,6 +121,8 @@ Temporary mailboxes, request files, and cleanup pipes allow access only to the o
 The helper holds the original host process handle and re-queries its primary token's account, login, AuthenticationId, and session ID during liveness checks. Closing a read-only connection removes the session lease before the temporary directory. Unrelated leftover files preventing directory cleanup cannot allow the old request to continue. If neither lease nor directory can be revoked, close fails and still waits for the worker thread to finish. While a Windows UAC prompt remains active, cancellation/timeout can only prevent subsequent work and wait for native return; it cannot report stopped early.
 
 ## Validation scope
+
+Build-tool fixtures cover SDK installations outside PATH, invalid explicit paths, host architecture, and preserving existing output when prerequisites are missing. The CLI reports absent tools without a Python traceback.
 
 Portable tests cover payload changes, retention of older generations, fixed installation layout, prohibited custom actions, final-pin round trips, license mismatches, and preservation of prior output on signing failures. Windows-specific tests cover write/directory-replacement denial while handles are held; these must run natively on Windows.
 

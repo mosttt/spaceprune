@@ -127,8 +127,9 @@ class WindowsPackageTests(unittest.TestCase):
         def run(arguments, **options):
             self.assertTrue(options["check"])
             calls.append(arguments)
-        builder.sign(Path("fixture with spaces/SpacePruneNative.msi"), "a" * 40, "https://timestamp.example.test", run)
+        builder.sign(Path("fixture with spaces/SpacePruneNative.msi"), "a" * 40, "https://timestamp.example.test", run, tool="SDK with spaces/signtool.exe")
         self.assertEqual([call[1] for call in calls], ["sign", "verify"])
+        self.assertTrue(all(call[0] == "SDK with spaces/signtool.exe" for call in calls))
         self.assertIn("SHA256", calls[0])
         self.assertNotIn("/p", calls[0])
         self.assertEqual(calls[0][-1], "fixture with spaces/SpacePruneNative.msi")
@@ -158,11 +159,13 @@ class WindowsPackageTests(unittest.TestCase):
                     Path(arguments[arguments.index("-o") + 1]).write_bytes(b"new MSI fixture")
             def check_output(arguments, **options):
                 return json.dumps({"target_directory": str(target_directory)}) if arguments[0] == "cargo" else REVISION
-            def sign(path, certificate, timestamp):
+            def sign(path, certificate, timestamp, *, tool):
+                self.assertEqual(tool, "fixture-signtool.exe")
                 if path.suffix == ".msi": raise RuntimeError("MSI signature rejected")
             with patch.object(builder.platform, "system", return_value="Windows"), patch.object(builder, "load_layout", return_value=layout), \
                  patch.object(builder.subprocess, "run", side_effect=run), patch.object(builder.subprocess, "check_output", side_effect=check_output), \
-                 patch.object(builder, "sign", side_effect=sign), \
+                 patch.object(builder, "resolve_signtool", return_value="fixture-signtool.exe"), \
+                 patch.object(builder, "resolve_wix", return_value="wix"), patch.object(builder, "sign", side_effect=sign), \
                  patch.dict(os.environ, {"CARGO_ENCODED_RUSTFLAGS": "", "SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY": "old-host-pin.json"}):
                 with self.assertRaisesRegex(RuntimeError, "signature rejected"):
                     builder.build(CORE, TARGET, "release", output, "a" * 40, "https://timestamp.example.test", "wix")
@@ -182,7 +185,8 @@ class WindowsPackageTests(unittest.TestCase):
                 shutil.copy2(source, built / source.name)
             output = root / "distribution"
             signed = []
-            def sign(path, certificate, timestamp):
+            def sign(path, certificate, timestamp, *, tool):
+                self.assertEqual(tool, "fixture-signtool.exe")
                 signed.append(path.name)
                 if path.suffix == ".msi":
                     path.write_bytes(path.read_bytes() + b"final signature fixture")
@@ -206,7 +210,8 @@ class WindowsPackageTests(unittest.TestCase):
                 return raw.decode(options.get("encoding") or "gbk")
             with patch.object(builder.platform, "system", return_value="Windows"), patch.object(builder, "load_layout", return_value=layout), \
                  patch.object(builder.subprocess, "run", side_effect=run), patch.object(builder.subprocess, "check_output", side_effect=check_output), \
-                 patch.object(builder, "sign", side_effect=sign):
+                 patch.object(builder, "resolve_signtool", return_value="fixture-signtool.exe"), \
+                 patch.object(builder, "resolve_wix", return_value="wix"), patch.object(builder, "sign", side_effect=sign):
                 result = builder.build(CORE, TARGET, "release", output, "a" * 40, "https://timestamp.example.test", "wix", True)
             self.assertEqual(Path(result["cli"]).read_bytes(), b"Host fixture embeds:" + (output / "package-identity.json").read_bytes())
             self.assertEqual(signed[-2:], ["SpacePruneNative.msi", "spaceprune.exe"])
