@@ -37,7 +37,7 @@ def main():
         for name, source in notice_paths(core, source_tree=True).items():
             shutil.copy2(source, notices / name)
         layout = load_layout(core, args.target, args.binaries.resolve(), notices)
-        revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=core, text=True).strip()
+        revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=core, encoding="utf-8").strip()
         result = {"wxs": str(prepare(layout, args.binaries.resolve(), output, revision, notices)),
             "defines": {"PayloadDir": str(args.binaries.resolve()), "LicenseDir": str(notices)}, "installed": False}
     else:

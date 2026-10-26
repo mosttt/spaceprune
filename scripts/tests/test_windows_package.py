@@ -175,7 +175,7 @@ class WindowsPackageTests(unittest.TestCase):
             root = Path(temporary)
             binaries = self.payload(root)
             layout = load_layout(CORE, TARGET, binaries)
-            target_directory = root / "target"
+            target_directory = root / "构建€target"
             built = target_directory / TARGET / "release"
             built.mkdir(parents=True)
             for source in binaries.iterdir():
@@ -200,7 +200,10 @@ class WindowsPackageTests(unittest.TestCase):
                     else:
                         self.assertNotIn("SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY", environment)
             def check_output(arguments, **options):
-                return json.dumps({"target_directory": str(target_directory)}) if arguments[0] == "cargo" else REVISION
+                # Cargo emits UTF-8 even when Windows/Python's locale defaults to GBK.
+                raw = (json.dumps({"target_directory": str(target_directory)}, ensure_ascii=False)
+                       if arguments[0] == "cargo" else REVISION).encode("utf-8")
+                return raw.decode(options.get("encoding") or "gbk")
             with patch.object(builder.platform, "system", return_value="Windows"), patch.object(builder, "load_layout", return_value=layout), \
                  patch.object(builder.subprocess, "run", side_effect=run), patch.object(builder.subprocess, "check_output", side_effect=check_output), \
                  patch.object(builder, "sign", side_effect=sign):

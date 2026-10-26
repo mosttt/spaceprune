@@ -29,7 +29,7 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
         subprocess.run(["git", "diff", "--exit-code", "HEAD", "--", "."], cwd=core, check=True, stdout=subprocess.DEVNULL)
     if output.exists():
         marker = output / "native-package.json"
-        if output.is_symlink() or not marker.is_file() or json.loads(marker.read_text()).get("generator") != "spaceprune-windows-native-package":
+        if output.is_symlink() or not marker.is_file() or json.loads(marker.read_text(encoding="utf-8")).get("generator") != "spaceprune-windows-native-package":
             raise ValueError("Refusing to replace unrelated files")
     environment = dict(os.environ)
     # Helpers are built before the final package pin exists; a host pin would create a hash cycle.
@@ -45,9 +45,9 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
     subprocess.run(["cargo", "build", "--locked", "--package", "spaceprune-readonly-helper",
         "--bin", "spaceprune-readonly-helper", "--bin", "spaceprune-cleanup-helper", "--target", target,
         *(["--release"] if profile == "release" else [])], cwd=core, env=environment, check=True)
-    cargo = json.loads(subprocess.check_output(["cargo", "metadata", "--locked", "--no-deps", "--format-version", "1"], cwd=core, text=True))
+    cargo = json.loads(subprocess.check_output(["cargo", "metadata", "--locked", "--no-deps", "--format-version", "1"], cwd=core, encoding="utf-8"))
     binaries = Path(cargo["target_directory"]) / target / profile
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=core, text=True).strip()
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=core, encoding="utf-8").strip()
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="spaceprune-windows-stage-", dir=output.parent) as temporary:
         staged = Path(temporary) / "package"

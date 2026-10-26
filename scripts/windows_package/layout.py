@@ -39,12 +39,12 @@ def notice_digest(directory: Path, *, source_tree: bool = False) -> str:
 
 def load_layout(core: Path, target: str, binaries: Path, notices: Path | None = None) -> dict:
     digests = [sha256(binaries / name) for name in ["spaceprune-readonly-helper.exe", "spaceprune-cleanup-helper.exe"]]
-    host = next(line[6:] for line in subprocess.check_output(["rustc", "-vV"], text=True).splitlines() if line.startswith("host: "))
+    host = next(line[6:] for line in subprocess.check_output(["rustc", "-vV"], encoding="utf-8").splitlines() if line.startswith("host: "))
     environment = dict(os.environ)
     environment.pop("SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY", None)
     result = subprocess.check_output(["cargo", "run", "--locked", "--quiet", "--target", host,
         "--package", "spaceprune-access", "--example", "windows_package_layout", "--", target, *digests,
-        notice_digest(notices or core, source_tree=notices is None)], cwd=core, env=environment, text=True)
+        notice_digest(notices or core, source_tree=notices is None)], cwd=core, env=environment, encoding="utf-8")
     value = json.loads(result)
     if value["schemaVersion"] != 1 or len(value["components"]) != 2:
         raise ValueError("Unsupported Windows package layout")
