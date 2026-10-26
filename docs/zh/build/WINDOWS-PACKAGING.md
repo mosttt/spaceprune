@@ -15,7 +15,13 @@ rustup target add x86_64-pc-windows-msvc
 dotnet tool install --global wix --version 4.0.6
 Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
     Select-Object Subject, Thumbprint, NotAfter, HasPrivateKey
-$env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = '<40-character-thumbprint>'
+$thumbprint = Read-Host 'Paste the Thumbprint from the certificate list above'
+$cert = Get-Item "Cert:\CurrentUser\My\$($thumbprint.Trim())" -ErrorAction Stop
+if (-not $cert.HasPrivateKey -or $cert.NotAfter -le (Get-Date)) {
+    throw 'Select a valid certificate with HasPrivateKey=True'
+}
+$env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
+[Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
 $signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
     Sort-Object FullName | Select-Object -Last 1
 if (-not $signTool) { throw 'Windows SDK signtool was not found' }
@@ -51,9 +57,10 @@ Export-Certificate -Cert $cert -FilePath $publicCert | Out-Null
 Import-Certificate -FilePath $publicCert -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
 Import-Certificate -FilePath $publicCert -CertStoreLocation Cert:\CurrentUser\TrustedPublisher | Out-Null
 $env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
+[Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
 ```
 
-私钥留在当前账号证书库，不进入源码、`.cer` 或安装包。以后更新不要重复创建证书：按上文列出已有代码签名证书，在新终端重新设置同一指纹即可。CLI 与 App 使用同一指纹；App 的正常构建入口会自动打包对应组件。
+私钥留在当前账号证书库，不进入源码、`.cer` 或安装包。命令同时保存当前用户的构建指纹，新开的终端会读取它。以后更新不要重复创建证书；需要切换身份时再按上文选择已有证书。CLI 与 App 使用同一指纹；App 的正常构建入口会自动打包对应组件。
 
 这是同一测试账号下的本机流程。UAC 若使用另一个管理员账号，或把包搬到另一台机器，该身份也必须明确受信任；不自动修改其他账号或整机信任库。正式公开分发的签名方式另行选择，不能要求普通用户导入开发证书。
 

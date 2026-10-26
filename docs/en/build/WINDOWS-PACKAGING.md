@@ -15,7 +15,13 @@ rustup target add x86_64-pc-windows-msvc
 dotnet tool install --global wix --version 4.0.6
 Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
     Select-Object Subject, Thumbprint, NotAfter, HasPrivateKey
-$env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = '<40-character-thumbprint>'
+$thumbprint = Read-Host 'Paste the Thumbprint from the certificate list above'
+$cert = Get-Item "Cert:\CurrentUser\My\$($thumbprint.Trim())" -ErrorAction Stop
+if (-not $cert.HasPrivateKey -or $cert.NotAfter -le (Get-Date)) {
+    throw 'Select a valid certificate with HasPrivateKey=True'
+}
+$env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
+[Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
 $signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
     Sort-Object FullName | Select-Object -Last 1
 if (-not $signTool) { throw 'Windows SDK signtool was not found' }
@@ -51,9 +57,10 @@ Export-Certificate -Cert $cert -FilePath $publicCert | Out-Null
 Import-Certificate -FilePath $publicCert -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
 Import-Certificate -FilePath $publicCert -CertStoreLocation Cert:\CurrentUser\TrustedPublisher | Out-Null
 $env:SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1 = $cert.Thumbprint
+[Environment]::SetEnvironmentVariable('SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1', $cert.Thumbprint, 'User')
 ```
 
-The private key stays in the account's certificate store, not in source, the `.cer` or the installer. Reuse this identity for updates: list existing certificates as above and select the same thumbprint in a new terminal. CLI and App use the same thumbprint; the App's normal build entry bundles its native components automatically.
+The private key stays in the account's certificate store, not in source, the `.cer` or the installer. The command saves the thumbprint for the current user, so new terminals can reuse it. Do not recreate the identity for updates; use the selector above only when changing certificates. CLI and App use the same thumbprint; the App's normal build entry bundles its native components automatically.
 
 This covers the same test account. A different UAC administrator or destination machine must also explicitly trust the identity; the build never changes other accounts or machine-wide trust automatically. Choose public-release signing separately rather than asking ordinary users to trust a development certificate.
 
