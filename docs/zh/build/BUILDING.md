@@ -160,7 +160,7 @@ cargo build --release --locked -p spaceprune-cli --target x86_64-pc-windows-msvc
 .\target\x86_64-pc-windows-msvc\release\spaceprune.exe --version
 ```
 
-正式 CLI ZIP 包含签名的 `spaceprune.exe` 与 `SpacePruneNative.msi`；工作流通过 `windows-native-package.py build --with-cli` 先固定最终 MSI，再编译宿主。直接 Cargo 构建仍用于普通开发，不会构建/安装系统组件。Windows runner 必须提供签名证书；详见 [Windows 原生组件打包](WINDOWS-PACKAGING.md)。
+正式 CLI ZIP 包含已内嵌签名 MSI 的 `spaceprune.exe`；运行时只需该 EXE。工作流通过 `windows-native-package.py build --with-cli` 先固定最终 MSI，再嵌入并签名宿主。直接 Cargo 构建仍用于普通开发，不会构建/安装系统组件。Windows runner 必须提供签名证书；详见 [Windows 原生组件打包](WINDOWS-PACKAGING.md)。
 
 需要权限且随包代次尚未安装时，CLI 自动调用系统 Installer 准备，再继续原授权流程。Windows GNU 交叉编译仅作为开发检查，不能代替 MSVC 制品及原生安装/UAC 验收。
 
@@ -305,7 +305,7 @@ $packageName = "spaceprune-v$releaseVersion-$releaseTarget"
 $packageDir = "dist/$packageName"
 if (Test-Path $packageDir) { throw "The staging directory already exists" }
 New-Item -ItemType Directory -Force "$packageDir/docs" | Out-Null
-Copy-Item target/windows-native-package/spaceprune.exe, target/windows-native-package/SpacePruneNative.msi, target/windows-native-package/package-identity.json "$packageDir/"
+Copy-Item target/windows-native-package/spaceprune.exe "$packageDir/"
 Copy-Item README.md, LICENSE, licenses/rust/THIRD-PARTY-LICENSES-RUST.txt, licenses/rust/THIRD-PARTY-LICENSES-RUST-STDLIB.html "$packageDir/"
 Copy-Item docs/* -Recurse "$packageDir/docs/"
 Compress-Archive -Path $packageDir -DestinationPath "dist/$packageName.zip"

@@ -200,10 +200,13 @@ class WindowsPackageTests(unittest.TestCase):
                         pin = Path(environment["SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY"])
                         identity = json.loads(pin.read_bytes())
                         self.assertEqual(identity["msi_sha256"], sha256(pin.parent / "SpacePruneNative.msi"))
+                        package = Path(environment["SPACEPRUNE_WINDOWS_EMBED_PACKAGE"])
+                        self.assertEqual(package, pin.parent / "SpacePruneNative.msi")
                         self.assertIn("SpacePruneNative.msi", signed)
-                        (built / "spaceprune.exe").write_bytes(b"Host fixture embeds:" + pin.read_bytes())
+                        (built / "spaceprune.exe").write_bytes(b"Host fixture embeds:" + pin.read_bytes() + package.read_bytes())
                     else:
                         self.assertNotIn("SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY", environment)
+                        self.assertNotIn("SPACEPRUNE_WINDOWS_EMBED_PACKAGE", environment)
             def check_output(arguments, **options):
                 # Cargo emits UTF-8 even when Windows/Python's locale defaults to GBK.
                 raw = (json.dumps({"target_directory": str(target_directory)}, ensure_ascii=False)
@@ -212,9 +215,10 @@ class WindowsPackageTests(unittest.TestCase):
             with patch.object(builder.platform, "system", return_value="Windows"), patch.object(builder, "load_layout", return_value=layout), \
                  patch.object(builder.subprocess, "run", side_effect=run), patch.object(builder.subprocess, "check_output", side_effect=check_output), \
                  patch.object(builder, "resolve_signtool", return_value="fixture-signtool.exe"), \
-                 patch.object(builder, "resolve_wix", return_value="wix"), patch.object(builder, "sign", side_effect=sign):
+                 patch.object(builder, "resolve_wix", return_value="wix"), patch.object(builder, "sign", side_effect=sign), \
+                 patch.dict(os.environ, {"SPACEPRUNE_WINDOWS_EMBED_PACKAGE": "old-host.msi"}):
                 result = builder.build(CORE, TARGET, "release", output, "a" * 40, "https://timestamp.example.test", "wix", True)
-            self.assertEqual(Path(result["cli"]).read_bytes(), b"Host fixture embeds:" + (output / "package-identity.json").read_bytes())
+            self.assertEqual(Path(result["cli"]).read_bytes(), b"Host fixture embeds:" + (output / "package-identity.json").read_bytes() + (output / "SpacePruneNative.msi").read_bytes())
             self.assertEqual(signed[-2:], ["SpacePruneNative.msi", "spaceprune.exe"])
             self.assertFalse(result["installed"])
 

@@ -28,7 +28,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 
 Skip WiX installation if 4.0.6 is already installed. The certificate must be valid, have an accessible private key, and have a chain trusted by both build and destination machines. Its fingerprint is an identity selector, not a private key. Without a trusted code-signing identity, ordinary `cargo build` can still produce a development CLI, but cannot establish installation/authorization acceptance for protected directories.
 
-`--with-cli` builds and signs `spaceprune.exe` after the final MSI is signed and the pin is written, then places the EXE, MSI, and pin in the output directory. Omit it when only components are needed. CLI archives must include that EXE and the fixed-name MSI; unpinned adjacent helpers are no longer the official distribution path. Archive these final files using the [build guide](BUILDING.md#5-create-archives-manually), not an intermediate EXE from the Cargo cache.
+`--with-cli` builds the CLI with the final signed MSI embedded and then signs `spaceprune.exe`. MSI and pin files remain build artifacts; CLI distribution needs only the executable plus applicable license material. Omit this option for component-only builds. Package the final EXE as described in [Building](BUILDING.md), not an intermediate Cargo executable.
 
 `SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1` selects the certificate; Windows Certificate Store manages its private key. The tool does not accept PFX passwords. `SPACEPRUNE_WINDOWS_SIGNTOOL` and `SPACEPRUNE_WINDOWS_WIX` can specify tool locations; `--timestamp-url` selects the RFC3161 timestamp service.
 
@@ -72,7 +72,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 .\target\windows-native-package\spaceprune.exe
 ```
 
-Keep `spaceprune.exe` and `SpacePruneNative.msi` together. Protected operations verify and install components on demand, then request UAC; do not copy helpers into system folders or elevate the entire GUI. The signed package provides the trusted components for protected cleanup; files held by another process or protected by system policy can still fail and must retain their real diagnostics without terminating processes or changing ACLs.
+The final `spaceprune.exe` contains the signed MSI and runs without adjacent package files. Protected operations verify and install components on demand, then request UAC; do not copy helpers into system folders or elevate the entire GUI. The signed package provides the trusted components for protected cleanup; files held by another process or protected by system policy can still fail and must retain their real diagnostics without terminating processes or changing ACLs.
 
 Ordinary accessible-file tests need no certificate: use the regular Cargo CLI or unsigned App `--debug --no-bundle` path. Development packages belong on isolated test machines. After testing and uninstalling the native components, remove only this exact certificate's Root/TrustedPublisher trust using Certificate Manager if no longer needed; do not bulk-delete certificates.
 
@@ -131,3 +131,9 @@ Portable tests cover payload changes, retention of older generations, fixed inst
 Actual WiX builds, certificate chains, UAC, Windows Installer cancellation/rollback, NTFS, and cross-account behavior still require Windows acceptance and are not marked passed.
 
 The Windows cleanup pipe returns a terminal connection error on cancellation, so buffered line reads cannot spin retrying `Interrupted`. A native regression test covers reader shutdown after cancellation; this does not establish acceptance of protected deletion or the complete UAC installation flow.
+
+### Single-executable Windows CLI
+
+Testing and releases use the same `windows-native-package.py build --with-cli` entry. Tests reuse the local development certificate; releases require a code-signing identity trusted by target devices. The final EXE embeds its MSI. Direct Cargo builds do not create an installer. The script compiles/signs helpers and the MSI first, then sets `SPACEPRUNE_WINDOWS_EMBED_PACKAGE` and `SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY` for Cargo; `build.rs` never recursively builds the workspace.
+
+Embedding checks `CARGO_CFG_TARGET_OS=windows` and target architecture. Linux/macOS neither read nor include MSI bytes. Only component installation stages the embedded MSI in a private current-logon temporary directory, verifies the pinned digest and Authenticode signature, and retains the verified file until Installer exits; staging is then removed. Invalid embedded packages never fall back to neighboring files. Ordinary directory access neither extracts nor installs components. Release archives may still include licenses and documentation.

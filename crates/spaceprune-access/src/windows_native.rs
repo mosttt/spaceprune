@@ -1,5 +1,6 @@
 //! Resolve only the package and installed payloads fixed by this host's build.
 mod installer;
+mod package;
 use crate::{
     OperationContext, PermissionOutcome,
     windows_package::{
@@ -8,6 +9,7 @@ use crate::{
     },
 };
 pub use installer::run_installer_if_requested;
+pub use package::PinnedPackage;
 use spaceprune_windows_elevation::{SignedFile, TrustedExecutable};
 use std::{
     fs::File,
@@ -84,20 +86,9 @@ pub fn pinned_helper(
     Ok(Some(image))
 }
 
-/// Validate the fixed adjacent MSI as signed data and match its complete final bytes before installation.
-pub fn pinned_package(operation: &OperationContext) -> Result<SignedFile, PermissionOutcome> {
-    check(operation)?;
-    let identity = embedded_identity()?.ok_or(PermissionOutcome::HelperMissing)?;
-    let host = std::env::current_exe().map_err(|_| PermissionOutcome::AuthorizationUnavailable)?;
-    let path = host
-        .parent()
-        .ok_or(PermissionOutcome::HelperMissing)?
-        .join(PACKAGE_NAME);
-    require_file(&path)?;
-    let source = spaceprune_windows_elevation::trusted_signed_file(&path)
-        .ok_or(PermissionOutcome::HelperUntrusted)?;
-    verify_file(source.file(), &identity.msi_sha256, operation)?;
-    Ok(source)
+/// Validate the embedded or fixed adjacent MSI as signed data before installation.
+pub fn pinned_package(operation: &OperationContext) -> Result<PinnedPackage, PermissionOutcome> {
+    package::open(operation)
 }
 
 fn require_file(path: &Path) -> Result<(), PermissionOutcome> {

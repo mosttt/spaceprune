@@ -238,7 +238,7 @@ jobs:
         run: |
           $package = "spaceprune-$env:GITHUB_REF_NAME-${{ matrix.target }}"
           New-Item -ItemType Directory -Force "dist/$package/docs" | Out-Null
-          Copy-Item target/windows-native-package/spaceprune.exe, target/windows-native-package/SpacePruneNative.msi, target/windows-native-package/package-identity.json "dist/$package/"
+          Copy-Item target/windows-native-package/spaceprune.exe "dist/$package/"
           Copy-Item README.md, LICENSE, licenses/rust/THIRD-PARTY-LICENSES-RUST.txt, licenses/rust/THIRD-PARTY-LICENSES-RUST-STDLIB.html "dist/$package/"
           Copy-Item docs/* -Recurse "dist/$package/docs/"
           Compress-Archive -Path "dist/$package" -DestinationPath "dist/$package.zip"

@@ -40,6 +40,7 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
     environment = dict(os.environ)
     # Helpers are built before the final package pin exists; a host pin would create a hash cycle.
     environment.pop("SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY", None)
+    environment.pop("SPACEPRUNE_WINDOWS_EMBED_PACKAGE", None)
     if target.endswith("-msvc"):
         if "CARGO_ENCODED_RUSTFLAGS" in environment:
             existing = environment["CARGO_ENCODED_RUSTFLAGS"]
@@ -80,7 +81,8 @@ def build(core: Path, target: str, profile: str, output: Path, certificate: str 
             sign(package, certificate, timestamp, tool=signtool)
         write_pin(layout, package, revision, staged / "package-identity.json")
         if include_cli:
-            host_environment = {**environment, "SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY": str(staged / "package-identity.json")}
+            host_environment = {**environment, "SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY": str(staged / "package-identity.json"),
+                "SPACEPRUNE_WINDOWS_EMBED_PACKAGE": str(package)}
             subprocess.run(["cargo", "build", "--locked", "--package", "spaceprune-cli", "--target", target,
                 *(["--release"] if profile == "release" else [])], cwd=core, env=host_environment, check=True)
             executable = staged / "spaceprune.exe"

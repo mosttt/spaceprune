@@ -6,6 +6,10 @@ rust-version.workspace = true
 license.workspace = true
 description = "Native operation, authorization and filesystem primitives shared by SpacePrune hosts"
 
+[build-dependencies]
+serde_json.workspace = true
+sha2 = "0.10"
+
 [dependencies]
 spaceprune-contracts = { path = "../spaceprune-contracts" }
 serde.workspace = true

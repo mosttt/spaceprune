@@ -28,7 +28,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 
 已有 WiX 4.0.6 时无需重复安装。证书应有效、具有可用私钥，且构建机和目标机信任其证书链；指纹只是身份选择器，不是私钥。缺少可信代码签名身份时，普通 `cargo build` 仍能生成开发 CLI，但不能据此完成受保护目录的安装／授权验收。
 
-`--with-cli` 在最终 MSI 签名及 pin 写入后构建并签名 `spaceprune.exe`，并将它与 MSI、pin 一起放入输出目录；仅需组件时省略该参数。CLI 归档必须包含该 EXE 与固定名 MSI，不再使用未固定版本的相邻 helper 作为正式分发路径。按 [构建指南](BUILDING.md#5-手工制作归档)归档这些最终文件，不使用 Cargo 缓存中的中间 EXE。
+`--with-cli` 在最终 MSI 签名及 pin 写入后将完整 MSI 嵌入 `spaceprune.exe`，再签名最终 EXE；仅需组件时省略该参数。Windows CLI 运行只需要这个 EXE，相邻 MSI 和 pin 仅作为构建产物保留，不必随 CLI 分发。按 [构建指南](BUILDING.md#5-手工制作归档)归档这些最终文件，不使用 Cargo 缓存中的中间 EXE。
 
 证书选择器也可通过 `SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1` 提供，证书私钥由 Windows 证书存储管理。工具不接收 PFX 密码。`SPACEPRUNE_WINDOWS_SIGNTOOL` 和 `SPACEPRUNE_WINDOWS_WIX` 可指定工具位置，`--timestamp-url` 指定 RFC3161 时间戳服务。
 
@@ -99,7 +99,7 @@ Windows 的 metadata v7 / cleanup v5 是登录绑定的引导与 IPC 协议；�
 
 在构建 Windows CLI 或应用宿主时，将 `SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY` 设置为上述 `package-identity.json` 的绝对路径。`spaceprune-access/build.rs` 将有界文件内容复制到编译产物，运行时不会读取该环境变量或邻接清单。非 Windows 构建忽略此输入；不提供此变量的开发构建保留现有受保护相邻 helper 查找策略。
 
-读取和清理入口共享 `windows_native::pinned_helper`，只查固定 Program Files 中的精确代次，并依次核对管理员保护、签名、完整载荷摘要和协议。畸形 pin 或架构不匹配明确拒绝，不降级到其他相邻程序。句柄保持到实际 UAC 会话退出。`pinned_package` 对固定相邻 MSI 同样验证完整签名后摘要，但本身不安装或执行它。
+读取和清理入口共享 `windows_native::pinned_helper`，只查固定 Program Files 中的精确代次，并依次核对管理员保护、签名、完整载荷摘要和协议。畸形 pin 或架构不匹配明确拒绝，不降级到其他相邻程序。句柄保持到实际 UAC 会话退出。`pinned_package` 对内嵌或固定相邻 MSI 同样验证完整签名后摘要，但本身不安装或执行它。
 
 构建顺序必须是 helper → 签名 MSI → 最终 pin → 宿主。helper 与布局工具主动清除继承的宿主 pin，避免把先前包身份编入待计算摘要的载荷而形成循环依赖。公开 Release 工作流使用 `--with-cli` 自动编排；Windows runner 需要预先在证书存储中提供签名身份，仓库变量 `SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1` 选择证书。缺少身份明确失败，不静默发布无法通过运行时信任检查的未签名包。
 
@@ -130,3 +130,9 @@ helper 持有原宿主进程句柄，并在存活检查中重新查询该进程�
 实际 WiX 构建、证书链、UAC、Windows Installer 取消与回滚、NTFS/跨账户行为仍需 Windows 验收；当前不把这些项目标记为通过。
 
 Windows 清理管道在取消时返回终止连接错误，避免逐行读取将 `Interrupted` 当作可重试中断而空转。原生回归测试覆盖取消后读取线程退出；这不代表受保护文件删除或完整 UAC 安装流程已经验收。
+
+### 单文件 Windows CLI
+
+测试与正式发布共用 `windows-native-package.py build --with-cli`；测试签名沿用本机开发证书，正式包使用目标设备信任的代码签名身份。最终 EXE 内嵌 MSI，直接 Cargo 构建不会自动制作安装器。构建脚本先编译／签名 helper 和 MSI，再设置 `SPACEPRUNE_WINDOWS_EMBED_PACKAGE` 与 `SPACEPRUNE_WINDOWS_PACKAGE_IDENTITY` 调用 Cargo；不从 `build.rs` 递归构建工作区。
+
+嵌入按 `CARGO_CFG_TARGET_OS=windows` 和目标架构校验，Linux/macOS 不读取或包含 MSI。运行时仅在需要安装组件时释放到当前登录私有的临时目录，核对固定摘要与 Authenticode 签名，并持有已验证文件直至 Installer 完成；随后清理临时文件。损坏的内嵌包不会降级使用相邻文件。普通目录访问不会释放或安装组件。许可证与文档仍可随发布归档提供。

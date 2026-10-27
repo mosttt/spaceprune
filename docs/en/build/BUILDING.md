@@ -145,7 +145,7 @@ cargo build --release --locked -p spaceprune-cli --target x86_64-pc-windows-msvc
 .\target\x86_64-pc-windows-msvc\release\spaceprune.exe --version
 ```
 
-The release CLI ZIP contains signed `spaceprune.exe` and `SpacePruneNative.msi`. The workflow uses `windows-native-package.py build --with-cli` to pin the final MSI before compiling the host. Direct Cargo builds remain suitable for development but do not build or install system components. The Windows runner must provide a signing certificate; see [Windows native packaging](WINDOWS-PACKAGING.md).
+The release CLI ZIP contains the signed `spaceprune.exe` with its signed MSI embedded; execution needs only the EXE. The workflow uses `windows-native-package.py build --with-cli` to pin and embed the final MSI before signing the host. Direct Cargo builds remain suitable for development but do not build or install system components. The Windows runner must provide a signing certificate; see [Windows native packaging](WINDOWS-PACKAGING.md).
 
 When permission is needed and the bundled generation is not installed, CLI automatically prepares it through the system Installer, then resumes authorization. Windows GNU cross-compilation is a development check, not a substitute for MSVC artifacts or native installation/UAC acceptance.
 
@@ -267,7 +267,7 @@ $packageName = "spaceprune-v$releaseVersion-$releaseTarget"
 $packageDir = "dist/$packageName"
 if (Test-Path $packageDir) { throw "The staging directory already exists" }
 New-Item -ItemType Directory -Force "$packageDir/docs" | Out-Null
-Copy-Item target/windows-native-package/spaceprune.exe, target/windows-native-package/SpacePruneNative.msi, target/windows-native-package/package-identity.json "$packageDir/"
+Copy-Item target/windows-native-package/spaceprune.exe "$packageDir/"
 Copy-Item README.md, LICENSE, licenses/rust/THIRD-PARTY-LICENSES-RUST.txt, licenses/rust/THIRD-PARTY-LICENSES-RUST-STDLIB.html "$packageDir/"
 Copy-Item docs/* -Recurse "$packageDir/docs/"
 Compress-Archive -Path $packageDir -DestinationPath "dist/$packageName.zip"
