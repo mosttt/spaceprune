@@ -8,10 +8,13 @@ use std::{
 use windows_sys::Win32::{
     Globalization::{CSTR_EQUAL, CompareStringOrdinal},
     Storage::FileSystem::{GetVolumeNameForVolumeMountPointW, GetVolumePathNameW},
-    System::SystemInformation::GetSystemWindowsDirectoryW,
+    System::{
+        Registry::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY, RegGetValueW},
+        SystemInformation::GetSystemWindowsDirectoryW,
+    },
     UI::Shell::{
-        FOLDERID_ProgramData, FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64,
-        FOLDERID_ProgramFilesX86, KF_FLAG_DONT_VERIFY,
+        FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
+        KF_FLAG_DONT_VERIFY,
     },
 };
 
@@ -42,15 +45,15 @@ impl SystemLocations {
         let system_volume = volume_root(&canonical_windows)?;
         let system_volume_aliases = aliases(&system_volume)?;
         let mut protected = aliases(&windows)?;
-        for id in [
-            FOLDERID_ProgramFiles,
-            FOLDERID_ProgramFilesX86,
-            FOLDERID_ProgramData,
-        ] {
+        for id in [FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX86] {
             let path =
                 crate::native::known_folder_path_with_flags(&id, KF_FLAG_DONT_VERIFY as u32)?;
             protected.extend(aliases(&path)?);
         }
+        // Known Folder expansion for ProgramData uses the caller's SystemDrive variable.
+        // The machine Shell Folders value is already expanded by Windows, so an altered
+        // process environment cannot redirect this protection boundary.
+        protected.extend(aliases(&machine_program_data()?)?);
         // This ID is unavailable to some architectures; the native Program Files ID above is mandatory.
         if let Some(path) = crate::native::known_folder_path_with_flags(
             &FOLDERID_ProgramFilesX64,
@@ -96,6 +99,33 @@ impl SystemLocations {
             .iter()
             .any(|root| root.contains(&path, ordinal_equal) != Some(false))
     }
+}
+
+fn machine_program_data() -> Option<PathBuf> {
+    let key: Vec<_> = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\0"
+        .encode_utf16()
+        .collect();
+    let value: Vec<_> = "Common AppData\0".encode_utf16().collect();
+    let mut buffer = vec![0_u16; WIDE_CAPACITY];
+    let mut bytes = (buffer.len() * 2) as u32;
+    // SAFETY: Read only a machine-owned, already expanded string into bounded storage.
+    let result = unsafe {
+        RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            key.as_ptr(),
+            value.as_ptr(),
+            RRF_RT_REG_SZ | RRF_SUBKEY_WOW6464KEY,
+            std::ptr::null_mut(),
+            buffer.as_mut_ptr().cast(),
+            &raw mut bytes,
+        )
+    };
+    if result != 0 || bytes < 2 || bytes as usize > buffer.len() * 2 {
+        return None;
+    }
+    let length = buffer.iter().position(|&unit| unit == 0)?;
+    let path = PathBuf::from(OsString::from_wide(&buffer[..length]));
+    path.is_absolute().then_some(path)
 }
 
 fn path_units(path: &Path) -> Option<WindowsPath> {
@@ -235,7 +265,7 @@ mod tests {
         )
         .unwrap();
         let program_data = crate::native::known_folder_path_with_flags(
-            &FOLDERID_ProgramData,
+            &windows_sys::Win32::UI::Shell::FOLDERID_ProgramData,
             KF_FLAG_DONT_VERIFY as u32,
         )
         .unwrap();

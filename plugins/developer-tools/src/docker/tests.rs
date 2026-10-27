@@ -6,6 +6,7 @@ struct Engine {
     endpoint: String,
     identity: RefCell<String>,
     objects: RefCell<Vec<String>>,
+    parents: RefCell<std::collections::BTreeMap<String, Vec<String>>>,
     calls: RefCell<Vec<Vec<String>>>,
     interface_missing: Cell<bool>,
     fail_remove: Cell<bool>,
@@ -17,6 +18,7 @@ impl Engine {
             endpoint: "unix:///fixture/docker.sock".into(),
             identity: RefCell::new("engine-one".into()),
             objects: RefCell::new(vec!["cacheone".into(), "cachetwo".into()]),
+            parents: RefCell::default(),
             calls: RefCell::new(Vec::new()),
             interface_missing: Cell::new(false),
             fail_remove: Cell::new(false),
@@ -56,7 +58,7 @@ impl Runner for Engine {
                 args,
                 &["buildx", "du", "--builder", "default", "--format", "json"]
             );
-            return Ok(self.objects.borrow().iter().map(|id|json!({"ID":id,"Size":if id=="cacheone"{"123B"}else{"1.5GB"},"Reclaimable":!self.becomes_busy.get(),"Description":"fixture"}).to_string()).collect::<Vec<_>>().join("\n"));
+            return Ok(self.objects.borrow().iter().map(|id|json!({"ID":id,"Parents":self.parents.borrow().get(id),"Size":if id=="cacheone"{"123B"}else{"1.5GB"},"Reclaimable":!self.becomes_busy.get(),"Description":"fixture"}).to_string()).collect::<Vec<_>>().join("\n"));
         }
         if args.starts_with(&["buildx", "prune"]) {
             assert_eq!(
@@ -79,7 +81,13 @@ impl Runner for Engine {
                 .unwrap()
                 .strip_suffix('$')
                 .unwrap();
-            if !self.becomes_busy.get() {
+            let referenced = self.objects.borrow().iter().any(|child| {
+                self.parents
+                    .borrow()
+                    .get(child)
+                    .is_some_and(|parents| parents.iter().any(|parent| parent == id))
+            });
+            if !self.becomes_busy.get() && !referenced {
                 self.objects.borrow_mut().retain(|existing| existing != id);
             }
             return Ok("Total: 123B".into());
@@ -95,6 +103,53 @@ fn scan(engine: &Engine) -> HandlerScanResult {
             engine,
         )
         .unwrap()
+}
+
+#[test]
+fn selected_cache_children_are_removed_before_parents_without_expanding_selection() {
+    let engine = Engine::new();
+    engine
+        .parents
+        .borrow_mut()
+        .insert("cachetwo".into(), vec!["cacheone".into()]);
+    let scanned = scan(&engine);
+    engine.objects.borrow_mut().push("unselected".into());
+    let result = DockerHandler(DockerKind::BuildCache)
+        .clean_with(
+            &DockerKind::BuildCache.task(),
+            &scanned.items,
+            &NullProgress,
+            &OperationContext::default(),
+            &engine,
+        )
+        .unwrap();
+    assert_eq!(result.succeeded, 2);
+    assert!(result.failures.is_empty());
+    assert_eq!(result.outcomes[0].item_id, "cachetwo");
+    assert_eq!(result.outcomes[1].item_id, "cacheone");
+    assert_eq!(*engine.objects.borrow(), ["unselected"]);
+}
+
+#[test]
+fn an_unselected_cache_child_is_never_added_to_make_a_parent_removable() {
+    let engine = Engine::new();
+    engine
+        .parents
+        .borrow_mut()
+        .insert("cachetwo".into(), vec!["cacheone".into()]);
+    let scanned = scan(&engine);
+    let result = DockerHandler(DockerKind::BuildCache)
+        .clean_with(
+            &DockerKind::BuildCache.task(),
+            &scanned.items[..1],
+            &NullProgress,
+            &OperationContext::default(),
+            &engine,
+        )
+        .unwrap();
+    assert_eq!(result.succeeded, 0);
+    assert_eq!(result.failures.len(), 1);
+    assert_eq!(*engine.objects.borrow(), ["cacheone", "cachetwo"]);
 }
 #[test]
 fn exact_selected_cache_only_and_unknown_reclaimed_bytes() {

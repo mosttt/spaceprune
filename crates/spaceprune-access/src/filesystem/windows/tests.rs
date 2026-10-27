@@ -93,6 +93,28 @@ fn ordinary_temp_directories_are_removed_without_path_reconstruction() {
 }
 
 #[test]
+fn ordinary_directory_listing_can_reopen_the_held_delete_handle() {
+    let temporary = tempfile::tempdir().unwrap();
+    let selected = temporary.path().join("selected");
+    fs::create_dir(&selected).unwrap();
+    fs::write(selected.join("child"), b"fixture").unwrap();
+    let roots = lock_ancestors(temporary.path()).expect("ancestor handles");
+    let handle = open_relative(
+        roots.last().unwrap(),
+        std::ffi::OsStr::new("selected"),
+        true,
+    )
+    .expect("selected delete handle");
+    let listing = handles::open_listing(&handle).expect("reopen directory for enumeration");
+    assert_eq!(
+        handles::read_directory(&listing, true)
+            .expect("enumeration")
+            .unwrap(),
+        vec![std::ffi::OsString::from("child")]
+    );
+}
+
+#[test]
 fn native_handles_prevent_renaming_a_selected_directory_while_its_children_are_processed() {
     let temporary = tempfile::tempdir().unwrap();
     let selected = temporary.path().join("selected");

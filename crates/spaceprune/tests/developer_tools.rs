@@ -1,3 +1,4 @@
+#![cfg_attr(not(target_os = "linux"), allow(missing_docs))]
 #![cfg(target_os = "linux")]
 //! Generated tool environments exercise both consumers' public facade without touching user caches.
 use spaceprune::api::{

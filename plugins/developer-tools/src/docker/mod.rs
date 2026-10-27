@@ -1,4 +1,5 @@
 //! Local Docker lifecycle operations; never raw deletion of engine storage.
+mod cache_order;
 mod cli;
 mod inventory;
 #[cfg(test)]
@@ -269,7 +270,19 @@ impl DockerHandler {
             unknown_reclaimed_items: Some(0),
             ..Default::default()
         };
-        for item in items {
+        for (index, item) in cache_order::selected(self.0, items, runner, context)
+            .into_iter()
+            .enumerate()
+        {
+            progress.emit(ProgressEvent {
+                phase: ProgressPhase::Clean,
+                module_id: Some(task.module_id.clone()),
+                task_id: Some(task.task_id.clone()),
+                handler_id: Some(task.handler_id.clone()),
+                current: Some(index),
+                total: Some(items.len()),
+                message: item.name.clone(),
+            });
             let mut outcome = ItemExecution {
                 item_id: item.id.clone(),
                 status: ItemExecutionStatus::NotAttempted,
@@ -371,6 +384,15 @@ impl DockerHandler {
                 result.reclaimed_bytes,
                 result.unknown_reclaimed_items(),
             );
+            progress.emit(ProgressEvent {
+                phase: ProgressPhase::Clean,
+                module_id: Some(task.module_id.clone()),
+                task_id: Some(task.task_id.clone()),
+                handler_id: Some(task.handler_id.clone()),
+                current: Some(index + 1),
+                total: Some(items.len()),
+                message: item.name.clone(),
+            });
         }
         Ok(result)
     }

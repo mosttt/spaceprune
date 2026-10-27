@@ -54,23 +54,21 @@ pub(super) fn open_relative(parent: &File, name: &OsStr, delete: bool) -> io::Re
 pub(super) fn open_listing(directory: &File) -> io::Result<File> {
     // The original handle excludes delete sharing, so this read handle cannot loosen that lock.
     // It must itself share deletion because the original selected directory holds DELETE access.
-    // NT relative opens do not normalize ".". Reopen the held object, not a reconstructed path.
-    // SAFETY: The original file-system handle remains open; File owns the returned handle.
-    let handle = unsafe {
-        ReOpenFile(
-            directory.as_raw_handle(),
-            FILE_READ_ATTRIBUTES | FILE_LIST_DIRECTORY,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-        )
-    };
-    if handle == INVALID_HANDLE_VALUE {
-        return Err(io::Error::last_os_error());
-    }
-    Ok(unsafe { File::from_raw_handle(handle) })
+    // ReOpenFile cannot reopen a directory on supported Windows versions. An empty NT
+    // relative name opens the object named by RootDirectory itself; "." is not normalized.
+    open_child_shared(
+        directory,
+        OsStr::new(""),
+        FILE_READ_ATTRIBUTES | FILE_LIST_DIRECTORY,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    )
 }
 
 fn open_child(parent: &File, name: &OsStr, access: u32) -> io::Result<File> {
+    open_child_shared(parent, name, access, FILE_SHARE_READ | FILE_SHARE_WRITE)
+}
+
+fn open_child_shared(parent: &File, name: &OsStr, access: u32, sharing: u32) -> io::Result<File> {
     let mut name = name.encode_wide().collect::<Vec<_>>();
     let length =
         u16::try_from(name.len().checked_mul(2).ok_or_else(boundary)?).map_err(|_| boundary())?;
@@ -99,7 +97,7 @@ fn open_child(parent: &File, name: &OsStr, access: u32) -> io::Result<File> {
             &raw mut status,
             ptr::null(),
             FILE_ATTRIBUTE_NORMAL,
-            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            sharing,
             FILE_OPEN,
             FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT | FILE_SYNCHRONOUS_IO_NONALERT,
             ptr::null(),

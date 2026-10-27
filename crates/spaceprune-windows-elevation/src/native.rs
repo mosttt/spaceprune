@@ -15,9 +15,7 @@ use windows_sys::Win32::{
             COINIT_APARTMENTTHREADED, COINIT_DISABLE_OLE1DDE, CoInitializeEx, CoTaskMemFree,
             CoUninitialize,
         },
-        Threading::{
-            GetExitCodeProcess, GetProcessId, INFINITE, TerminateProcess, WaitForSingleObject,
-        },
+        Threading::{GetExitCodeProcess, GetProcessId, TerminateProcess, WaitForSingleObject},
     },
     UI::{
         Shell::{
@@ -120,6 +118,8 @@ pub(super) fn run_elevated_and_wait(
         return Err(ElevationError::Cancelled);
     }
     let deadline = Instant::now() + timeout;
+    let executable =
+        crate::shell_path::local_path(executable).ok_or(ElevationError::Unavailable)?;
     let directory = wide_null(
         executable
             .parent()
@@ -217,12 +217,16 @@ fn terminate(process: HANDLE, exit_code: u32) -> Result<(), ElevationError> {
     // UAC may grant only query/synchronize rights. The caller must also withdraw its IPC
     // control directory so the helper exits cooperatively when termination is denied.
     // SAFETY: The owned handle remains valid; a timeout must never report a live worker as stopped.
-    if unsafe { WaitForSingleObject(process, INFINITE) } == WAIT_OBJECT_0 {
+    if unsafe { WaitForSingleObject(process, 5_000) } == WAIT_OBJECT_0 {
         Ok(())
     } else {
         Err(ElevationError::Unavailable)
     }
 }
+
+#[cfg(test)]
+#[path = "native_tests.rs"]
+mod tests;
 
 fn command_parameters(arguments: &[OsString]) -> Vec<u16> {
     let mut parameters = Vec::new();

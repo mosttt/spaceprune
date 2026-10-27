@@ -7,6 +7,7 @@ pub(super) struct Object {
     pub id: String,
     pub name: String,
     pub bytes: Option<u64>,
+    pub parents: Vec<String>,
 }
 pub(super) fn valid_id(kind: DockerKind, id: &str) -> bool {
     match kind {
@@ -70,6 +71,20 @@ pub(super) fn list(
                     id: id.clone(),
                     name: format!("{} · {id}", description),
                     bytes,
+                    parents: match row.get("Parents") {
+                        None | Some(Value::Null) => Vec::new(),
+                        Some(Value::Array(parents)) => parents
+                            .iter()
+                            .map(|parent| {
+                                parent
+                                    .as_str()
+                                    .filter(|id| valid_id(kind, id))
+                                    .map(str::to_owned)
+                                    .ok_or_else(invalid)
+                            })
+                            .collect::<PluginResult<_>>()?,
+                        _ => return Err(invalid()),
+                    },
                 });
             }
         }
@@ -141,6 +156,7 @@ pub(super) fn list(
                     id: id.into(),
                     name: if tags.is_empty() { id.into() } else { tags },
                     bytes: row["Size"].as_u64(),
+                    parents: Vec::new(),
                 });
             }
         }
@@ -193,6 +209,7 @@ pub(super) fn list(
                         .trim_start_matches('/')
                         .into(),
                     bytes: row["Size"].as_u64(),
+                    parents: Vec::new(),
                 });
             }
         }

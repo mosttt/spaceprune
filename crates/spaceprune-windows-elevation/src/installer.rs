@@ -7,7 +7,7 @@ use std::{
     ptr,
 };
 use windows_sys::Win32::{
-    Foundation::{ERROR_INSTALL_FAILURE, ERROR_INSTALL_USEREXIT},
+    Foundation::{ERROR_INSTALL_FAILURE, ERROR_INSTALL_USEREXIT, ERROR_INVALID_NAME},
     System::ApplicationInstallationAndServicing::{
         INSTALLLOGMODE_ACTIONDATA, INSTALLLOGMODE_ERROR, INSTALLLOGMODE_FATALEXIT,
         INSTALLLOGMODE_PROGRESS, INSTALLMESSAGE_ACTIONDATA, INSTALLMESSAGE_PROGRESS,
@@ -28,12 +28,10 @@ pub fn install_package_in_worker(
     if should_stop() {
         return ERROR_INSTALL_USEREXIT;
     }
-    let path: Vec<u16> = package
-        .path()
-        .as_os_str()
-        .encode_wide()
-        .chain(Some(0))
-        .collect();
+    let Some(path) = crate::shell_path::local_path(package.path()) else {
+        return ERROR_INVALID_NAME;
+    };
+    let path: Vec<u16> = path.as_os_str().encode_wide().chain(Some(0)).collect();
     let properties: Vec<u16> = "ALLUSERS=1 REBOOT=ReallySuppress\0"
         .encode_utf16()
         .collect();

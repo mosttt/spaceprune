@@ -1,6 +1,7 @@
 use super::{Kind, Options, coredump_action, executable_action, package_action};
 
 #[test]
+#[cfg(unix)]
 fn a_failed_system_command_preserves_side_effect_uncertainty() {
     use super::*;
     use std::fs;

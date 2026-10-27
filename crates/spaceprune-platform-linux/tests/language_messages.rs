@@ -1,3 +1,4 @@
+#![cfg_attr(not(target_os = "linux"), allow(missing_docs))]
 #![cfg(target_os = "linux")]
 //! Exercise product messages at public scan/error origins without system commands or authorization.
 

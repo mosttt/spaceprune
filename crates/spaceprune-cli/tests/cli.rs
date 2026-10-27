@@ -10,12 +10,24 @@ use tempfile::tempdir;
 
 fn spaceprune() -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_spaceprune"));
+    command.env("LC_ALL", "en_US.UTF-8");
     if cfg!(target_os = "windows") {
         command.env_remove("APPDATA").env_remove("USERPROFILE");
     } else {
         command.env_remove("XDG_CONFIG_HOME").env_remove("HOME");
     }
     command
+}
+
+fn system_text(english: &'static str, chinese: &'static str) -> &'static str {
+    if cfg!(any(target_os = "windows", target_os = "macos"))
+        && spaceprune::api::LanguagePreference::System.resolve()
+            == spaceprune::api::Language::SimplifiedChinese
+    {
+        chinese
+    } else {
+        english
+    }
 }
 
 fn spaceprune_with_home(directory: &Path) -> Command {
@@ -83,7 +95,10 @@ fn root_help_does_not_load_an_explicit_configuration() {
         .output()
         .unwrap();
     assert!(output.status.success());
-    assert!(String::from_utf8_lossy(&output.stdout).contains("Usage: spaceprune"));
+    assert!(
+        String::from_utf8_lossy(&output.stdout)
+            .contains(system_text("Usage: spaceprune", "用法：spaceprune"))
+    );
 }
 
 #[test]
@@ -386,8 +401,10 @@ fn interactive_theme_picker_requires_a_terminal() {
         .unwrap();
     assert_eq!(output.status.code(), Some(2));
     assert!(
-        String::from_utf8_lossy(&output.stderr)
-            .contains("Interactive theme selection requires a TTY")
+        String::from_utf8_lossy(&output.stderr).contains(system_text(
+            "Interactive theme selection requires a TTY",
+            "交互选择主题需要终端"
+        ))
     );
 }
 
@@ -450,8 +467,10 @@ fn interactive_recipe_picker_requires_a_terminal() {
         .unwrap();
     assert_eq!(output.status.code(), Some(2));
     assert!(
-        String::from_utf8_lossy(&output.stderr)
-            .contains("Interactive recipe selection requires a TTY")
+        String::from_utf8_lossy(&output.stderr).contains(system_text(
+            "Interactive recipe selection requires a TTY",
+            "交互选择方案需要终端"
+        ))
     );
 }
 
@@ -773,7 +792,10 @@ fn select_requires_a_terminal() {
     let output = spaceprune_with_home(temp.path()).output().unwrap();
     assert_eq!(output.status.code(), Some(2));
     assert!(
-        String::from_utf8_lossy(&output.stderr).contains("Interactive selection requires a TTY")
+        String::from_utf8_lossy(&output.stderr).contains(system_text(
+            "Interactive selection requires a TTY",
+            "交互选择需要终端"
+        ))
     );
 }
 
@@ -850,6 +872,11 @@ min-size = "0 B"
             cache.to_string_lossy()
         ),
     );
+    fs::write(
+        &config,
+        "schema-version = 2\nrecipe = 'progress'\nlanguage = 'en'\n",
+    )
+    .unwrap();
     for disabled in [false, true] {
         let mut command = spaceprune();
         command
@@ -1305,7 +1332,16 @@ fn shared_language_preference_overrides_system_without_loading_recipe() {
     };
     let system = run(&["--help"], "zh_CN.UTF-8");
     assert!(system.status.success());
-    assert!(String::from_utf8_lossy(&system.stdout).contains("查看或更改共享应用语言"));
+    let follows_native_locale = cfg!(any(target_os = "windows", target_os = "macos"));
+    let system_help = if follows_native_locale {
+        system_text(
+            "Inspect or change the shared application language",
+            "查看或更改共享应用语言",
+        )
+    } else {
+        "查看或更改共享应用语言"
+    };
+    assert!(String::from_utf8_lossy(&system.stdout).contains(system_help));
     let saved = run(&["language", "set", "en"], "zh_CN.UTF-8");
     assert!(saved.status.success());
     let english = run(&["--help"], "zh_CN.UTF-8");
@@ -1338,6 +1374,10 @@ fn unknown_system_and_saved_languages_fall_back_to_english() {
     let temp = tempdir().unwrap();
     let config = temp.path().join("config.toml");
     for language in [None, Some("future-language")] {
+        // Native Windows/macOS language detection does not use POSIX locale variables.
+        if language.is_none() && cfg!(any(target_os = "windows", target_os = "macos")) {
+            continue;
+        }
         let language = language
             .map(|id| format!("language = '{id}'\n"))
             .unwrap_or_default();
@@ -1491,11 +1531,11 @@ fn management_json_queries_do_not_open_pickers_or_modify_preferences() {
             assert_eq!(value["recipe"], "personal");
             assert_eq!(value["name"], "Personal");
             assert_eq!(
-                value["entry"],
+                Path::new(value["entry"].as_str().unwrap()),
                 directory
-                    .join("recipes/personal/personal.toml")
-                    .to_str()
-                    .unwrap()
+                    .join("recipes")
+                    .join("personal")
+                    .join("personal.toml")
             );
         } else {
             assert_eq!(value["theme"], "graphite");

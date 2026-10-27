@@ -12,6 +12,9 @@ use std::{ffi::OsString, path::Path, sync::atomic::AtomicBool, time::Duration};
 mod native;
 
 #[cfg(target_os = "windows")]
+mod shell_path;
+
+#[cfg(target_os = "windows")]
 #[allow(unsafe_code)]
 mod private_acl;
 

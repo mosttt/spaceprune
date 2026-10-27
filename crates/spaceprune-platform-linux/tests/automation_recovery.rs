@@ -1,3 +1,4 @@
+#![cfg_attr(not(target_os = "linux"), allow(missing_docs))]
 #![cfg(target_os = "linux")]
 //! Scheduler mutations are exercised only through an isolated command fixture.
 

@@ -1576,13 +1576,21 @@ mod tests {
 
     #[test]
     fn focused_filesystem_group_displays_its_roots_without_changing_selection() {
+        let roots = if cfg!(windows) {
+            [
+                r"C:\fixture\project-a\target",
+                r"C:\fixture\project-b\target",
+            ]
+        } else {
+            ["/fixture/project-a/target", "/fixture/project-b/target"]
+        };
         let mut report = report_with_items(3);
         let task = &mut report.modules[0].tasks[0];
         task.name = "target".to_owned();
         task.handler_id = "builtin.filesystem/paths".to_owned();
         task.request.options = serde_json::json!({"roots": [
-            {"path": "/fixture/project-a/target"},
-            {"path": "/fixture/project-b/target"},
+            {"path": roots[0]},
+            {"path": roots[1]},
         ]});
         let cancellation = CancellationToken::default();
         let mut app = SelectionApp::new(&report, &cancellation, Theme::default());
@@ -1592,8 +1600,8 @@ mod tests {
         let mut terminal = Terminal::new(TestBackend::new(110, 32)).unwrap();
         terminal.draw(|frame| app.render(frame)).unwrap();
         let text = screen_text(&terminal);
-        assert!(text.contains("/fixture/project-a/target"));
-        assert!(text.contains("/fixture/project-b/target"));
+        assert!(text.contains(roots[0]));
+        assert!(text.contains(roots[1]));
         assert!(text.contains("Handler: builtin.filesystem/paths"));
         assert!(text.contains("Selected 1 of 2 selectable items"));
         assert_eq!(app.selected, selected);

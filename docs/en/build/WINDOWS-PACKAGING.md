@@ -124,6 +124,8 @@ The helper holds the original host process handle and re-queries its primary tok
 
 ## Validation scope
 
+Native regressions also cover ordinary directory enumeration/deletion through held handles, preservation of directory replacement locks, bounded shutdown without process termination rights, and system directory classification independent of caller environment variables. Windows Installer and ShellExecute receive an identity-checked ordinary local path while the signed file and ancestor handles stay pinned, avoiding extended-path failures before UAC.
+
 Build-tool fixtures cover SDK installations outside PATH, invalid explicit paths, host architecture, and preserving existing output when prerequisites are missing. The CLI reports absent tools without a Python traceback.
 
 Portable tests cover payload changes, retention of older generations, fixed installation layout, prohibited custom actions, final-pin round trips, license mismatches, and preservation of prior output on signing failures. Windows-specific tests cover write/directory-replacement denial while handles are held; these must run natively on Windows.

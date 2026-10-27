@@ -1,3 +1,4 @@
+#![cfg_attr(not(target_os = "linux"), allow(missing_docs))]
 #![cfg(target_os = "linux")]
 //! Public configuration → capability → scan → confirmation → cleanup, on a strict fake Engine.
 use spaceprune::api::*;
