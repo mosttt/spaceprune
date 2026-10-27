@@ -299,6 +299,17 @@ impl DockerHandler {
                     cli::interface(self.0, &selected.binding, runner, context)?;
                     let current = inventory::list(self.0, &selected.binding, runner, context)?;
                     if !current.iter().any(|object| object.id == selected.id) {
+                        // Eligibility can disappear because Docker already removed a record,
+                        // including during an earlier native prune in this confirmed batch.
+                        if !inventory::exists(
+                            self.0,
+                            &selected.binding,
+                            &selected.id,
+                            runner,
+                            context,
+                        )? {
+                            return Ok(ItemExecutionStatus::AlreadyAbsent);
+                        }
                         return Err(PluginError::new(
                             "docker-object-changed",
                             messages::text("docker.object_changed"),
@@ -320,12 +331,17 @@ impl DockerHandler {
                             messages::text("docker.object_changed"),
                         ));
                     }
-                    Ok(())
+                    Ok(ItemExecutionStatus::Succeeded)
                 })();
                 match execution {
-                    Ok(()) => {
-                        outcome.status = ItemExecutionStatus::Succeeded;
-                        outcome.reclaimed_estimate = None;
+                    Ok(status) => {
+                        outcome.status = status;
+                        outcome.reclaimed_estimate = if status == ItemExecutionStatus::AlreadyAbsent
+                        {
+                            Some(0)
+                        } else {
+                            None
+                        };
                     }
                     Err(error) => {
                         outcome.status = if started {
