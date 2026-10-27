@@ -28,6 +28,8 @@ Scanning binds the local endpoint and Engine ID; cleanup checks both again along
 
 Cleanup uses official commands with exact object IDs. Image/container deletion is never forced; unselected parent images are retained and running containers are not stopped. Buildx uses anchored ID filters, never an unbounded system prune. Volumes, bind mounts, Docker backing directories and Docker Desktop virtual disks are outside the scope. Docker refusals caused by dependencies, concurrent state or multiple tags remain failed/uncertain outcomes requiring a fresh scan.
 
+A selected object already absent before its cleanup step is verified and reported as an idempotent zero-byte success, including objects removed by an earlier operation in the same batch. An object that merely became busy or protected remains a changed-state failure, not a successful removal. Failed or malformed inventory queries cannot confirm absence.
+
 Image sizes and container writable-layer sizes use Docker integer-byte fields. Rounded Buildx kB/MB/GB output stays unknown; exact integer-byte values remain known. Shared layers cannot be summed into freed disk space, and Docker Desktop VM disks may not shrink immediately. Estimated and completed reclaimed bytes therefore remain unknown, not zero. Successful removal is verified by checking object absence independently of eligibility.
 
 API consumers can use `probe_system_capabilities` for available capabilities and installed-interface diagnostics. Entries with an `issue` cannot issue cleanup sources. Existing `discover_system_capabilities` still returns only available tasks. App inventory displays diagnostics without executable tasks; inspecting a known failure returns the diagnosis without enumerating objects or creating Recipe sources.

@@ -251,10 +251,23 @@ pub(super) fn exists(
     };
     let output = runner.run(Some(&binding.endpoint), &args, context)?;
     if kind == DockerKind::BuildCache {
-        Ok(rows(&output)?
-            .iter()
-            .any(|row| row["ID"].as_str() == Some(id)))
+        let mut found = false;
+        for row in rows(&output)? {
+            let current = row["ID"].as_str().ok_or_else(invalid)?;
+            if !valid_id(kind, current) {
+                return Err(invalid());
+            }
+            found |= current == id;
+        }
+        Ok(found)
     } else {
-        Ok(output.lines().any(|line| line == id))
+        let ids = output
+            .lines()
+            .filter(|line| !line.is_empty())
+            .collect::<Vec<_>>();
+        if ids.iter().any(|current| !valid_id(kind, current)) {
+            return Err(invalid());
+        }
+        Ok(ids.contains(&id))
     }
 }

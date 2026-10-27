@@ -177,7 +177,7 @@ fn remote_endpoint_changed_engine_forged_id_and_cancel_never_remove() {
                 scanned.items[0].opaque["id"] = json!(".*");
             }
             "cancel" => context.cancel(),
-            _ => engine.objects.borrow_mut().clear(),
+            _ => engine.becomes_busy.set(true),
         }
         let result = DockerHandler(DockerKind::BuildCache)
             .clean_with(
@@ -266,4 +266,118 @@ fn a_prune_skipped_record_is_not_reported_removed_when_it_becomes_busy() {
     assert_eq!(result.succeeded, 0);
     assert_eq!(result.outcomes[0].status, ItemExecutionStatus::Uncertain);
     assert!(engine.objects.borrow().contains(&"cacheone".into()));
+}
+
+#[test]
+fn an_already_removed_selected_object_is_an_idempotent_zero_byte_success() {
+    let engine = Engine::new();
+    let scanned = scan(&engine);
+    engine.objects.borrow_mut().remove(0);
+    let result = DockerHandler(DockerKind::BuildCache)
+        .clean_with(
+            &DockerKind::BuildCache.task(),
+            &scanned.items[..1],
+            &NullProgress,
+            &OperationContext::default(),
+            &engine,
+        )
+        .unwrap();
+    assert_eq!(result.succeeded, 1);
+    assert_eq!(result.unknown_reclaimed_items(), 0);
+    assert_eq!(result.reclaimed_bytes, 0);
+    assert_eq!(
+        result.outcomes[0].status,
+        ItemExecutionStatus::AlreadyAbsent
+    );
+    assert_eq!(result.outcomes[0].reclaimed_estimate, Some(0));
+    assert!(result.outcomes[0].failure.is_none());
+    assert_eq!(*engine.objects.borrow(), ["cachetwo"]);
+    assert!(
+        !engine
+            .calls
+            .borrow()
+            .iter()
+            .any(|args| args.get(1).is_some_and(|arg| arg == "prune")
+                && !args.contains(&"--help".into()))
+    );
+}
+
+#[test]
+fn an_earlier_prune_removing_another_selection_does_not_create_a_failure_or_double_count() {
+    let engine = Engine::new();
+    let scanned = scan(&engine);
+    engine.objects.borrow_mut().push("arrivedlater".into());
+    struct Cascade<'a>(&'a Engine);
+    impl Runner for Cascade<'_> {
+        fn run(
+            &self,
+            endpoint: Option<&str>,
+            args: &[&str],
+            context: &OperationContext,
+        ) -> PluginResult<String> {
+            let result = self.0.run(endpoint, args, context)?;
+            if args.starts_with(&["buildx", "prune"]) && !args.contains(&"--help") {
+                self.0.objects.borrow_mut().retain(|id| id != "cachetwo");
+            }
+            Ok(result)
+        }
+    }
+    let result = DockerHandler(DockerKind::BuildCache)
+        .clean_with(
+            &DockerKind::BuildCache.task(),
+            &scanned.items,
+            &NullProgress,
+            &OperationContext::default(),
+            &Cascade(&engine),
+        )
+        .unwrap();
+    assert_eq!(result.succeeded, 2);
+    assert_eq!(result.unknown_reclaimed_items(), 1);
+    assert_eq!(result.outcomes[0].status, ItemExecutionStatus::Succeeded);
+    assert_eq!(
+        result.outcomes[1].status,
+        ItemExecutionStatus::AlreadyAbsent
+    );
+    assert_eq!(result.outcomes[1].reclaimed_estimate, Some(0));
+    assert_eq!(*engine.objects.borrow(), ["arrivedlater"]);
+    let calls = engine.calls.borrow();
+    let prunes = calls
+        .iter()
+        .filter(|args| {
+            args.get(1).is_some_and(|arg| arg == "prune") && !args.contains(&"--help".into())
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(prunes.len(), 1);
+    assert_eq!(prunes[0].last().unwrap(), "id=^cacheone$");
+}
+
+#[test]
+fn malformed_existence_results_cannot_confirm_object_absence() {
+    struct Listing(&'static str);
+    impl Runner for Listing {
+        fn run(&self, _: Option<&str>, _: &[&str], _: &OperationContext) -> PluginResult<String> {
+            Ok(self.0.into())
+        }
+    }
+    let binding = Binding {
+        endpoint: "unix:///fixture/docker.sock".into(),
+        engine: "engine-one".into(),
+    };
+    for (kind, output) in [
+        (DockerKind::BuildCache, r#"{"Reclaimable":false}"#),
+        (DockerKind::BuildCache, r#"{"ID":""}"#),
+        (DockerKind::DanglingImages, "malformed-image-id"),
+        (DockerKind::StoppedContainers, "malformed-container-id"),
+    ] {
+        assert!(
+            inventory::exists(
+                kind,
+                &binding,
+                "cacheone",
+                &Listing(output),
+                &OperationContext::default()
+            )
+            .is_err()
+        );
+    }
 }
