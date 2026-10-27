@@ -83,7 +83,11 @@ fn manual_snapshot_is_optional_and_therefore_selectable() {
         &mut issues,
     );
     assert_eq!(item.recommendation, Recommendation::Optional);
-    assert_eq!(item.logical_bytes, Some(16));
+    // Apparent size includes directory metadata, which varies across filesystems.
+    assert_eq!(
+        item.logical_bytes,
+        Some(16 + fs::metadata(&target).unwrap().len())
+    );
     assert_eq!(item.reclaimable_bytes, None);
     assert!(issues.is_empty());
 }
@@ -268,7 +272,7 @@ fn snapshot_scan_measures_logical_sizes_but_cleanup_uses_only_confirmed_groups()
             .unwrap()
             .set_len(number * 1_048_576)
             .unwrap();
-        logical_bytes += number * 1_048_576;
+        logical_bytes += number * 1_048_576 + fs::metadata(&path).unwrap().len();
     }
     fs::write(&records, json!({"home": [
             {"number": 0},

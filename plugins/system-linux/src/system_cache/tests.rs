@@ -30,6 +30,12 @@ fn a_failed_system_command_preserves_side_effect_uncertainty() {
         &spaceprune_plugin_api::NullProgress,
         &OperationContext::default(),
     );
+    if spaceprune_access::process::is_elevated() {
+        // Elevated execution must reject commands outside trusted system directories.
+        assert!(matches!(result, Err(ActionFailure::BeforeStart(_))));
+        assert!(!effect.exists());
+        return;
+    }
     assert!(matches!(result, Err(ActionFailure::Unconfirmed(_))));
     assert_eq!(fs::read(&effect).unwrap(), b"effect");
 }
