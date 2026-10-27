@@ -318,8 +318,19 @@ pub(super) struct PipeReader {
 }
 impl Read for PipeReader {
     fn read(&mut self, bytes: &mut [u8]) -> io::Result<usize> {
+        if bytes.is_empty() {
+            return Ok(0);
+        }
         loop {
-            self.context.check()?;
+            self.context.check().map_err(|error| {
+                // Buffered readers retry Interrupted indefinitely. Cancellation is permanent,
+                // so return a terminal connection error and let shutdown join this reader.
+                if error.kind() == io::ErrorKind::Interrupted {
+                    io::Error::new(io::ErrorKind::ConnectionAborted, error)
+                } else {
+                    error
+                }
+            })?;
             match self.pipe.try_read(bytes) {
                 Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
                     std::thread::sleep(Duration::from_millis(10))
@@ -336,5 +347,34 @@ impl Write for PipeWriter {
     }
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cancelled_pipe_reader_ends_a_buffered_frame() {
+        let temp = tempfile::tempdir().unwrap();
+        let pipe = LocalPipe::create(&pipe_name(
+            temp.path().file_name().unwrap().to_str().unwrap(),
+        ))
+        .unwrap();
+        let context = OperationContext::default();
+        context.cancel();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let reader = std::thread::spawn(move || {
+            let result = super::super::worker::frame(&mut std::io::BufReader::new(PipeReader {
+                pipe,
+                context,
+            }));
+            sender.send(result).unwrap();
+        });
+        let result = receiver
+            .recv_timeout(Duration::from_secs(2))
+            .expect("cancelled frame reader must exit so cleanup shutdown can join it");
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::ConnectionAborted);
+        reader.join().unwrap();
     }
 }

@@ -129,3 +129,5 @@ Build-tool fixtures cover SDK installations outside PATH, invalid explicit paths
 Portable tests cover payload changes, retention of older generations, fixed installation layout, prohibited custom actions, final-pin round trips, license mismatches, and preservation of prior output on signing failures. Windows-specific tests cover write/directory-replacement denial while handles are held; these must run natively on Windows.
 
 Actual WiX builds, certificate chains, UAC, Windows Installer cancellation/rollback, NTFS, and cross-account behavior still require Windows acceptance and are not marked passed.
+
+The Windows cleanup pipe returns a terminal connection error on cancellation, so buffered line reads cannot spin retrying `Interrupted`. A native regression test covers reader shutdown after cancellation; this does not establish acceptance of protected deletion or the complete UAC installation flow.
