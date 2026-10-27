@@ -21,7 +21,7 @@ def main():
     parser.add_argument("--profile", choices=["debug", "release"], default="release")
     parser.add_argument("--with-cli", action="store_true", help="Build and sign the portable CLI after its final MSI pin exists")
     parser.add_argument("--wix", default=os.environ.get("SPACEPRUNE_WINDOWS_WIX", "wix"))
-    parser.add_argument("--timestamp-url", default="https://timestamp.digicert.com")
+    parser.add_argument("--timestamp-url", default="http://timestamp.digicert.com")
     signing = parser.add_mutually_exclusive_group()
     signing.add_argument("--certificate-sha1", default=os.environ.get("SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1"))
     signing.add_argument("--unsigned", action="store_true")

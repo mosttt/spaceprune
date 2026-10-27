@@ -32,6 +32,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed' }
 
 证书选择器也可通过 `SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1` 提供，证书私钥由 Windows 证书存储管理。工具不接收 PFX 密码。`SPACEPRUNE_WINDOWS_SIGNTOOL` 和 `SPACEPRUNE_WINDOWS_WIX` 可指定工具位置，`--timestamp-url` 指定 RFC3161 时间戳服务。
 
+默认时间戳地址为 `http://timestamp.digicert.com`。Windows SDK SignTool 会拒绝该地址的 HTTPS 形式并报告 `Invalid Timestamp URL`；保留服务支持的地址形式，不省略时间戳或签名验证。
+
 顺序为：构建两个 helper → SHA-256 Authenticode 签名并验证 → 计算签名后载荷身份 → 生成 WiX/MSI → 签名并验证 MSI → 写入最终包身份。`package-identity.json` 绑定最终 MSI 字节、两个签名 EXE、许可证材料及 Core revision。正式签名构建要求已跟踪源码与 HEAD 一致。跨架构构建不执行目标程序，结果中的 `nativeProbesExecuted` 如实标记。
 
 开发可显式选择 `--unsigned`，该产物无法通过正式运行时的签名信任检查。生成失败不会覆盖先前完成的输出；仅允许替换本工具标记的输出目录。

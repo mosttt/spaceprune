@@ -32,6 +32,8 @@ Skip WiX installation if 4.0.6 is already installed. The certificate must be val
 
 `SPACEPRUNE_WINDOWS_CERTIFICATE_SHA1` selects the certificate; Windows Certificate Store manages its private key. The tool does not accept PFX passwords. `SPACEPRUNE_WINDOWS_SIGNTOOL` and `SPACEPRUNE_WINDOWS_WIX` can specify tool locations; `--timestamp-url` selects the RFC3161 timestamp service.
 
+The default timestamp URL is `http://timestamp.digicert.com`. Windows SDK SignTool rejects the HTTPS form of that address with `Invalid Timestamp URL`; retain the supported URL form rather than omitting timestamps or signature verification.
+
 Build order: build both helpers → apply and verify SHA-256 Authenticode signatures → compute signed payload identity → generate WiX/MSI → sign and verify MSI → write final package identity. `package-identity.json` binds final MSI bytes, both signed EXEs, license materials, and Core revision. Official signed builds require tracked source to match HEAD. Cross-architecture builds do not execute target programs; `nativeProbesExecuted` reports this accurately.
 
 Development builds can explicitly use `--unsigned`, but those artifacts cannot pass official runtime signature-trust checks. Generation failures preserve completed prior output. Only output directories marked by this tool may be replaced.

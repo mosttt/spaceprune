@@ -127,12 +127,13 @@ class WindowsPackageTests(unittest.TestCase):
         def run(arguments, **options):
             self.assertTrue(options["check"])
             calls.append(arguments)
-        builder.sign(Path("fixture with spaces/SpacePruneNative.msi"), "a" * 40, "https://timestamp.example.test", run, tool="SDK with spaces/signtool.exe")
+        package = Path("fixture with spaces") / "SpacePruneNative.msi"
+        builder.sign(package, "a" * 40, "https://timestamp.example.test", run, tool="SDK with spaces/signtool.exe")
         self.assertEqual([call[1] for call in calls], ["sign", "verify"])
         self.assertTrue(all(call[0] == "SDK with spaces/signtool.exe" for call in calls))
         self.assertIn("SHA256", calls[0])
         self.assertNotIn("/p", calls[0])
-        self.assertEqual(calls[0][-1], "fixture with spaces/SpacePruneNative.msi")
+        self.assertEqual(calls[0][-1], str(package))
 
     def test_failed_package_signing_keeps_the_previous_generated_output(self):
         with tempfile.TemporaryDirectory() as temporary:
