@@ -4,6 +4,13 @@ fn main() {
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
         embed_macos_metadata();
     }
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+        embed_windows_metadata();
+    }
+}
+
+// Build scripts run on the host: select resources by Cargo's target OS, so cross-builds work.
+fn embed_windows_metadata() {
     embed_resource::compile_for(
         "assets/spaceprune-readonly-helper.rc",
         ["spaceprune-readonly-helper", "spaceprune-cleanup-helper"],

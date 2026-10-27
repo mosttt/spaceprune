@@ -113,7 +113,8 @@ fn catalog<'a>(
             ],
         ),
     ];
-    if !cfg!(target_os = "linux") {
+    #[cfg(not(target_os = "linux"))]
+    {
         if let Some(developer) = entries
             .iter_mut()
             .find(|entry| entry.id == DEVELOPER_TOOLS_PLUGIN_ID)

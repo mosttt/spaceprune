@@ -21,6 +21,7 @@ impl PreparedPlan {
         let context = request_context(&grant, binding)?;
         let mut registry = spaceprune_engine::PluginRegistry::new();
         spaceprune_plugin_filesystem::register(&mut registry).map_err(io::Error::other)?;
+        #[cfg(target_os = "linux")]
         spaceprune_plugin_snapper::register(&mut registry).map_err(io::Error::other)?;
         spaceprune_platform::register_handlers(&mut registry).map_err(io::Error::other)?;
         #[cfg(target_os = "linux")]

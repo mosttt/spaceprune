@@ -6,13 +6,15 @@ rust-version.workspace = true
 license.workspace = true
 description = "Linux integration for SpacePrune"
 
-[dependencies]
+[target.'cfg(target_os = "linux")'.dependencies]
 spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
 spaceprune-config = { path = "../spaceprune-config" }
 spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
 thiserror.workspace = true
 
-[dev-dependencies]
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+rustix = { version = "1.1.4", features = ["fs", "process"] }
+
 spaceprune-access = { path = "../spaceprune-access" }
 spaceprune-engine = { path = "../spaceprune-engine" }
 serde_json.workspace = true
@@ -20,9 +22,6 @@ tempfile.workspace = true
 
 [lints]
 workspace = true
-
-[target.'cfg(target_os = "linux")'.dev-dependencies]
-rustix = { version = "1.1.4", features = ["fs", "process"] }
 
 [[test]]
 name = "go_cache_policy"

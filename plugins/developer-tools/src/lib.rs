@@ -2,16 +2,21 @@
 #![deny(missing_docs)]
 //! Tool-owned cache discovery and identity-bound cleanup, separate from filesystem rules.
 
+#[cfg(target_os = "linux")]
 mod cache;
 mod discovery;
 mod docker;
+#[cfg(target_os = "linux")]
 mod execution;
 #[cfg(target_os = "linux")]
 mod scan;
-pub use discovery::{discover_legacy_go_task, discover_tasks, probe_tasks};
+#[cfg(target_os = "linux")]
+pub use discovery::discover_legacy_go_task;
+pub use discovery::{discover_tasks, probe_tasks};
 #[cfg(target_os = "linux")]
 pub use scan::{inspect, prepare, validate};
 
+#[cfg(target_os = "linux")]
 use serde::Deserialize;
 use serde_json::json;
 use spaceprune_engine::{EngineError, PluginRegistry};
@@ -20,13 +25,14 @@ use spaceprune_plugin_api::{
     IssueLevel, ItemFailure, OperationContext, PluginError, PluginResult, ProgressEvent,
     ProgressPhase, ProgressSink, Recommendation, TaskRequest, messages,
 };
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 use std::ffi::OsString;
+#[cfg(target_os = "linux")]
 use std::{
-    fs, io,
+    fs,
     path::{Path, PathBuf},
-    sync::Arc,
 };
+use std::{io, sync::Arc};
 
 /// Read-only native capability probe, before any cache or object enumeration.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -43,12 +49,14 @@ pub const PLUGIN_ID: &str = "builtin.developer-tools";
 pub const LEGACY_GO_HANDLER: &str = "builtin.system-linux/go-modcache";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg(target_os = "linux")]
 enum Kind {
     GoModCache,
     GoBuildCache,
     CargoRegistryCache,
     NpmCache,
 }
+#[cfg(target_os = "linux")]
 impl Kind {
     const ALL: [Self; 4] = [
         Self::GoModCache,
@@ -82,6 +90,7 @@ impl Kind {
     }
 }
 
+#[cfg(target_os = "linux")]
 fn kind(handler: &str) -> PluginResult<Kind> {
     if handler == LEGACY_GO_HANDLER {
         return Ok(Kind::GoModCache);
@@ -93,7 +102,14 @@ fn kind(handler: &str) -> PluginResult<Kind> {
 }
 /// Whether the handler is a registered developer cache or the preserved Go alias.
 pub fn is_cache_handler(handler: &str) -> bool {
-    kind(handler).is_ok()
+    matches!(
+        handler,
+        LEGACY_GO_HANDLER
+            | "builtin.developer-tools/go-modcache"
+            | "builtin.developer-tools/go-buildcache"
+            | "builtin.developer-tools/cargo-registry-cache"
+            | "builtin.developer-tools/npm-cache"
+    )
 }
 
 /// Register the supported developer-tool lifecycle handlers.
@@ -109,6 +125,7 @@ pub fn register(registry: &mut PluginRegistry) -> Result<(), EngineError> {
     Ok(())
 }
 /// Register only the original Go handler; discovery advertises the canonical plugin.
+#[cfg(target_os = "linux")]
 pub fn register_legacy_go(registry: &mut PluginRegistry) -> Result<(), EngineError> {
     registry.register(Arc::new(DeveloperHandler {
         kind: Kind::GoModCache,
@@ -117,15 +134,18 @@ pub fn register_legacy_go(registry: &mut PluginRegistry) -> Result<(), EngineErr
 }
 
 #[derive(Debug)]
+#[cfg(target_os = "linux")]
 struct DeveloperHandler {
     kind: Kind,
     legacy: bool,
 }
 #[derive(Debug, Deserialize)]
 #[serde(default, deny_unknown_fields)]
+#[cfg(target_os = "linux")]
 struct Options {
     elevation: String,
 }
+#[cfg(target_os = "linux")]
 impl Default for Options {
     fn default() -> Self {
         Self {
@@ -135,15 +155,18 @@ impl Default for Options {
 }
 #[derive(Debug, Deserialize)]
 #[serde(default, deny_unknown_fields)]
+#[cfg(target_os = "linux")]
 struct Recommend {
     enabled: bool,
 }
+#[cfg(target_os = "linux")]
 impl Default for Recommend {
     fn default() -> Self {
         Self { enabled: true }
     }
 }
 #[derive(Debug)]
+#[cfg(target_os = "linux")]
 struct Action {
     id: String,
     paths: Vec<PathBuf>,
@@ -151,6 +174,7 @@ struct Action {
     unavailable_reason: Option<String>,
 }
 #[derive(Debug)]
+#[cfg(target_os = "linux")]
 enum ActionFailure {
     Native {
         started: bool,
@@ -160,6 +184,7 @@ enum ActionFailure {
     BeforeStart(String),
 }
 
+#[cfg(target_os = "linux")]
 impl Handler for DeveloperHandler {
     fn descriptor(&self) -> HandlerDescriptor {
         HandlerDescriptor {
@@ -231,6 +256,7 @@ impl Handler for DeveloperHandler {
             .collect()
     }
 }
+#[cfg(target_os = "linux")]
 fn parse(task: &TaskRequest) -> PluginResult<(Options, Recommend)> {
     // Preserve the original system-linux Go options without widening the new plugin schema.
     let mut value = task.options.clone();
@@ -261,6 +287,7 @@ fn parse(task: &TaskRequest) -> PluginResult<(Options, Recommend)> {
     })?;
     Ok((options, recommend))
 }
+#[cfg(target_os = "linux")]
 fn invalid_source() -> PluginError {
     PluginError::new(
         "invalid-cache-source",

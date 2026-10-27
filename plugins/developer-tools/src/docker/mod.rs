@@ -99,7 +99,7 @@ pub(super) fn probe_tasks(context: &OperationContext) -> Vec<CapabilityProbe> {
             return Vec::new();
         }
         let binding = cli::probe(&cli::Native, context);
-        return DockerKind::ALL
+        DockerKind::ALL
             .into_iter()
             .map(|kind| {
                 let issue = binding
@@ -119,7 +119,7 @@ pub(super) fn probe_tasks(context: &OperationContext) -> Vec<CapabilityProbe> {
                     issue,
                 }
             })
-            .collect();
+            .collect()
     }
     #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
     Vec::new()

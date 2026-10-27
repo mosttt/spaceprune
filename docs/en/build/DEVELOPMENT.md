@@ -80,3 +80,9 @@ Integrate through public `spaceprune::api`. A host's interface, services and rel
 ## 6. Documentation and progress
 
 Put user, configuration, architecture, and build documentation under `docs/zh/` or `docs/en/`, grouped into `usage/`, `build/` and `reference/`; plans, decisions, investigations, and validation records belong in `docs/{zh,en}/development/`. Update the relevant guide when commands, configuration schemas, execution boundaries, or packaging change. Code identifiers and new comments use English. Chinese documentation is maintained first during development, with English versions completed afterward.
+
+## Platform compilation boundaries
+
+Native implementations and dependencies are selected by the target OS. Snapper, Linux system cleanup and systemd integration compile only for Linux; Windows elevation only for Windows. Filesystem rules, Docker, configuration, protocols and package descriptors remain shared where applicable. Snapper's native query API is Linux-only. An explicit workspace-wide check may check an empty platform crate on other targets without compiling its implementation or dependencies.
+
+Run `python scripts/check-platform-boundaries.py` to verify the CLI dependency graph for Windows, Linux and macOS. Build scripts select resources with `CARGO_CFG_TARGET_OS`, not the build host. The portable resource compiler remains a host build tool to support cross-compilation; non-Windows artifacts do not embed an MSI.

@@ -40,6 +40,7 @@ pub fn probe_tasks(context: &OperationContext) -> io::Result<Vec<CapabilityProbe
 }
 
 /// Preserve the original platform discovery API without advertising duplicate new capabilities.
+#[cfg(target_os = "linux")]
 pub fn discover_legacy_go_task(context: &OperationContext) -> io::Result<Option<TaskRequest>> {
     context.check()?;
     let observed = action(Kind::GoModCache, context);
@@ -55,6 +56,7 @@ pub fn discover_legacy_go_task(context: &OperationContext) -> io::Result<Option<
     }))
 }
 
+#[cfg(target_os = "linux")]
 pub(super) fn action(kind: Kind, context: &OperationContext) -> Action {
     let program = match kind {
         Kind::GoModCache | Kind::GoBuildCache => "go",
@@ -84,6 +86,7 @@ pub(super) fn action(kind: Kind, context: &OperationContext) -> Action {
     action
 }
 
+#[cfg(target_os = "linux")]
 fn cargo_cache() -> Option<PathBuf> {
     if !command_exists("cargo") {
         return None;
@@ -96,6 +99,7 @@ fn cargo_cache() -> Option<PathBuf> {
         .ok()
         .map(|home| home.join("registry/cache"))
 }
+#[cfg(target_os = "linux")]
 fn npm_cache(context: &OperationContext) -> Option<PathBuf> {
     let mut command = native_system_command("npm").ok()?;
     command
@@ -109,6 +113,7 @@ fn npm_cache(context: &OperationContext) -> Option<PathBuf> {
         .current_dir("/");
     query(command, context).map(|root| root.join("_cacache"))
 }
+#[cfg(target_os = "linux")]
 fn go_path(key: &str, context: &OperationContext) -> Option<PathBuf> {
     let mut command = native_system_command("go").ok()?;
     command
@@ -120,6 +125,7 @@ fn go_path(key: &str, context: &OperationContext) -> Option<PathBuf> {
         .env("GOFLAGS", "");
     query(command, context)
 }
+#[cfg(target_os = "linux")]
 fn query(command: Command, context: &OperationContext) -> Option<PathBuf> {
     let output = spaceprune_access::process::capture(
         command,
@@ -163,7 +169,8 @@ pub(super) fn command_exists(program: &str) -> bool {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
-                fs::metadata(path).is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+                std::fs::metadata(path)
+                    .is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
             }
             #[cfg(not(unix))]
             {

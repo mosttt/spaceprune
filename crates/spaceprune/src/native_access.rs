@@ -6,7 +6,9 @@ use spaceprune_plugin_api::{
 #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 use std::sync::Arc;
 
+#[cfg(target_os = "linux")]
 mod snapper;
+#[cfg(target_os = "linux")]
 pub use snapper::{snapper_configs, snapper_snapshots};
 
 /// Applies native authorization only after a registered handler reports insufficient access.

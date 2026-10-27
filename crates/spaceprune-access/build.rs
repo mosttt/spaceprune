@@ -1,5 +1,13 @@
 //! Bind platform distribution metadata at build time, never from runtime environment variables.
 fn main() {
+    // Package descriptors are also used by cross-platform packaging tools.
+    macos_distribution();
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+        windows_package_pin();
+    }
+}
+
+fn macos_distribution() {
     println!("cargo:rerun-if-env-changed=SPACEPRUNE_MACOS_DISTRIBUTION");
     let distribution =
         std::env::var("SPACEPRUNE_MACOS_DISTRIBUTION").unwrap_or_else(|_| "cli".into());
@@ -8,7 +16,6 @@ fn main() {
         "Unsupported macOS native distribution"
     );
     println!("cargo:rustc-env=SPACEPRUNE_MACOS_DISTRIBUTION={distribution}");
-    windows_package_pin();
 }
 
 fn windows_package_pin() {

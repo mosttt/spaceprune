@@ -14,9 +14,11 @@ pub use crate::system_capabilities::{
 use crate::{build_engine, build_readonly_engine};
 pub use spaceprune_plugin_developer_tools::CapabilityProbe;
 
+pub use crate::native_access::NativeScanAccess;
 #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 pub use crate::native_access::shared_metadata_service;
-pub use crate::native_access::{NativeScanAccess, snapper_configs, snapper_snapshots};
+#[cfg(target_os = "linux")]
+pub use crate::native_access::{snapper_configs, snapper_snapshots};
 pub use spaceprune_access::storage::{StorageVolume, local_storage_volumes};
 
 /// Select the product message language without changing operation semantics.
@@ -57,6 +59,7 @@ pub use spaceprune_plugin_host::{
     HostError, InstalledPlugin, PluginHost, PluginManifest, install_plugin, plugin_search_paths,
     remove_plugin,
 };
+#[cfg(target_os = "linux")]
 pub use spaceprune_plugin_snapper::{
     SnapperConfig, SnapperInventory, SnapperSnapshot, SnapperSnapshotGroup, snapper_host_id,
 };

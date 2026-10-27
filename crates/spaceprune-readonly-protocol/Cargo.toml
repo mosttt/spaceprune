@@ -10,7 +10,6 @@ description = "SpacePrune 只读权限 Helper 协议"
 spaceprune-access = { path = "../spaceprune-access" }
 base64.workspace = true
 getrandom.workspace = true
-rustix.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tempfile.workspace = true

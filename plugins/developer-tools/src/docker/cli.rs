@@ -92,8 +92,10 @@ pub(super) fn probe(runner: &dyn Runner, context: &OperationContext) -> PluginRe
         .ok()
         .filter(|s| !s.is_empty());
     let selected_host = std::env::var("DOCKER_HOST").ok().filter(|s| !s.is_empty());
-    let endpoint = if selected_context.is_none() && selected_host.is_some() {
-        selected_host.unwrap()
+    let endpoint = if selected_context.is_none()
+        && let Some(host) = selected_host
+    {
+        host
     } else {
         let mut args = vec!["context", "inspect"];
         if let Some(name) = selected_context.as_deref() {

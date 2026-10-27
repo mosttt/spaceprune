@@ -64,7 +64,8 @@ class ProvisioningTests(unittest.TestCase):
             def run(args, **kwargs):
                 key = Path(args[args.index("--key") + 1])
                 self.assertEqual(key.read_text(), "private fixture")
-                self.assertEqual(key.stat().st_mode & 0o777, 0o600)
+                if os.name == "posix":
+                    self.assertEqual(key.stat().st_mode & 0o777, 0o600)
                 return subprocess.CompletedProcess(args, 1, "private fixture", "private fixture")
             with patch.dict(os.environ, {"RUNNER_TEMP": temporary, "APPLE_API_KEY_ID": "fixture",
                 "APPLE_API_ISSUER": "fixture", "APPLE_API_PRIVATE_KEY": "private fixture"}), patch.object(provisioning.subprocess, "run", side_effect=run):

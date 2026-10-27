@@ -145,7 +145,9 @@ fn complete_scans_stream_large_filtered_results_and_reuse_the_connection() {
     }
     fs::write(data.join("keep.log"), b"retained").unwrap();
     fs::write(data.join("secret.key"), b"not returned").unwrap();
-    let operation = OperationContext::default().child(Duration::from_secs(20));
+    // This verifies streaming and session reuse, not filesystem throughput. Two
+    // identity-bound scans of 6,000 files need headroom on Windows and busy CI hosts.
+    let operation = OperationContext::default().child(Duration::from_secs(120));
     let mut mailbox = Mailbox::create(&operation).unwrap();
     let bootstrap = mailbox.directory.path().join("bootstrap.json");
     let nonce = mailbox.nonce.clone();

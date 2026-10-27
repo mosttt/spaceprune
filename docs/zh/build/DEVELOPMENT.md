@@ -91,3 +91,9 @@ Core/CLI 自有源码继续使用 [MIT License](../../../LICENSE)。Cargo 依赖
 正式文档先按 `docs/zh/`、`docs/en/` 分语言，再按 `usage/`、`build/`、`reference/` 分类，开发计划、决策、问题排查与验证记录放在 `docs/{zh,en}/development/`。
 修改命令、配置 Schema、执行边界或打包方式时同步更新对应文档。
 代码标识符和新增注释使用英文；当前先维护中文文档，项目完成后补齐英文版本。
+
+## 平台编译边界
+
+系统专属实现与依赖按目标系统选择。Snapper、Linux 系统清理和 systemd 集成仅编译到 Linux；Windows 授权仅编译到 Windows。文件系统规则、Docker、配置、协议和打包描述在适用平台共用。Snapper 原生查询 API 仅在 Linux 提供。显式检查整个 workspace 时可能检查空的平台 crate，但不会编译其实现和依赖。
+
+运行 `python scripts/check-platform-boundaries.py` 检查 Windows、Linux、macOS 的 CLI 依赖边界。构建脚本依据 `CARGO_CFG_TARGET_OS` 选择资源，不能根据构建主机判断目标；可移植的资源编译器仍作为宿主构建工具支持交叉编译，非 Windows 制品不会嵌入 MSI。
