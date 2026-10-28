@@ -57,6 +57,43 @@ fn engine(config: &str) -> (tempfile::TempDir, spaceprune_engine::Engine) {
 }
 
 #[test]
+fn runtime_ipc_directories_are_not_candidates_or_removed_as_descendants() {
+    use spaceprune_contracts::rule::RuleScope;
+    let files = tempdir().unwrap();
+    for name in ["spaceprune-readonly-live", "spaceprune-cleanup-live"] {
+        fs::create_dir(files.path().join(name)).unwrap();
+        fs::write(files.path().join(name).join("lease"), b"active").unwrap();
+    }
+    fs::create_dir(files.path().join("ordinary-cache")).unwrap();
+    fs::write(files.path().join("ordinary-cache/log"), b"removable").unwrap();
+    let (_config, engine) = scoped_engine(files.path(), RuleScope::DirectoryChildren, vec![], true);
+    let report = engine
+        .scan(
+            &ScanRequest::default(),
+            &NullProgress,
+            &OperationContext::default(),
+        )
+        .unwrap();
+    let items = &report.modules[0].tasks[0].items;
+    assert_eq!(items.len(), 1);
+    assert!(items[0].location.ends_with("ordinary-cache"));
+    let plan = report.plan_recommended().unwrap();
+    // A new IPC directory inside an already selected subtree must also survive cleanup.
+    let late = files.path().join("ordinary-cache/spaceprune-cleanup-later");
+    fs::create_dir(&late).unwrap();
+    fs::write(late.join("lease"), b"active").unwrap();
+    let _ = engine.execute(&plan, &NullProgress, &OperationContext::default());
+    assert!(!files.path().join("ordinary-cache/log").exists());
+    for path in [
+        files.path().join("spaceprune-readonly-live"),
+        files.path().join("spaceprune-cleanup-live"),
+        late,
+    ] {
+        assert_eq!(fs::read(path.join("lease")).unwrap(), b"active");
+    }
+}
+
+#[test]
 fn scans_include_and_exclude_globs() {
     let files = tempdir().unwrap();
     fs::create_dir_all(files.path().join("nested")).unwrap();

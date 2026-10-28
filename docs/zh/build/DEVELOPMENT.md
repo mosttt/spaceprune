@@ -1,5 +1,7 @@
 # Core 与 CLI 开发指南
 
+Windows 清理通过命名管道分块传输确认清单，支持超过管道缓冲区的大批量清单。运行时的 `spaceprune-readonly-*` 和 `spaceprune-cleanup-*` 目录属于保留目录：扫描跳过，递归清理保留，包括确认后才创建的目录。
+
 本仓库是独立的 Rust workspace，提供 MIT 许可的 Core、CLI 与内置插件。构建和开发仅需本仓库及公开依赖。
 
 ## 1. 源码与工具链

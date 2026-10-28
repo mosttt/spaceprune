@@ -203,7 +203,9 @@ impl LocalPipe {
     /// Write available capacity; a full pipe returns WouldBlock for a budget-aware caller to retry.
     pub fn try_write(&self, bytes: &[u8]) -> io::Result<usize> {
         let mut written = 0;
-        let length = bytes.len().min(u32::MAX as usize) as u32;
+        // A nonblocking write larger than the pipe quota can repeatedly accept zero bytes,
+        // even with an active reader. Stream bounded chunks below the 64 KiB pipe capacity.
+        let length = bytes.len().min(16 * 1024) as u32;
         // SAFETY: The input slice covers length bytes and the pipe is explicitly nonblocking.
         if unsafe {
             WriteFile(

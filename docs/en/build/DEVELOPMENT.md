@@ -1,5 +1,7 @@
 # Developing Core and CLI
 
+Windows cleanup streams confirmed plans in bounded named-pipe chunks, including plans larger than the transport buffer. Runtime `spaceprune-readonly-*` and `spaceprune-cleanup-*` directories are reserved: scanning skips them and recursive cleanup preserves them, including directories created after confirmation.
+
 This independent Rust workspace provides MIT-licensed Core libraries, CLI and built-in plugins. Development requires only this repository and public dependencies.
 
 ## 1. Source and toolchain

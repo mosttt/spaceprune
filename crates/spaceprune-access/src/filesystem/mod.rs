@@ -11,11 +11,13 @@ pub use inspection::{DirectoryInspection, inspect_directory};
 /// Reserved transient execution names must never become candidates after an interrupted run.
 pub fn is_execution_artifact(path: &Path) -> bool {
     path.components().any(|component| {
-        component
-            .as_os_str()
-            .to_string_lossy()
-            .starts_with(".spaceprune-execute-")
-            || component.as_os_str() == ".spaceprune-executions"
+        let name = component.as_os_str().to_string_lossy();
+        #[cfg(windows)]
+        let name = name.to_ascii_lowercase();
+        name.starts_with(".spaceprune-execute-")
+            || name == ".spaceprune-executions"
+            || name.starts_with("spaceprune-readonly-")
+            || name.starts_with("spaceprune-cleanup-")
     })
 }
 #[cfg(unix)]

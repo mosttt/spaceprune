@@ -134,8 +134,11 @@ pub(super) fn measure(
 // Keep aggregate inspection aligned with the reserved execution-artifact boundary.
 fn is_execution_artifact(path: &Path) -> bool {
     path.components().any(|component| {
-        let name = component.as_os_str().to_string_lossy();
-        name.starts_with(".spaceprune-execute-") || name == ".spaceprune-executions"
+        let name = component.as_os_str().to_string_lossy().to_ascii_lowercase();
+        name.starts_with(".spaceprune-execute-")
+            || name == ".spaceprune-executions"
+            || name.starts_with("spaceprune-readonly-")
+            || name.starts_with("spaceprune-cleanup-")
     })
 }
 
