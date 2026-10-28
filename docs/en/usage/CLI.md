@@ -1,5 +1,7 @@
 # CLI reference
 
+Files blocked by a confirmed sharing violation are summarized as in use and skipped, without repeating native errors in human output. Close the relevant application and rescan later; cleanup does not force-close it or retry administrator authorization for a sharing violation. Genuine authorization, handler and uncertain-outcome failures remain errors. `--output json` retains original outcomes, failures and exit semantics, plus `unfinished_items` with scan-based uncleaned-size estimates. These logical-content estimates are separate from processed or freed bytes. Partial filesystem estimates subtract confirmed comparable processed bytes; unavailable or inconsistent measurements remain unknown.
+
 This page covers the complete command interface, terminal controls, and common configuration examples. New users should start with the [quick start](../../../README.md#quick-start). See [Configuration reference](CONFIGURATION.md) for all fields, complete personal configuration, and common errors.
 
 ## Fixed command interface

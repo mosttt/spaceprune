@@ -9,6 +9,11 @@ use crate::theme::{Theme, Tone};
 
 /// Keep the shared authorization cause readable without dropping per-item JSON diagnostics.
 pub(super) fn failure_details(execution: &ExecutionReport) -> Vec<String> {
+    let unfinished = spaceprune::api::unfinished_cleanup_items(execution, None)
+        .into_iter()
+        .filter(|item| item.in_use)
+        .map(|item| (item.module_id, item.task_id, item.item_id))
+        .collect::<std::collections::BTreeSet<_>>();
     let mut lines = execution
         .operation_failures
         .iter()
@@ -22,6 +27,13 @@ pub(super) fn failure_details(execution: &ExecutionReport) -> Vec<String> {
         }
         if let Some(result) = &group.result {
             for failure in &result.failures {
+                if unfinished.contains(&(
+                    group.module_id.clone(),
+                    group.task_id.clone(),
+                    failure.item_id.clone(),
+                )) {
+                    continue;
+                }
                 let permission_denied = failure.io_failure.as_ref().is_some_and(|failure| {
                     failure.kind == spaceprune::api::IoFailureKind::AccessDenied
                 });
@@ -88,7 +100,20 @@ pub(super) fn summary(
         ),
         Tone::Success,
     );
-    let failures = execution.failure_count() - execution.operation_failures.len();
+    let busy = spaceprune::api::unfinished_cleanup_items(execution, None)
+        .iter()
+        .filter(|item| item.in_use)
+        .count();
+    if busy > 0 {
+        row(
+            crate::i18n::text("terminal.in_use_skipped"),
+            count(busy, "item"),
+            Tone::Warning,
+        );
+    }
+    let failures = execution
+        .failure_count()
+        .saturating_sub(execution.operation_failures.len() + busy);
     row(
         crate::i18n::text("terminal.failures"),
         failures.to_string(),
@@ -268,14 +293,63 @@ fn status(execution: &ExecutionReport) -> (&'static str, Tone) {
             crate::i18n::text("terminal.cleanup_cancelled"),
             Tone::Warning,
         )
-    } else if execution.has_errors() {
+    } else if execution.has_errors()
+        && (execution.groups.iter().any(|group| group.error.is_some())
+            || execution.failure_count()
+                > spaceprune::api::unfinished_cleanup_items(execution, None)
+                    .iter()
+                    .filter(|item| item.in_use)
+                    .count())
+    {
         (crate::i18n::text("terminal.cleanup_errors"), Tone::Error)
+    } else if execution.has_errors() {
+        (crate::i18n::text("terminal.cleanup_in_use"), Tone::Warning)
     } else {
         (
             crate::i18n::text("terminal.cleanup_complete"),
             Tone::Success,
         )
     }
+}
+
+pub(super) fn unfinished_details(
+    execution: &ExecutionReport,
+    plan: &spaceprune::api::CleanupPlan,
+    theme: Theme,
+) -> String {
+    let items = spaceprune::api::unfinished_cleanup_items(execution, Some(plan));
+    if items.is_empty() {
+        return String::new();
+    }
+    let known = items
+        .iter()
+        .filter_map(|item| item.estimated_bytes)
+        .fold(0u64, u64::saturating_add);
+    let unknown = items
+        .iter()
+        .filter(|item| item.estimated_bytes.is_none())
+        .count();
+    let key = if unknown == 0 {
+        "terminal.uncleaned_approx"
+    } else if known > 0 {
+        "terminal.uncleaned_at_least"
+    } else {
+        "terminal.uncleaned_unknown"
+    };
+    let mut text = crate::i18n::message(
+        key,
+        &[
+            ("size", format_bytes(known)),
+            ("count", unknown.to_string()),
+        ],
+    );
+    text.push('\n');
+    text.push_str(crate::i18n::text("terminal.uncleaned_estimate_note"));
+    if items.iter().any(|item| item.in_use) {
+        text.push('\n');
+        text.push_str(crate::i18n::text("terminal.in_use_help"));
+    }
+    theme.stdout(text, Tone::Muted)
 }
 
 #[cfg(test)]

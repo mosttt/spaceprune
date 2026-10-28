@@ -1,6 +1,26 @@
 use super::*;
 use spaceprune::api::{GroupExecutionReport, VolumeSpaceChange};
 
+#[test]
+fn locked_files_use_a_warning_receipt_without_repeated_red_os_errors() {
+    let mut report = execution(0, 0, Some(0));
+    let result = report.groups[0].result.as_mut().unwrap();
+    let failure = serde_json::json!({"item_id":"locked", "message":"Raw OS sharing error", "io_failure":{"kind":"sharing_violation","os_code":32}});
+    result.record_outcome(serde_json::from_value(serde_json::json!({"item_id":"locked","status":"failed","reclaimed_estimate":0,"failure":failure})).unwrap());
+    let (text, tone) = execution_summary(&report);
+    assert!(text.contains("in-use content skipped"));
+    assert!(text.contains("In use (skipped)"));
+    assert!(matches!(tone, Tone::Warning));
+    assert!(failure_details(&report).is_empty());
+    report.groups[0].error = Some("Unexpected handler failure".into());
+    assert!(matches!(status(&report).1, Tone::Error));
+    assert!(
+        failure_details(&report)
+            .join("\n")
+            .contains("Unexpected handler failure")
+    );
+}
+
 fn execution_summary(execution: &ExecutionReport) -> (String, Tone) {
     (
         summary(execution, Some(Duration::from_secs(26)), Theme::default()),

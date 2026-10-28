@@ -286,6 +286,10 @@ pub(crate) fn emit_execution(
         OutputMode::Json => print_json_run(report, plan, Some(execution), false)?,
         OutputMode::Human => {
             println!("{}", cleanup::summary(execution, elapsed, theme));
+            let unfinished = cleanup::unfinished_details(execution, plan, theme);
+            if !unfinished.is_empty() {
+                println!("{unfinished}");
+            }
             for diagnostic in cleanup::failure_details(execution) {
                 eprintln!("{}", theme.stderr(diagnostic, Tone::Error));
             }
@@ -308,6 +312,7 @@ pub(crate) fn print_json_run(
             "plan": plan,
             "execution": execution,
             "cleanup_size_summary": execution.map(ExecutionReport::size_summary),
+            "unfinished_items": execution.map(|execution| spaceprune::api::unfinished_cleanup_items(execution, Some(plan))),
             "cancelled": cancelled || report.cancelled || execution.is_some_and(|value| value.cancelled),
         }))?
     );

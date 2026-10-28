@@ -11,6 +11,7 @@ mod assembly;
 mod automation;
 #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 mod cleanup_access;
+mod cleanup_receipt;
 mod native_access;
 mod plugins;
 mod system_capabilities;

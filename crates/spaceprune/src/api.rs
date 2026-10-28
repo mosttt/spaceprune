@@ -8,6 +8,7 @@ use std::{
 use anyhow::{Result, anyhow};
 
 pub use crate::automation::{AutomationRunReport, AutomationRunStatus};
+pub use crate::cleanup_receipt::{UnfinishedCleanupItem, unfinished_cleanup_items};
 pub use crate::system_capabilities::{
     discover_system_capabilities, inspect_system_capability, probe_system_capabilities,
 };

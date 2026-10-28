@@ -846,5 +846,33 @@
   "terminal.processed_label": [
     "Processed estimate: ",
     "处理量估计："
+  ],
+  "terminal.in_use_skipped": [
+    "In use (skipped)",
+    "正在使用，已跳过"
+  ],
+  "terminal.cleanup_in_use": [
+    "Cleanup finished; in-use content skipped",
+    "清理结束，已跳过正在使用的内容"
+  ],
+  "terminal.uncleaned_approx": [
+    "Uncleaned: approximately {size}",
+    "未清理约 {size}"
+  ],
+  "terminal.uncleaned_at_least": [
+    "Uncleaned: at least {size}; {count} more items with unknown size",
+    "未清理至少 {size}，另 {count} 项大小未知"
+  ],
+  "terminal.uncleaned_unknown": [
+    "Uncleaned: {count} items with unknown size",
+    "未清理：{count} 项大小未知"
+  ],
+  "terminal.uncleaned_estimate_note": [
+    "Estimates use scan sizes and confirmed processed content; they are separate from cleaned bytes.",
+    "按扫描大小及已确认处理量估算，与已清理大小分开统计。"
+  ],
+  "terminal.in_use_help": [
+    "In-use content was left in place. Close the relevant app and rescan later. Full paths and diagnostics: --output json.",
+    "正在使用的内容已保留，可关闭相关程序后重新扫描。完整路径和详情可通过 --output json 查看。"
   ]
 }
