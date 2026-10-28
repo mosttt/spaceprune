@@ -10,6 +10,48 @@ use spaceprune_engine::{EngineBuilder, NullProgress, OperationContext, ScanReque
 use tempfile::tempdir;
 
 #[test]
+fn scan_streams_content_measurements_before_returning_the_final_report() {
+    use spaceprune_plugin_api::{ProgressEvent, ProgressSink, ScanMeasurement, TaskRequest};
+    struct Measurements(std::sync::Mutex<Vec<ScanMeasurement>>);
+    impl ProgressSink for Measurements {
+        fn emit(&self, _: ProgressEvent) {}
+        fn record_scan(&self, _: &TaskRequest, value: ScanMeasurement) {
+            self.0.lock().unwrap().push(value);
+        }
+    }
+    let files = tempdir().unwrap();
+    fs::write(files.path().join("small"), [0u8; 10]).unwrap();
+    fs::write(files.path().join("large"), [0u8; 100]).unwrap();
+    let config = format!(
+        r#"schema-version = 2
+name = "measurement"
+[modules.cache]
+name = "Cache"
+[modules.cache.tasks.files]
+name = "Files"
+handler = "builtin.filesystem/paths"
+[modules.cache.tasks.files.options]
+roots = [{{ path = {} }}]
+[modules.cache.tasks.files.recommend]
+min-size = "50B"
+"#,
+        toml::Value::String(files.path().to_string_lossy().into_owned())
+    );
+    let (_configuration, engine) = engine(&config);
+    let sink = Measurements(Default::default());
+    engine
+        .scan(&ScanRequest::default(), &sink, &OperationContext::default())
+        .unwrap();
+    let updates = sink.0.lock().unwrap();
+    assert!(updates.iter().any(|value| value.checked_items == 1));
+    let last = updates.last().unwrap();
+    assert_eq!(last.checked_items, 2);
+    assert_eq!(last.logical_bytes, 110);
+    assert_eq!(last.recommended_bytes, 100);
+    assert_eq!(last.unknown_size_items, 0);
+}
+
+#[test]
 fn prunes_directories_that_cannot_match_a_recursive_glob() {
     let matcher = super::RootMatcher::compile(&super::RootOptions {
         scope: Default::default(),

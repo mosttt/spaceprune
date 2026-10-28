@@ -192,16 +192,16 @@
     "管理本地清理方案"
   ],
   "commands.help_recipe_usage": [
-    "Usage:\n  spaceprune recipe\n  spaceprune recipe list\n  spaceprune recipe set <recipe-id>",
-    "用法：\n  spaceprune recipe\n  spaceprune recipe list\n  spaceprune recipe set <recipe-id>"
+    "Without an override, the CLI follows the most recently used graphical recipe. Use spaceprune recipe set <recipe-id> to override, or spaceprune recipe follow to resume. --config uses that configuration explicitly.",
+    "CLI 默认跟随 App 最近使用的方案。spaceprune recipe set <recipe-id> 手动覆盖，spaceprune recipe follow 恢复跟随；--config 使用显式指定的配置。"
   ],
   "commands.help_recipe_list": [
     "List local cleanup recipes",
     "列出本地清理方案"
   ],
   "commands.help_recipe_set": [
-    "Set the active cleanup recipe by ID",
-    "按 ID 设置当前清理方案"
+    "Override the CLI recipe without changing the shared default",
+    "手动指定 CLI 方案，不改变默认方案"
   ],
   "commands.help_recipe_id": [
     "Recipe directory and entry file ID",
@@ -602,5 +602,13 @@
   "commands.follow_system": [
     "Follow the system language",
     "跟随系统语言"
+  ],
+  "commands.help_recipe_follow": [
+    "Follow the most recently used graphical recipe",
+    "跟随 App 最近使用的方案"
+  ],
+  "commands.recipe_following": [
+    "Following the most recently used graphical recipe.",
+    "已恢复跟随 App 最近使用的方案。"
   ]
 }

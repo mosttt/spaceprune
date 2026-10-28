@@ -1,6 +1,6 @@
 # CLI reference
 
-The terminal groups unfinished items by cause, with a count, an uncleaned-size estimate and a next step for each group. Partial deletion is stated separately; comparable confirmed bytes are subtracted only once. Busy files do not trigger repeated elevation. Full paths and native diagnostics remain in JSON output. Windows background tool processes use the no-window creation flag while interactive authorization stays visible. Native window colors are optional on Windows 11; older systems retain native decorations.
+The terminal groups unfinished items by cause, with a count, an uncleaned-size estimate and a next step for each group. Comparable confirmed partial bytes are subtracted only once. Busy files do not trigger repeated elevation. Full paths and native diagnostics remain in JSON output. Windows background tool processes use the no-window creation flag while interactive authorization stays visible. Native window colors are optional on Windows 11; older systems retain native decorations.
 
 Files blocked by a confirmed sharing violation are summarized as in use and skipped, without repeating native errors in human output. Close the relevant application and rescan later; cleanup does not force-close it or retry administrator authorization for a sharing violation. Genuine authorization, handler and uncertain-outcome failures remain errors. `--output json` retains original outcomes, failures and exit semantics, plus `unfinished_items` with scan-based uncleaned-size estimates. These logical-content estimates are separate from processed or freed bytes. Partial filesystem estimates subtract confirmed comparable processed bytes; unavailable or inconsistent measurements remain unknown.
 
@@ -22,6 +22,7 @@ spaceprune automation <list|install|uninstall|run>
 spaceprune recipe
 spaceprune recipe list
 spaceprune recipe set <recipe-id>
+spaceprune recipe follow
 spaceprune theme
 spaceprune theme list
 spaceprune theme set <theme-id>
@@ -68,7 +69,7 @@ Snapshots already missing during pre-execution revalidation show `already absent
 
 When ordinary Linux file cleanup lacks permission, affected confirmed items are collected and system authorization is requested according to the recipe. Valid sudo authentication is reused; only expiry requires a password. Refusal does not prompt again per file. Valid sudo authentication obtained for Snapper can also be reused, but listing or read-only access does not grant deletion permission. Set `elevation = "never"` in filesystem task options to forbid automatic elevation.
 
-Permission failures show a small set of examples and a total count; JSON retains all failures. Rescan items whose cleanup was not confirmed. Authorization failure does not mean the entire batch was unchanged.
+Known unfinished causes use one line each: count, estimated uncleaned size and a short next step. Paths and native diagnostics remain in JSON without repeated permission explanations. Partially cleaned content contributes only its estimated remainder. Scan selection summarizes unreadable or busy entries while keeping readable entries selectable; errors with other causes remain visible. Rescan items whose cleanup was not confirmed.
 
 ## Linux system authorization components
 
@@ -145,7 +146,7 @@ spaceprune recipe list
 spaceprune recipe set personal
 ```
 
-`spaceprune recipe` interactively previews and selects recipes under `recipes` following `<ID>/<ID>.toml`; Enter saves and Esc cancels. `recipe set <ID>` switches directly and accepts only recipes actually present under the current `recipes` root. `recipe list` shows names, entry paths, and active state. Switching updates only the application `recipe` field, not the cleanup recipe.
+`spaceprune recipe` interactively previews and selects recipes under `recipes` following `<ID>/<ID>.toml`; Enter saves and Esc cancels. `recipe set <ID>` switches directly and accepts only recipes actually present under the current `recipes` root. `recipe list` shows names, entry paths, and active state. Selection creates a CLI-only override in `config.selection.toml`; it does not change the shared default recipe or automation configuration. Without an override the CLI follows the graphical application’s most recently used recipe, falling back to the shared default. `recipe follow` clears the override. `--config` selects another configuration and its associated selection state. Deleted selections fall back to an existing selection or default.
 
 `recipe --output json` directly returns the current recipe ID, name, entry, and configuration path, without opening a picker or writing configuration. `recipe list --output json` returns the list; `recipe set <ID> --output json` explicitly switches and returns the result.
 
@@ -265,3 +266,5 @@ When a filesystem task row is focused, such as one named `target`, Details shows
 Modules, projects/folders, and files use the theme's primary accent, secondary accent, and light text respectively. Each known logical size matches its row's name color. Selection and focus leave these hierarchy colors unchanged: checkboxes and the status column separately identify full, partial, empty, and unavailable states. Full-selection markers and status words are green; partial-selection markers are amber. Selection counts and known selected sizes on the right match the name and logical size on the left. Unknown sizes remain amber; unselected, unavailable, and not-applicable states use secondary text.
 
 Details paths, selection counts, and known values follow the focused hierarchy level, while selection status words and reasons use the same status colors as the table. Field labels and explanations are subdued. The shortcut footer separates keys from actions; narrow screens prioritize main actions, with other shortcuts under `?`. Theme preferences are stored in application configuration, not in cleanup recipes.
+
+Scanning reports cumulative measured content and recommended content separately; cleanup reports confirmed processed-size estimates as results arrive. Windows extended drive/UNC prefixes are hidden in human output only; JSON and native identities are unchanged.

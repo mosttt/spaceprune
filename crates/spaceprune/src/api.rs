@@ -50,7 +50,7 @@ pub use spaceprune_platform::{
 };
 pub use spaceprune_plugin_api::{
     HandlerScanResult, ItemExecution, ItemExecutionStatus, ItemFailure, LogicalSizeSummary,
-    PluginError, PluginResult, SizeApplicability, VolumeSpaceChange,
+    PluginError, PluginResult, ScanMeasurement, SizeApplicability, VolumeSpaceChange,
 };
 pub use spaceprune_plugin_api::{
     linux_authorization_interaction, prefer_graphical_linux_authorization,

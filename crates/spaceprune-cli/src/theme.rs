@@ -186,7 +186,7 @@ impl Theme {
     }
 
     fn paint(self, value: impl Display, tone: Tone, enabled: bool) -> String {
-        let value = value.to_string();
+        let value = crate::progress::display_message(&value.to_string());
         if !enabled {
             return value;
         }

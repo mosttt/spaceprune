@@ -32,6 +32,7 @@ pub use journal::default_directory as default_execution_journal_directory;
 pub use journal::recover_execution;
 /// 跨插件复用的文件系统基础函数。
 pub mod fs;
+pub mod measurement;
 mod plan;
 mod scan;
 pub use plan::{CleanupPlan, ScanReservation};

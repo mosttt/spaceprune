@@ -902,7 +902,11 @@ fn row_status(row: &ViewRow<'_>, theme: Theme) -> Line<'static> {
             Recommendation::Unavailable => crate::i18n::text("terminal.unavailable"),
         }
     } else if matches!(row.kind, RowKind::Task { .. }) && !row.diagnostics.is_empty() {
-        crate::i18n::text("terminal.row_scan_issues")
+        crate::i18n::text(if row.selectable > 0 {
+            "terminal.row_scan_partial"
+        } else {
+            "terminal.row_scan_issues"
+        })
     } else if row.selectable == 0 {
         crate::i18n::text("terminal.nothing_selectable")
     } else if row.selected == row.selectable {
@@ -988,14 +992,28 @@ fn row_status_style(row: &ViewRow<'_>, theme: Theme) -> Style {
 }
 
 fn task_diagnostics(task: &spaceprune::api::TaskReport) -> Vec<String> {
-    task.error
-        .iter()
-        .cloned()
-        .chain(task.issues.iter().map(|issue| match &issue.location {
-            Some(location) => format!("{}: {}", location, issue.message),
-            None => issue.message.clone(),
-        }))
-        .collect()
+    let mut restricted = 0;
+    let mut busy = 0;
+    let mut other = Vec::new();
+    for issue in &task.issues {
+        match issue.io_failure.as_ref().map(|failure| failure.kind) {
+            Some(spaceprune::api::IoFailureKind::AccessDenied) => restricted += 1,
+            Some(spaceprune::api::IoFailureKind::SharingViolation) => busy += 1,
+            _ => other.push(match &issue.location {
+                Some(location) => format!("{}: {}", location, issue.message),
+                None => issue.message.clone(),
+            }),
+        }
+    }
+    for (count, key) in [
+        (restricted, "terminal.scan_unreadable"),
+        (busy, "terminal.scan_busy"),
+    ] {
+        if count > 0 {
+            other.push(crate::i18n::message(key, &[("count", count.to_string())]));
+        }
+    }
+    task.error.iter().cloned().chain(other).collect()
 }
 
 fn centered(area: Rect, width: u16, height: u16) -> Rect {
@@ -1400,6 +1418,40 @@ mod tests {
         assert_eq!(
             buffer.cell((79, 23)).unwrap().bg,
             theme.palette.background.tui()
+        );
+    }
+
+    #[test]
+    fn unreadable_entries_do_not_obscure_readable_selections() {
+        let mut report = report_with_items(3);
+        report.modules[0].tasks[0].issues.push(
+            serde_json::from_value(serde_json::json!({
+                "level":"warning", "message":"Could not bind candidate identity: OS error 5",
+                "location":"C:/fixture/protected.tmp",
+                "io_failure":{"kind":"access_denied","os_code":5}
+            }))
+            .unwrap(),
+        );
+        let cancellation = CancellationToken::default();
+        let mut app = SelectionApp::new(&report, &cancellation, Theme::default());
+        press(&mut app, KeyCode::Char('+'));
+        press(&mut app, KeyCode::Down);
+        let mut terminal = Terminal::new(TestBackend::new(150, 30)).unwrap();
+        terminal.draw(|frame| app.render(frame)).unwrap();
+        let text = screen_text(&terminal);
+        assert!(text.contains("Partly checked"));
+        assert!(text.contains("1 entries could not be read and were skipped"));
+        assert!(!text.contains("Could not bind candidate"));
+        assert!(!text.contains("protected.tmp"));
+        press(&mut app, KeyCode::Char(' '));
+        assert_eq!(app.selected.len(), 2);
+        assert_eq!(
+            report.modules[0].tasks[0].issues[0]
+                .io_failure
+                .as_ref()
+                .unwrap()
+                .os_code,
+            Some(5)
         );
     }
 

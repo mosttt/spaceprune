@@ -141,11 +141,34 @@ pub(super) fn engine_id(
     Ok(value)
 }
 
-fn command_error(error: impl std::fmt::Display) -> PluginError {
+fn command_error(error: std::io::Error) -> PluginError {
+    let (code, key) = match error.kind() {
+        std::io::ErrorKind::Interrupted => ("operation-stopped", "docker.cancelled"),
+        std::io::ErrorKind::TimedOut => ("docker-timeout", "docker.timeout"),
+        std::io::ErrorKind::NotFound => ("docker-unavailable", "docker.unavailable"),
+        std::io::ErrorKind::PermissionDenied => ("docker-access-denied", "docker.access_denied"),
+        _ => ("docker-command-failed", "docker.command_failed"),
+    };
     PluginError::new(
-        "docker-unavailable",
-        messages::message("docker.unavailable", &[("error", error.to_string())]),
+        code,
+        messages::message(key, &[("error", error.to_string())]),
     )
+}
+
+#[cfg(test)]
+mod error_tests {
+    use super::*;
+    #[test]
+    fn interruption_and_timeout_do_not_claim_docker_is_missing() {
+        for (kind, expected) in [
+            (std::io::ErrorKind::Interrupted, "operation-stopped"),
+            (std::io::ErrorKind::TimedOut, "docker-timeout"),
+            (std::io::ErrorKind::NotFound, "docker-unavailable"),
+            (std::io::ErrorKind::PermissionDenied, "docker-access-denied"),
+        ] {
+            assert_eq!(command_error(std::io::Error::from(kind)).code, expected);
+        }
+    }
 }
 
 // Help probes are read-only and do not enumerate objects or bootstrap a builder.
@@ -176,6 +199,9 @@ pub(super) fn interface(
         let help = runner
             .run(Some(&binding.endpoint), &args, context)
             .map_err(|error| {
+                if error.code == "operation-stopped" || error.code == "docker-timeout" {
+                    return error;
+                }
                 PluginError::new(
                     "docker-interface-unavailable",
                     messages::message("docker.interface_unavailable", &[("error", error.message)]),

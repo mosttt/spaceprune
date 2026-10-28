@@ -880,63 +880,83 @@
     "正在使用，已跳过"
   ],
   "terminal.reason_in_use_help": [
-    "Another program is using the content. Close the relevant program and scan again.",
-    "相关程序仍在使用这些内容，系统暂时不允许删除。关闭相关程序后可重新扫描。"
+    "Close the relevant app and rescan.",
+    "关闭相关程序后可重新扫描。"
   ],
   "terminal.reason_access_denied": [
     "Deletion not permitted",
     "系统未允许删除"
   ],
   "terminal.reason_access_denied_help": [
-    "File or folder permissions may protect the remaining content. Check access to this location, then scan again; administrator approval does not guarantee deletion.",
-    "剩余内容可能受文件或目录权限保护。请检查该位置的访问权限，处理后重新扫描；管理员授权也不能保证所有内容都能删除。"
+    "Check permissions and rescan.",
+    "检查访问权限后可重新扫描。"
   ],
   "terminal.reason_authorization_denied": [
     "Authorization declined or cancelled",
     "授权被拒绝或取消"
   ],
   "terminal.reason_authorization_denied_help": [
-    "Protected items were not confirmed as cleaned. Scan again and approve the system request if you still want to clean them.",
-    "受保护内容未确认清理成功。如仍需清理，请重新扫描，并在系统提示中授权。"
+    "Rescan and approve access to retry.",
+    "重新扫描并授权后可重试。"
   ],
   "terminal.reason_authorization_timeout": [
     "Authorization timed out",
     "授权等待超时"
   ],
   "terminal.reason_authorization_timeout_help": [
-    "The system did not confirm authorization in time. Scan again before retrying.",
-    "未及时收到系统授权确认，请重新扫描后重试。"
+    "Rescan to retry authorization.",
+    "重新扫描后可重试授权。"
   ],
   "terminal.reason_authorization_unavailable": [
     "Cleanup authorization unavailable",
     "无法建立清理授权"
   ],
   "terminal.reason_authorization_unavailable_help": [
-    "Check the installed authorization component, then scan again. Detailed error codes are available in the JSON receipt.",
-    "请检查已安装的授权组件后重新扫描；具体错误代码可在 JSON 结果中查看。"
+    "Check the authorization component and retry.",
+    "检查授权组件后重试。"
   ],
   "terminal.reason_read_only": [
     "Read-only location",
     "位置为只读"
   ],
   "terminal.reason_read_only_help": [
-    "This location does not allow changes. Check the volume state before retrying.",
-    "该位置不允许写入或删除。请检查磁盘状态后重试。"
+    "Check the volume's write permissions.",
+    "请检查磁盘的写入权限。"
   ],
   "terminal.reason_other": [
     "Other unfinished items",
     "其他未完成项目"
   ],
   "terminal.reason_other_help": [
-    "Review the reported cause and scan again before retrying.",
-    "请查看具体原因，处理后重新扫描。"
+    "See details before retrying.",
+    "查看详情后重试。"
   ],
   "terminal.partial_cleanup_help": [
     "Partly cleaned: processed content is already counted as cleaned; this estimate covers the remaining content.",
     "已完成部分清理：处理成功的内容已计入清理结果，此处估计剩余未清理部分。"
   ],
   "terminal.receipt_json_details": [
-    "Full paths and diagnostic details are available with --output json.",
-    "完整路径和诊断详情可通过 --output json 查看。"
+    "Details: --output json",
+    "详情：--output json"
+  ],
+  "terminal.row_scan_partial": [
+    "Partly checked",
+    "部分未检查"
+  ],
+  "terminal.scan_unreadable": [
+    "{count} entries could not be read and were skipped; other results remain available.",
+    "{count} 项无法读取，已跳过；其余项目可正常选择。"
+  ],
+  "terminal.scan_busy": [
+    "{count} busy entries were skipped; close the relevant app and rescan.",
+    "{count} 项正在使用，已跳过；关闭相关程序后可重新扫描。"
+  ],
+  "terminal.live_scan_size": [
+    "  Checked {count} · Measured ~{size} · Recommended ~{recommended} · {unknown} unmeasured",
+    "  已检查 {count} 项 · 已统计约 {size} · 推荐约 {recommended} · {unknown} 项待计量"
+  ],
+  "terminal.live_cleanup_size": [
+    "  Cleaned ~{size} · {unknown} unmeasured",
+    "  已清理约 {size} · {unknown} 项待计量"
   ]
 }

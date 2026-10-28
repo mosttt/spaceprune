@@ -52,12 +52,12 @@
     "大小低于建议阈值"
   ],
   "filesystem.check_root": [
-    "Checking configured filesystem root {p0}",
-    "正在检查配置的文件系统根路径 {p0}"
+    "Checking directory {p0}",
+    "正在检查目录 {p0}"
   ],
   "filesystem.measure_candidate": [
-    "Measuring candidate metadata {p0}",
-    "正在统计候选项目元数据 {p0}"
+    "Reading size and date {p0}",
+    "正在检查大小与日期 {p0}"
   ],
   "native.reusing_metadata": [
     "Reusing authorized metadata access for {p0}",
@@ -2112,8 +2112,8 @@
     "Docker 已停止的容器"
   ],
   "docker.build_consequence": [
-    "Remove selected unused build-cache records from the local Engine default builder. Later builds may rebuild or download; rounded Docker sizes remain unknown. Shared layers do not predict disk space freed.",
-    "清理本机 Engine 默认构建器的选定闲置缓存。后续可能重新构建或下载；Docker 四舍五入的大小记为未知，共享层大小不代表可释放空间。"
+    "Unused local build cache. Sizes are Docker content estimates; shared layers may reduce disk space freed. Age means last use (creation for never-used records).",
+    "本机构建缓存；大小按 Docker 报告估算，共享层可能减少实际释放空间。时间按最后使用计算，从未使用的记录按创建时间计算。"
   ],
   "docker.image_consequence": [
     "Remove selected untagged images not referenced by any container. Do not remove parent images, containers or volumes. Shared layers make reclaimed space unknown.",
@@ -2182,5 +2182,57 @@
   "filesystem.authorized_cleanup_not_started": [
     "{p0}; protected cleanup could not start: {reason}",
     "{p0}；受保护内容的清理未能启动：{reason}"
+  ],
+  "measurement.modified": [
+    "not modified for at least {age}",
+    "至少 {age} 未修改"
+  ],
+  "measurement.last_used": [
+    "last used (or created if never used) at least {age} ago",
+    "最后使用（从未使用时取创建时间）距今至少 {age}"
+  ],
+  "measurement.created": [
+    "created at least {age} ago",
+    "创建已满 {age}"
+  ],
+  "measurement.stopped": [
+    "stopped for at least {age}",
+    "停止运行已满 {age}"
+  ],
+  "measurement.minimum": [
+    "size at least {size}",
+    "大小不少于 {size}"
+  ],
+  "measurement.and": [
+    " and ",
+    "，且"
+  ],
+  "measurement.matches": [
+    "Matches: {conditions}.",
+    "符合条件：{conditions}。"
+  ],
+  "measurement.not_matched": [
+    "Not all conditions match: {conditions}.",
+    "未同时满足：{conditions}。"
+  ],
+  "measurement.missing": [
+    "Measurement incomplete; cannot confirm: {conditions}.",
+    "数据不完整，无法确认是否满足：{conditions}。"
+  ],
+  "measurement.no_threshold": [
+    "Matches the selected scope; no age or size threshold is set.",
+    "匹配方案指定范围；未设置时间或大小条件。"
+  ],
+  "docker.cancelled": [
+    "Cleanup was stopped. Rescan to check the remaining objects.",
+    "清理已停止，请重新扫描检查剩余内容。"
+  ],
+  "docker.timeout": [
+    "Docker did not respond in time. Rescan to check the remaining objects.",
+    "Docker 响应超时，请重新扫描检查剩余内容。"
+  ],
+  "measurement.days": [
+    "{days} days",
+    "{days} 天"
   ]
 }

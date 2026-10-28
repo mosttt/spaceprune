@@ -448,8 +448,35 @@ fn recipe_list_and_set_use_the_id_named_layout() {
     assert!(
         fs::read_to_string(directory.join("config.toml"))
             .unwrap()
-            .contains("recipe = \"work\"")
+            .contains("recipe = \"personal\"")
     );
+    assert!(
+        fs::read_to_string(directory.join("config.selection.toml"))
+            .unwrap()
+            .contains("cli-override = \"work\"")
+    );
+    fs::write(
+        directory.join("config.selection.toml"),
+        "last-used = 'work'\ncli-override = 'personal'\n",
+    )
+    .unwrap();
+    let output = spaceprune_with_home(temp.path())
+        .args(["recipe", "follow", "--output=json"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let output = spaceprune_with_home(temp.path())
+        .args(["recipe", "list", "--output=json"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let recipes: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(recipes[0]["active"], false);
+    assert_eq!(recipes[1]["active"], true);
 }
 
 #[test]

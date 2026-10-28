@@ -7,6 +7,7 @@ license.workspace = true
 description = "Public plugin protocol for SpacePrune"
 
 [dependencies]
+serde.workspace = true
 spaceprune-access = { path = "../spaceprune-access" }
 spaceprune-contracts = { path = "../spaceprune-contracts" }
 

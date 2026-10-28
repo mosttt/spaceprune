@@ -282,28 +282,28 @@ pub(super) fn append_item(
     };
     let bytes = stats.logical_bytes;
     let modified = stats.latest_modified;
-    let old_enough = older_than.is_none_or(|threshold| core_fs::is_older_than(modified, threshold));
-    let large_enough = bytes >= minimum;
-    let (recommendation, reason) = if recommend.enabled && old_enough && large_enough {
-        (
-            Recommendation::Recommended,
-            spaceprune_plugin_api::messages::text("filesystem.matches_rules").to_owned(),
-        )
-    } else if !recommend.enabled {
-        (
-            Recommendation::Optional,
-            spaceprune_plugin_api::messages::text("filesystem.recommendation_disabled").to_owned(),
-        )
-    } else if !old_enough {
-        (
-            Recommendation::Optional,
-            spaceprune_plugin_api::messages::text("filesystem.recent").to_owned(),
+    let policy = spaceprune_engine::measurement::MeasurementPolicy {
+        older_than,
+        min_bytes: recommend.min_size.as_ref().map(|_| minimum),
+    };
+    let matches = policy.matches(
+        Some(bytes),
+        modified,
+        core_fs::unix_timestamp(std::time::SystemTime::now()).unwrap_or(0),
+    );
+    let recommendation = if recommend.enabled && matches {
+        Recommendation::Recommended
+    } else {
+        Recommendation::Optional
+    };
+    let reason = if recommend.enabled {
+        policy.explanation(
+            Some(bytes),
+            modified,
+            spaceprune_engine::measurement::TimeBasis::Modified,
         )
     } else {
-        (
-            Recommendation::Optional,
-            spaceprune_plugin_api::messages::text("filesystem.below_size").to_owned(),
-        )
+        spaceprune_plugin_api::messages::text("filesystem.recommendation_disabled").to_owned()
     };
     let binding = (|| -> std::io::Result<_> {
         let identity = identity?;

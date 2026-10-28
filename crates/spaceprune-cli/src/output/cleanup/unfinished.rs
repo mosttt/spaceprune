@@ -28,7 +28,7 @@ pub(super) fn reason(failure: &ItemFailure) -> &'static str {
 
 pub(super) fn render(
     execution: &ExecutionReport,
-    plan: &spaceprune::api::CleanupPlan,
+    plan: &spaceprune::api::CleanupPlanData,
     theme: Theme,
 ) -> String {
     let items = spaceprune::api::unfinished_cleanup_items(execution, Some(plan));
@@ -90,23 +90,19 @@ pub(super) fn render(
         );
         let _ = writeln!(
             text,
-            "{} · {} · {}",
+            "{} · {} · {}{}{}",
             crate::i18n::text(reason),
             count(group.len(), "item"),
-            size
+            size,
+            if crate::i18n::is_chinese() {
+                "；"
+            } else {
+                "; "
+            },
+            crate::i18n::text(&format!("{reason}_help"))
         );
-        let _ = writeln!(text, "  {}", crate::i18n::text(&format!("{reason}_help")));
-        if group.iter().any(|item| item.partially_applied) {
-            let _ = writeln!(
-                text,
-                "  {}",
-                crate::i18n::text("terminal.partial_cleanup_help")
-            );
-        }
     }
     if !items.is_empty() {
-        text.push_str(crate::i18n::text("terminal.uncleaned_estimate_note"));
-        text.push('\n');
         text.push_str(crate::i18n::text("terminal.receipt_json_details"));
     }
     theme.stdout(text, Tone::Muted)

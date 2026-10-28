@@ -199,6 +199,8 @@ impl Handler for PathsHandler {
             .transpose()?;
         let mut result = HandlerScanResult::default();
         let mut seen = BTreeSet::new();
+        let mut measurement = spaceprune_plugin_api::ScanMeasurement::default();
+        progress.record_scan(task, measurement);
 
         for (root_index, root_options) in options.roots.iter().enumerate() {
             if context.is_stopped() {
@@ -246,23 +248,7 @@ impl Handler for PathsHandler {
                 if context.is_stopped() {
                     break;
                 }
-                if index == 0
-                    || index + 1 == total
-                    || updated.elapsed() >= Duration::from_millis(100)
-                {
-                    emit_progress(
-                        progress,
-                        task,
-                        ProgressPhase::Measure,
-                        Some(index),
-                        Some(total),
-                        spaceprune_plugin_api::messages::message(
-                            "filesystem.measure_candidate",
-                            &[("p0", (path.display()).to_string())],
-                        ),
-                    );
-                    updated = Instant::now();
-                }
+                let previous_items = result.items.len();
                 if seen.insert(path.clone()) {
                     append_item(
                         &mut result,
@@ -277,8 +263,30 @@ impl Handler for PathsHandler {
                         context,
                     );
                 }
+                for item in &result.items[previous_items..] {
+                    measurement.add_item(item);
+                }
+                if index == 0
+                    || index + 1 == total
+                    || updated.elapsed() >= Duration::from_millis(100)
+                {
+                    emit_progress(
+                        progress,
+                        task,
+                        ProgressPhase::Measure,
+                        Some(index + 1),
+                        Some(total),
+                        spaceprune_plugin_api::messages::message(
+                            "filesystem.measure_candidate",
+                            &[("p0", (path.display()).to_string())],
+                        ),
+                    );
+                    progress.record_scan(task, measurement);
+                    updated = Instant::now();
+                }
             }
         }
+        progress.record_scan(task, measurement);
         Ok(result)
     }
 

@@ -19,8 +19,6 @@ pub(super) fn failure_details(execution: &ExecutionReport) -> Vec<String> {
         .iter()
         .map(|failure| format!("- {}", failure.message))
         .collect::<Vec<_>>();
-    let mut permission_failures = 0_usize;
-    let mut shown_causes = Vec::new();
     for group in &execution.groups {
         if let Some(error) = &group.error {
             lines.push(format!("- {}.{}: {error}", group.module_id, group.task_id));
@@ -34,46 +32,12 @@ pub(super) fn failure_details(execution: &ExecutionReport) -> Vec<String> {
                 )) {
                     continue;
                 }
-                let permission_denied = failure.io_failure.as_ref().is_some_and(|failure| {
-                    failure.kind == spaceprune::api::IoFailureKind::AccessDenied
-                });
-                if permission_denied {
-                    permission_failures += 1;
-                    if permission_failures > 5 {
-                        continue;
-                    }
-                    if shown_causes.contains(&failure.message.as_str()) {
-                        lines.push(format!("- {}", failure.item_id));
-                        continue;
-                    }
-                    shown_causes.push(failure.message.as_str());
+                // Known causes already have a counted, actionable summary with their size.
+                if unfinished::reason(failure) == "terminal.reason_other" {
+                    lines.push(format!("- {}: {}", failure.item_id, failure.message));
                 }
-                let reason = unfinished::reason(failure);
-                let message = if reason == "terminal.reason_other" {
-                    failure.message.as_str()
-                } else {
-                    crate::i18n::text(reason)
-                };
-                lines.push(format!("- {}: {message}", failure.item_id));
             }
         }
-    }
-    if permission_failures > 0 {
-        lines.push(crate::i18n::message(
-            "terminal.permission_failures",
-            &[
-                ("permission_failures", permission_failures.to_string()),
-                (
-                    "p0",
-                    if permission_failures > 5 {
-                        crate::i18n::text("terminal.first_permission_errors")
-                    } else {
-                        ""
-                    }
-                    .to_owned(),
-                ),
-            ],
-        ));
     }
     lines
 }

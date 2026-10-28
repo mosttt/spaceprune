@@ -23,6 +23,7 @@ spaceprune automation <list|install|uninstall|run>
 spaceprune recipe
 spaceprune recipe list
 spaceprune recipe set <recipe-id>
+spaceprune recipe follow
 spaceprune theme
 spaceprune theme list
 spaceprune theme set <theme-id>
@@ -85,7 +86,7 @@ Snapper 逻辑大小统计与 `delete --sync` 的 Btrfs 同步等待会分别说
 
 Linux 普通文件清理遇到权限不足时，会汇总本次已确认的受影响项目，按方案设置请求系统授权。已有 sudo 认证有效时直接复用，过期时才出现系统密码提示；拒绝后不逐文件重复请求。Snapper 使用 sudo 时取得的有效认证也可以复用，读取列表或只读检查权限本身不会赋予删除权限。可以在 filesystem 任务的 options 中设置 `elevation = "never"`，明确禁止自动提权。
 
-权限失败会先显示少量项目示例并汇总数量，完整失败仍保存在 JSON 输出。清理结果未确认的项目应重新扫描核对，不能因授权失败假定整批完全没有变化。
+已知未完成原因每类只显示一行：数量、未清理大小估算和简短处理建议。路径和原生诊断保存在 JSON 中，不重复解释权限。部分清理项目只估算剩余大小。扫描选择页汇总无法读取或正在使用的项目，其余可读项目仍可选择；其他原因的错误继续显示。清理结果未确认的项目应重新扫描核对。
 
 ## Linux 系统授权组件
 
@@ -176,7 +177,7 @@ spaceprune recipe set personal
 
 直接运行 `spaceprune recipe` 会交互预览并选择 `recipes` 下符合 `<ID>/<ID>.toml` 约定的方案；Enter 保存，Esc 取消。
 `recipe set <ID>` 直接切换，且只接受当前 `recipes` 下实际存在的方案；`recipe list` 会显示名称、入口路径和活动状态。
-切换只更新应用配置中的 `recipe` 字段，不改写清理方案。
+选择保存在 `config.selection.toml`，只覆盖 CLI 使用的方案，不改变默认方案及自动清理配置。未手动覆盖时，CLI 跟随图形应用最近使用的方案；没有使用记录时采用默认方案。`recipe follow` 恢复跟随；`--config` 选择另一份配置及其对应的选择记录。已删除的方案会回退到仍存在的选择或默认方案。
 `recipe --output json` 直接返回当前方案 ID、名称、入口与配置路径，不打开选择界面、不写配置；
 `recipe list --output json` 返回方案列表，`recipe set <ID> --output json` 则明确执行切换并返回结果。
 
@@ -319,3 +320,5 @@ Snapper 和 Linux 系统清理属于内置插件，Linux 是它们的平台属�
 Details 的路径、选择数量和已知数值沿用当前层级颜色，选择状态词和原因沿用表格中的状态色，字段标签和说明弱化显示。
 底部快捷键区分按键和动作，窄屏优先显示主要操作，其余快捷键可按 `?` 查看。
 四主题与桌面使用同一配色家族，主题选择仍分别保存。
+
+扫描实时显示已统计内容大小及符合推荐条件的大小；清理随确认结果更新已处理大小估算。Windows 扩展路径前缀只在用户可见文本中隐藏，JSON 和底层文件身份保持原样。

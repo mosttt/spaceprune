@@ -44,6 +44,8 @@ struct Activity {
     succeeded: usize,
     failures: usize,
     completed_items: BTreeMap<(String, String), usize>,
+    measurements: BTreeMap<(String, String), spaceprune::api::ScanMeasurement>,
+    cleanup_sizes: BTreeMap<(String, String), (u64, usize)>,
 }
 
 impl Activity {
@@ -64,10 +66,13 @@ impl Activity {
             succeeded: 0,
             failures: 0,
             completed_items: BTreeMap::new(),
+            measurements: BTreeMap::new(),
+            cleanup_sizes: BTreeMap::new(),
         }
     }
 
-    fn record(&mut self, event: ProgressEvent) {
+    fn record(&mut self, mut event: ProgressEvent) {
+        event.message = display_message(&event.message);
         let now = Instant::now();
         if event.module_id.is_some() && self.active_module != event.module_id {
             self.module_started = now;
@@ -157,7 +162,7 @@ impl Activity {
             ),
             (self.module_progress_bar(now, width), Tone::Secondary),
             (format!("  {details}"), Tone::Secondary),
-            (String::new(), Tone::Muted),
+            (self.size_summary(), Tone::Accent),
             (
                 format!("  {footer}"),
                 if cancelled {
@@ -187,7 +192,7 @@ impl Activity {
             while history.len() <= history_rows {
                 history.push((String::new(), Tone::Muted));
             }
-            lines.splice(4..4, history);
+            lines.splice(5..5, history);
         }
         if height < 7 {
             lines.remove(4);
@@ -247,6 +252,43 @@ impl Activity {
                 width.saturating_sub(summary.width())
             )
         )
+    }
+
+    fn size_summary(&self) -> String {
+        use spaceprune::api::fs::format_bytes;
+        match self.operation {
+            Operation::Scan if !self.measurements.is_empty() => {
+                let mut total = spaceprune::api::ScanMeasurement::default();
+                for measurement in self.measurements.values() {
+                    total.merge(*measurement);
+                }
+                crate::i18n::message(
+                    "terminal.live_scan_size",
+                    &[
+                        ("count", total.checked_items.to_string()),
+                        ("size", format_bytes(total.logical_bytes)),
+                        ("recommended", format_bytes(total.recommended_bytes)),
+                        ("unknown", total.unknown_size_items.to_string()),
+                    ],
+                )
+            }
+            Operation::Clean if !self.cleanup_sizes.is_empty() => {
+                let (bytes, unknown) = self
+                    .cleanup_sizes
+                    .values()
+                    .fold((0u64, 0usize), |(b, u), (next, missing)| {
+                        (b.saturating_add(*next), u.saturating_add(*missing))
+                    });
+                crate::i18n::message(
+                    "terminal.live_cleanup_size",
+                    &[
+                        ("size", format_bytes(bytes)),
+                        ("unknown", unknown.to_string()),
+                    ],
+                )
+            }
+            _ => String::new(),
+        }
     }
 
     fn module_progress_bar(&self, now: Instant, width: usize) -> String {
@@ -580,12 +622,56 @@ impl TextProgress {
 }
 
 impl ProgressSink for TextProgress {
+    fn record_cleanup_with_accounting(
+        &self,
+        task: &spaceprune::api::TaskRequest,
+        accounting: spaceprune::api::CleanupSizeAccounting,
+        succeeded: usize,
+        bytes: u64,
+        unknown: usize,
+    ) {
+        if accounting == spaceprune::api::CleanupSizeAccounting::SnapshotGroups {
+            if let Some(activity) = &mut self
+                .state
+                .0
+                .lock()
+                .expect("progress lock poisoned")
+                .activity
+            {
+                activity
+                    .completed_items
+                    .insert((task.module_id.clone(), task.task_id.clone()), succeeded);
+            }
+        } else {
+            self.record_cleanup(task, succeeded, bytes, unknown);
+        }
+    }
+    fn record_scan(
+        &self,
+        task: &spaceprune::api::TaskRequest,
+        measurement: spaceprune::api::ScanMeasurement,
+    ) {
+        if !self.live {
+            return;
+        }
+        if let Some(activity) = &mut self
+            .state
+            .0
+            .lock()
+            .expect("progress lock poisoned")
+            .activity
+        {
+            activity
+                .measurements
+                .insert((task.module_id.clone(), task.task_id.clone()), measurement);
+        }
+    }
     fn record_cleanup(
         &self,
         task: &spaceprune::api::TaskRequest,
         succeeded: usize,
-        _bytes: u64,
-        _unknown: usize,
+        bytes: u64,
+        unknown: usize,
     ) {
         if !self.live {
             return;
@@ -595,6 +681,10 @@ impl ProgressSink for TextProgress {
             activity
                 .completed_items
                 .insert((task.module_id.clone(), task.task_id.clone()), succeeded);
+            activity.cleanup_sizes.insert(
+                (task.module_id.clone(), task.task_id.clone()),
+                (bytes, unknown),
+            );
         }
     }
     fn emit(&self, event: ProgressEvent) {
@@ -612,7 +702,7 @@ impl ProgressSink for TextProgress {
                 (Some(current), Some(total)) => format!("[{current}/{total}] "),
                 _ => String::new(),
             };
-            eprintln!("{prefix}{}", event.message);
+            eprintln!("{prefix}{}", display_message(&event.message));
         }
     }
 
@@ -735,9 +825,81 @@ fn clip(value: &str, width: usize) -> String {
     result
 }
 
+/// Windows extended-path syntax is an I/O detail, even in embedded progress messages.
+pub(crate) fn display_message(value: &str) -> String {
+    let mut result = String::with_capacity(value.len());
+    let mut tail = value;
+    while let Some(index) = tail.find(r"\\?\") {
+        result.push_str(&tail[..index]);
+        let suffix = &tail[index + 4..];
+        if suffix.starts_with("UNC\\") || suffix.starts_with("unc\\") {
+            result.push_str(r"\\");
+            tail = &suffix[4..];
+        } else if suffix
+            .as_bytes()
+            .get(0)
+            .is_some_and(u8::is_ascii_alphabetic)
+            && suffix.as_bytes().get(1..3) == Some(b":\\")
+        {
+            tail = suffix;
+        } else {
+            result.push_str(r"\\?\");
+            tail = suffix;
+        }
+    }
+    result.push_str(tail);
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn displayed_paths_hide_windows_transport_prefixes_but_keep_other_paths() {
+        assert_eq!(
+            display_message(r"Checking \\?\C:\cache\中文 file; \\?\UNC\server\share\file"),
+            r"Checking C:\cache\中文 file; \\server\share\file"
+        );
+        assert_eq!(
+            display_message(r"/home/cache/file \\?\Volume{test}\file"),
+            r"/home/cache/file \\?\Volume{test}\file"
+        );
+    }
+
+    #[test]
+    fn cumulative_size_updates_replace_one_task_without_erasing_other_tasks() {
+        let mut activity = Activity::new(Operation::Scan, 0);
+        let key = ("cache".into(), "one".into());
+        activity.measurements.insert(
+            key.clone(),
+            spaceprune::api::ScanMeasurement {
+                checked_items: 1,
+                logical_bytes: 10,
+                ..Default::default()
+            },
+        );
+        activity.measurements.insert(
+            ("cache".into(), "two".into()),
+            spaceprune::api::ScanMeasurement {
+                checked_items: 1,
+                logical_bytes: 20,
+                ..Default::default()
+            },
+        );
+        activity.measurements.insert(
+            key,
+            spaceprune::api::ScanMeasurement {
+                checked_items: 2,
+                logical_bytes: 30,
+                unknown_size_items: 1,
+                ..Default::default()
+            },
+        );
+        let summary = activity.size_summary();
+        assert!(summary.contains("50 B"), "{summary}");
+        assert!(summary.contains("Checked 3"), "{summary}");
+    }
 
     #[test]
     fn long_running_steps_keep_time_and_cancellation_visible_without_inventing_progress() {

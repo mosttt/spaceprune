@@ -76,13 +76,22 @@ impl ConfigLoader {
 
     /// 加载应用入口及其选中的清理方案，并保留可供自动化重载的应用路径。
     pub fn load_app_path(&mut self, path: impl AsRef<Path>) -> Result<ResolvedConfig, ConfigError> {
+        self.load_app_path_with_recipe(path, None)
+    }
+
+    /// Load an application configuration with a host-selected recipe, preserving validation.
+    pub fn load_app_path_with_recipe(
+        &mut self,
+        path: impl AsRef<Path>,
+        recipe: Option<&str>,
+    ) -> Result<ResolvedConfig, ConfigError> {
         let path = normalize_path(path.as_ref())?;
         let source_name = path.display().to_string();
         let source = fs::read_to_string(&path).map_err(|source| ConfigError::Read {
             path: path.clone(),
             source,
         })?;
-        let app: AppConfig = toml::from_str(&source).map_err(|error| ConfigError::Invalid {
+        let mut app: AppConfig = toml::from_str(&source).map_err(|error| ConfigError::Invalid {
             source_name: source_name.clone(),
             message: error.to_string(),
         })?;
@@ -97,6 +106,9 @@ impl ConfigLoader {
                     ],
                 ),
             });
+        }
+        if let Some(recipe) = recipe {
+            app.recipe = recipe.into();
         }
         if !is_valid_id(&app.recipe) {
             return Err(ConfigError::Invalid {

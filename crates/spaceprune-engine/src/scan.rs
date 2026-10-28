@@ -252,6 +252,11 @@ impl Engine {
                     }
                     Err(error) => report.error = Some(error.to_string()),
                 }
+                let mut measurement = spaceprune_plugin_api::ScanMeasurement::default();
+                for item in report.leaf_items() {
+                    measurement.add_item(item);
+                }
+                progress.record_scan(&task_request, measurement);
                 self.event_bus.emit(
                     context,
                     SpacePruneEvent::TaskScanFinished {

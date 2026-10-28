@@ -164,6 +164,6 @@ impl SelectionApp<'_> {
 fn location_line(location: &str, value: Style, label: Style) -> Line<'_> {
     Line::from(vec![
         Span::styled(crate::i18n::text("terminal.location_label"), label),
-        Span::styled(location, value),
+        Span::styled(crate::progress::display_message(location), value),
     ])
 }

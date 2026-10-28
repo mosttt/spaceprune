@@ -44,6 +44,17 @@ impl Runner for Engine {
         if args[0] == "info" {
             return Ok(json!(*self.identity.borrow()).to_string());
         }
+        if args.starts_with(&["system", "df"]) {
+            return Ok(serde_json::to_string(
+                &self
+                    .objects
+                    .borrow()
+                    .iter()
+                    .map(|id| json!({"ID": id, "LastUsedAt": "2000-01-01 00:00:00 +0000 UTC"}))
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap());
+        }
         if args.last() == Some(&"--help") {
             if self.interface_missing.get() && args[0] == "buildx" {
                 return Err(PluginError::new(
@@ -106,6 +117,21 @@ fn scan(engine: &Engine) -> HandlerScanResult {
 }
 
 #[test]
+fn native_size_and_absolute_time_apply_both_recommendation_conditions() {
+    let engine = Engine::new();
+    let mut task = DockerKind::BuildCache.task();
+    task.recommend = json!({"enabled": true, "older-than": "60d", "min-size": "1GB"});
+    let result = DockerHandler(DockerKind::BuildCache)
+        .scan_with(&task, &OperationContext::default(), &engine)
+        .unwrap();
+    assert_eq!(result.items[0].recommendation, Recommendation::Optional);
+    assert_eq!(result.items[1].recommendation, Recommendation::Recommended);
+    assert!(result.items.iter().all(|item| item.modified_at.is_some()));
+    assert!(result.items[1].reason.contains("60 days"));
+    assert!(result.items[1].reason.contains("and"));
+}
+
+#[test]
 fn selected_cache_children_are_removed_before_parents_without_expanding_selection() {
     let engine = Engine::new();
     engine
@@ -152,11 +178,11 @@ fn an_unselected_cache_child_is_never_added_to_make_a_parent_removable() {
     assert_eq!(*engine.objects.borrow(), ["cacheone", "cachetwo"]);
 }
 #[test]
-fn exact_selected_cache_only_and_unknown_reclaimed_bytes() {
+fn selected_cache_reports_processed_content_estimates_without_claiming_physical_space() {
     let engine = Engine::new();
     let scanned = scan(&engine);
     assert_eq!(scanned.items[0].logical_bytes, Some(123));
-    assert_eq!(scanned.items[1].logical_bytes, None);
+    assert_eq!(scanned.items[1].logical_bytes, Some(1_500_000_000));
     assert!(
         scanned
             .items
@@ -175,7 +201,8 @@ fn exact_selected_cache_only_and_unknown_reclaimed_bytes() {
         )
         .unwrap();
     assert_eq!(result.succeeded, 1);
-    assert_eq!(result.unknown_reclaimed_items(), 1);
+    assert_eq!(result.unknown_reclaimed_items(), 0);
+    assert_eq!(result.reclaimed_bytes, 123);
     assert_eq!(*engine.objects.borrow(), ["cachetwo", "arrivedlater"]);
 }
 #[test]
@@ -387,7 +414,8 @@ fn an_earlier_prune_removing_another_selection_does_not_create_a_failure_or_doub
         )
         .unwrap();
     assert_eq!(result.succeeded, 2);
-    assert_eq!(result.unknown_reclaimed_items(), 1);
+    assert_eq!(result.unknown_reclaimed_items(), 0);
+    assert_eq!(result.reclaimed_bytes, 123);
     assert_eq!(result.outcomes[0].status, ItemExecutionStatus::Succeeded);
     assert_eq!(
         result.outcomes[1].status,

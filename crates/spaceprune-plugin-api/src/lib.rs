@@ -8,6 +8,9 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
+mod scan_measurement;
+pub use scan_measurement::ScanMeasurement;
+
 pub use spaceprune_contracts::messages;
 
 pub use spaceprune_contracts::cache::{
@@ -82,6 +85,9 @@ pub trait CleanupAccess: Send + Sync {
 
 /// 接收进度事件的对象。
 pub trait ProgressSink: Send + Sync {
+    /// Replace the cumulative measurement snapshot for one scan task.
+    fn record_scan(&self, _task: &TaskRequest, _measurement: ScanMeasurement) {}
+
     /// Bind a host's activity to its durable journal before any destructive dispatch.
     /// Existing sinks need no persistence; a participating host can reject an unsaved binding.
     fn execution_journal_started(&self, _journal: &ExecutionJournalReference) -> PluginResult<()> {

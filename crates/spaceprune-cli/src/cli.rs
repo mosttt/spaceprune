@@ -133,6 +133,8 @@ pub(crate) enum ThemeCommand {
 /// 清理方案管理命令。
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum RecipeCommand {
+    /// Resume following the graphical application's current recipe.
+    Follow,
     /// 交互选择清理方案。
     Pick,
     /// 列出本地清理方案。
@@ -632,6 +634,7 @@ fn recipe_command() -> Command {
         .about(crate::i18n::text("commands.help_recipe"))
         .after_help(crate::i18n::text("commands.help_recipe_usage"))
         .subcommand(Command::new("list").about(crate::i18n::text("commands.help_recipe_list")))
+        .subcommand(Command::new("follow").about(crate::i18n::text("commands.help_recipe_follow")))
         .subcommand(
             Command::new("set")
                 .about(crate::i18n::text("commands.help_recipe_set"))
@@ -854,6 +857,7 @@ fn parsed_theme_command(matches: &ArgMatches) -> ThemeCommand {
 fn parsed_recipe_command(matches: &ArgMatches) -> RecipeCommand {
     match matches.subcommand() {
         None => RecipeCommand::Pick,
+        Some(("follow", _)) => RecipeCommand::Follow,
         Some(("list", _)) => RecipeCommand::List,
         Some(("set", subcommand_matches)) => RecipeCommand::Set(
             subcommand_matches

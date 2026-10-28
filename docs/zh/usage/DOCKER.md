@@ -22,7 +22,7 @@ platforms = ["linux", "windows", "macos"]
 enabled = false
 ```
 
-Docker 的 `options` 为空，不接受路径、shell、任意命令、builder 或提权配置；`recommend` 仅有 `enabled`，默认 `false`，不支持年龄或大小过滤。保存 Recipe 定义未来扫描范围；每次执行仍只作用于本次扫描并确认的完整对象 ID，不包含确认后新增对象。
+Docker 的 `options` 为空，不接受路径、shell、任意命令、builder 或提权配置；`recommend` 支持 `enabled`（默认 `false`），以及可选的 `older-than`、`min-size` 条件。保存 Recipe 定义未来扫描范围；每次执行仍只作用于本次扫描并确认的完整对象 ID，不包含确认后新增对象。
 
 每次扫描固定本机端点与 Engine ID，清理前重新检查两者及对象资格。仅接受本机 `unix://` socket 或 Windows `npipe:////./pipe/`；拒绝 TCP、SSH 及远程 named pipe，即使 TCP 地址写作 localhost。不会切换 context、启动 daemon/builder 或操作远程机器。需要切换本机 context 时由用户在 Docker 中完成，然后重新扫描。
 
@@ -30,6 +30,10 @@ Docker 的 `options` 为空，不接受路径、shell、任意命令、builder �
 
 扫描后、实际清理前已消失的选中对象会复核为“已不存在”，按幂等成功处理，本次处理量记为 0；同一批前序清理已移除的对象也不重复计量。对象只是变为使用中或受保护时仍报告状态变化，不当作已删除。查询失败或返回格式不完整时不能确认对象消失。
 
-镜像大小和容器可写层大小取自 Docker 的整数字节字段。Buildx 输出四舍五入的 kB/MB/GB 时大小保持未知；准确的整数字节保留已知值。共享层不可简单相加为可释放空间，Docker Desktop 虚拟磁盘也未必立即缩小。因此预估可释放字节与完成后的回收字节为未知，而不是 0；清理成功状态来自对象实际消失的复核。
+镜像大小和容器可写层大小取自 Docker 的整数字节字段。Buildx 输出四舍五入的 kB/MB/GB 时保留内容大小估算。共享层不可简单相加为可释放空间，Docker Desktop 虚拟磁盘也未必立即缩小。因此预估可释放字节与完成后的回收字节为未知，而不是 0；已确认处理的内容大小另行统计。清理成功状态来自对象实际消失的复核。
 
 API 调用者可用 `probe_system_capabilities` 获取可用能力及已安装接口的诊断，`issue` 不为空的结果不可签发清理来源。原有 `discover_system_capabilities` 继续只返回可用任务。App 把诊断作为不可执行的 inventory 提示；检查已知失败项仅返回诊断，不枚举对象或创建方案任务。
+
+## 大小与时间条件
+
+通过 Docker 原生结构化命令接口读取容量和时间。`1.5GB` 等四舍五入数值保留为内容大小估算，不保证主机或虚拟磁盘释放等量空间。`recommend.older-than` 与 `recommend.min-size` 和文件系统任务使用相同条件格式，同时配置时必须同时满足。构建缓存使用 Engine 磁盘统计提供的绝对最后使用时间，仅从未使用过的记录可取创建时间；镜像使用创建时间；容器使用最后停止时间，从未运行时使用创建时间。缺少必要大小或时间时不推荐；有标签镜像与已停止容器仍需手动选择。不会把“几个月前”等相对描述当作准确时间。用户取消、超时与 Docker 缺失或 Engine 无法访问分别报告。

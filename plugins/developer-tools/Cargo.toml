@@ -12,6 +12,7 @@ spaceprune-engine = { path = "../../crates/spaceprune-engine" }
 spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
 serde.workspace = true
 serde_json.workspace = true
+humantime.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

@@ -125,7 +125,11 @@ fn run(
     if matches!(&bootstrap.command, CliCommand::Recipe(_)) {
         return run_recipe_command(&bootstrap, config_store.as_ref(), theme);
     }
-    let config = load_config(config_path.as_deref())?;
+    let config = if matches!(&bootstrap.command, CliCommand::Automation(_)) {
+        load_default_recipe(config_path.as_deref())?
+    } else {
+        load_config(config_path.as_deref())?
+    };
     let parsed = match parse(&arguments, Some(&config), theme)? {
         ParseResult::Parsed(parsed) => parsed,
         ParseResult::Exit(code) => return Ok(code),
@@ -141,9 +145,50 @@ fn run(
 
 fn load_config(path: Option<&Path>) -> Result<ResolvedConfig> {
     let mut loader = ConfigLoader::new();
+    if let Some(store) = ConfigStore::discover(path)
+        && store.path().is_file()
+    {
+        let recipe = store.cli_recipe()?;
+        return loader
+            .load_app_path_with_recipe(store.path(), recipe.as_deref())
+            .map_err(Into::into);
+    }
+    load_default_recipe(path)
+}
+
+fn load_default_recipe(path: Option<&Path>) -> Result<ResolvedConfig> {
+    let mut loader = ConfigLoader::new();
     if let Some(path) = path {
         loader.load_app_path(path).map_err(Into::into)
     } else {
         loader.load_default().map_err(Into::into)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn interactive_recipe_override_does_not_change_automation_default() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = ConfigStore::new(temp.path().join("config.toml"));
+        for id in ["default", "desktop", "manual"] {
+            store
+                .upsert_recipe(
+                    id,
+                    &format!("schema-version = 2\nname = '{id}'\ninclude = ['official:minimal']\n"),
+                )
+                .unwrap();
+        }
+        store.save_recipe("default").unwrap();
+        store.remember_used_recipe("desktop").unwrap();
+        assert_eq!(load_config(Some(store.path())).unwrap().name, "desktop");
+        store.save_cli_recipe(Some("manual")).unwrap();
+        assert_eq!(load_config(Some(store.path())).unwrap().name, "manual");
+        assert_eq!(
+            load_default_recipe(Some(store.path())).unwrap().name,
+            "default"
+        );
     }
 }

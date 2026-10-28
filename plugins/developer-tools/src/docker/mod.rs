@@ -2,6 +2,7 @@
 mod cache_order;
 mod cli;
 mod inventory;
+mod measurement;
 #[cfg(test)]
 mod tests;
 use super::*;
@@ -18,6 +19,14 @@ pub(super) enum DockerKind {
     StoppedContainers,
 }
 impl DockerKind {
+    fn time_basis(self) -> spaceprune_engine::measurement::TimeBasis {
+        use spaceprune_engine::measurement::TimeBasis;
+        match self {
+            Self::BuildCache => TimeBasis::LastUsed,
+            Self::DanglingImages | Self::UnusedImages => TimeBasis::Created,
+            Self::StoppedContainers => TimeBasis::Stopped,
+        }
+    }
     pub(super) const ALL: [Self; 4] = [
         Self::BuildCache,
         Self::DanglingImages,
@@ -83,6 +92,19 @@ struct DockerOptions {}
 #[serde(default, deny_unknown_fields)]
 struct DockerRecommend {
     enabled: bool,
+    #[serde(rename = "older-than")]
+    older_than: Option<String>,
+    #[serde(rename = "min-size")]
+    min_size: Option<String>,
+}
+
+impl DockerRecommend {
+    fn policy(&self) -> PluginResult<spaceprune_engine::measurement::MeasurementPolicy> {
+        spaceprune_engine::measurement::MeasurementPolicy::parse(
+            self.older_than.as_deref(),
+            self.min_size.as_deref(),
+        )
+    }
 }
 
 pub(super) fn register(registry: &mut PluginRegistry) -> Result<(), EngineError> {
@@ -142,7 +164,7 @@ impl Handler for DockerHandler {
             platforms: vec!["linux".into(), "windows".into(), "macos".into()],
             size_accounting: Default::default(),
             options_schema: json!({"type":"object","additionalProperties":false}),
-            recommend_schema: json!({"type":"object","additionalProperties":false,"properties":{"enabled":{"type":"boolean","default":false}}}),
+            recommend_schema: json!({"type":"object","additionalProperties":false,"properties":{"enabled":{"type":"boolean","default":false},"older-than":{"type":"string"},"min-size":{"type":"string"}}}),
         }
     }
     fn validate(&self, task: &TaskRequest) -> PluginResult<()> {
@@ -160,7 +182,9 @@ impl Handler for DockerHandler {
             return Err(invalid());
         }
         serde_json::from_value::<DockerOptions>(task.options.clone()).map_err(|_| invalid())?;
-        serde_json::from_value::<DockerRecommend>(task.recommend.clone()).map_err(|_| invalid())?;
+        serde_json::from_value::<DockerRecommend>(task.recommend.clone())
+            .map_err(|_| invalid())?
+            .policy()?;
         Ok(())
     }
     fn scan(
@@ -191,9 +215,12 @@ impl DockerHandler {
         self.validate(task)?;
         let recommend: DockerRecommend =
             serde_json::from_value(task.recommend.clone()).map_err(|_| invalid())?;
+        let policy = recommend.policy()?;
+        let now = spaceprune_engine::fs::unix_timestamp(std::time::SystemTime::now()).unwrap_or(0);
         let scanned = cli::probe(runner, context).and_then(|binding| {
             cli::interface(self.0, &binding, runner, context)?;
-            inventory::list(self.0, &binding, runner, context).map(|objects| (binding, objects))
+            inventory::list_measured(self.0, &binding, runner, context, true)
+                .map(|objects| (binding, objects))
         });
         match scanned {
             Ok((binding, objects)) => Ok(HandlerScanResult {
@@ -208,16 +235,25 @@ impl DockerHandler {
                         logical_bytes: object.bytes,
                         // Shared layers and Desktop VM allocation prevent independent physical estimates.
                         reclaimable_bytes: None,
-                        modified_at: None,
+                        modified_at: object.timestamp,
                         recommendation: if recommend.enabled
                             && matches!(self.0, DockerKind::BuildCache | DockerKind::DanglingImages)
+                            && policy.matches(object.bytes, object.timestamp, now)
                         {
                             Recommendation::Recommended
                         } else {
                             Recommendation::Optional
                         },
-                        reason: self.0.consequence().into(),
-                        tags: vec!["docker-lifecycle".into(), self.0.id().into()],
+                        reason: format!(
+                            "{} {}",
+                            policy.explanation(object.bytes, object.timestamp, self.0.time_basis()),
+                            self.0.consequence()
+                        ),
+                        tags: vec![
+                            "docker-lifecycle".into(),
+                            self.0.id().into(),
+                            self.0.time_basis().tag().into(),
+                        ],
                         opaque: json!(Selection {
                             binding: binding.clone(),
                             kind: self.0,
@@ -292,6 +328,7 @@ impl DockerHandler {
             };
             if !context.is_stopped() {
                 let mut started = false;
+                let mut processed_bytes = None;
                 let execution = (|| {
                     let selected: Selection =
                         serde_json::from_value(item.opaque.clone()).map_err(|_| invalid())?;
@@ -311,6 +348,10 @@ impl DockerHandler {
                     }
                     cli::interface(self.0, &selected.binding, runner, context)?;
                     let current = inventory::list(self.0, &selected.binding, runner, context)?;
+                    processed_bytes = current
+                        .iter()
+                        .find(|object| object.id == selected.id)
+                        .and_then(|object| object.bytes);
                     if !current.iter().any(|object| object.id == selected.id) {
                         // Eligibility can disappear because Docker already removed a record,
                         // including during an earlier native prune in this confirmed batch.
@@ -353,10 +394,14 @@ impl DockerHandler {
                         {
                             Some(0)
                         } else {
-                            None
+                            processed_bytes
                         };
                     }
                     Err(error) => {
+                        if !started && error.code == "operation-stopped" {
+                            result.record_outcome(outcome);
+                            break;
+                        }
                         outcome.status = if started {
                             ItemExecutionStatus::Uncertain
                         } else {

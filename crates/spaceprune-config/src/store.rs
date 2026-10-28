@@ -14,6 +14,7 @@ use crate::{RECIPE_DIRECTORY_NAME, user_config_path};
 
 mod application;
 mod recipes;
+mod selection;
 
 /// 应用入口配置读写错误。
 #[derive(Debug, Error)]

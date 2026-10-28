@@ -29,8 +29,27 @@ pub(crate) fn run_recipe_command(
     let recipes = store.recipes()?;
 
     match command {
+        RecipeCommand::Follow => {
+            store.save_cli_recipe(None)?;
+            if parsed.output == OutputMode::Json {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(
+                        &json!({"recipe": store.cli_recipe()?, "following": true})
+                    )?
+                );
+            } else {
+                println!(
+                    "{}",
+                    theme.stdout(
+                        crate::i18n::text("commands.recipe_following"),
+                        Tone::Success
+                    )
+                );
+            }
+        }
         RecipeCommand::Pick if parsed.output == OutputMode::Json => {
-            let active = store.active_recipe()?;
+            let active = store.cli_recipe()?;
             let recipe = recipes
                 .iter()
                 .find(|recipe| active.as_deref() == Some(recipe.id.as_str()));
@@ -45,7 +64,7 @@ pub(crate) fn run_recipe_command(
             );
         }
         RecipeCommand::List => {
-            let active = store.active_recipe()?;
+            let active = store.cli_recipe()?;
             #[derive(Serialize)]
             struct Entry<'a> {
                 id: &'a str,
@@ -125,7 +144,7 @@ pub(crate) fn run_recipe_command(
         }
         RecipeCommand::Pick | RecipeCommand::Set(_) => {
             let active = if matches!(command, RecipeCommand::Pick) {
-                store.active_recipe()?
+                store.cli_recipe()?
             } else {
                 None
             };
@@ -154,9 +173,11 @@ pub(crate) fn run_recipe_command(
                     };
                     id
                 }
-                RecipeCommand::List => unreachable!("recipe list is handled separately"),
+                RecipeCommand::List | RecipeCommand::Follow => {
+                    unreachable!("recipe action handled separately")
+                }
             };
-            store.save_recipe(&id)?;
+            store.save_cli_recipe(Some(&id))?;
             let recipe = recipes
                 .iter()
                 .find(|recipe| recipe.id == id)
@@ -168,7 +189,7 @@ pub(crate) fn run_recipe_command(
                         "recipe": recipe.id,
                         "name": recipe.name,
                         "entry": recipe.path,
-                        "path": store.path(),
+                        "path": store.path().with_extension("selection.toml"),
                     }))?
                 );
             } else {
@@ -190,7 +211,14 @@ pub(crate) fn run_recipe_command(
                     theme.stdout(
                         crate::i18n::message(
                             "commands.saved_to",
-                            &[("p0", (store.path().display()).to_string())]
+                            &[(
+                                "p0",
+                                store
+                                    .path()
+                                    .with_extension("selection.toml")
+                                    .display()
+                                    .to_string()
+                            )]
                         ),
                         Tone::Muted
                     )

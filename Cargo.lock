@@ -1707,6 +1707,7 @@ dependencies = [
 name = "spaceprune-plugin-api"
 version = "0.1.3"
 dependencies = [
+ "serde",
  "spaceprune-access",
  "spaceprune-contracts",
 ]
@@ -1715,6 +1716,7 @@ dependencies = [
 name = "spaceprune-plugin-developer-tools"
 version = "0.1.3"
 dependencies = [
+ "humantime",
  "serde",
  "serde_json",
  "spaceprune-access",

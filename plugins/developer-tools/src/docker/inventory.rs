@@ -7,6 +7,7 @@ pub(super) struct Object {
     pub id: String,
     pub name: String,
     pub bytes: Option<u64>,
+    pub timestamp: Option<u64>,
     pub parents: Vec<String>,
 }
 pub(super) fn valid_id(kind: DockerKind, id: &str) -> bool {
@@ -37,10 +38,41 @@ pub(super) fn list(
     runner: &dyn Runner,
     context: &OperationContext,
 ) -> PluginResult<Vec<Object>> {
+    list_measured(kind, binding, runner, context, false)
+}
+
+pub(super) fn list_measured(
+    kind: DockerKind,
+    binding: &Binding,
+    runner: &dyn Runner,
+    context: &OperationContext,
+    include_timestamps: bool,
+) -> PluginResult<Vec<Object>> {
     let run = |args: &[&str]| runner.run(Some(&binding.endpoint), args, context);
     let mut objects = Vec::new();
     match kind {
         DockerKind::BuildCache => {
+            // Engine df exposes absolute last-use timestamps; Buildx du renders relative ages.
+            // Read only the build-cache section, on the same frozen local Engine endpoint.
+            let dates = include_timestamps
+                .then(|| {
+                    run(&[
+                        "system",
+                        "df",
+                        "--verbose",
+                        "--format",
+                        "{{json .BuildCache}}",
+                    ])
+                })
+                .and_then(Result::ok)
+                .and_then(|output| serde_json::from_str::<Vec<Value>>(&output).ok())
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|row| row["ID"].as_str().map(str::to_owned).map(|id| (id, row)))
+                .collect::<std::collections::BTreeMap<_, _>>();
+            context.check().map_err(|_| {
+                PluginError::new("operation-stopped", messages::text("docker.cancelled"))
+            })?;
             // "default" is Buildx's reserved Docker-context builder, never the user's selected
             // docker-container/kubernetes/remote builder. --host fixes its Engine transport.
             for row in rows(&run(&[
@@ -59,10 +91,16 @@ pub(super) fn list(
                     .and_then(Value::as_str)
                     .ok_or_else(invalid)?
                     .to_owned();
-                let bytes = row
-                    .get("Size")
-                    .and_then(Value::as_str)
-                    .and_then(exact_bytes);
+                let bytes = row.get("Size").and_then(measurement::bytes);
+                let timestamp = dates
+                    .get(&id)
+                    .and_then(|row| measurement::timestamp(row.get("LastUsedAt")))
+                    .or_else(|| measurement::timestamp(row.get("LastUsedAt")))
+                    .or_else(|| {
+                        (row["UsageCount"].as_u64() == Some(0))
+                            .then(|| measurement::timestamp(row.get("CreatedAt")))
+                            .flatten()
+                    });
                 let description = row
                     .get("Description")
                     .and_then(Value::as_str)
@@ -71,6 +109,7 @@ pub(super) fn list(
                     id: id.clone(),
                     name: format!("{} · {id}", description),
                     bytes,
+                    timestamp,
                     parents: match row.get("Parents") {
                         None | Some(Value::Null) => Vec::new(),
                         Some(Value::Array(parents)) => parents
@@ -129,7 +168,7 @@ pub(super) fn list(
                     "image",
                     "inspect",
                     "--format",
-                    r#"{"ID":{{json .Id}},"Size":{{json .Size}},"Tags":{{json .RepoTags}}}"#,
+                    r#"{"ID":{{json .Id}},"Size":{{json .Size}},"Tags":{{json .RepoTags}},"CreatedAt":{{json .Created}}}"#,
                     id,
                 ])?;
                 let rows = rows(&details)?;
@@ -156,6 +195,7 @@ pub(super) fn list(
                     id: id.into(),
                     name: if tags.is_empty() { id.into() } else { tags },
                     bytes: row["Size"].as_u64(),
+                    timestamp: measurement::timestamp(row.get("CreatedAt")),
                     parents: Vec::new(),
                 });
             }
@@ -187,7 +227,7 @@ pub(super) fn list(
                     "inspect",
                     "--size",
                     "--format",
-                    r#"{"ID":{{json .Id}},"Size":{{json .SizeRw}},"Name":{{json .Name}},"State":{{json .State.Status}}}"#,
+                    r#"{"ID":{{json .Id}},"Size":{{json .SizeRw}},"Name":{{json .Name}},"State":{{json .State.Status}},"FinishedAt":{{json .State.FinishedAt}},"CreatedAt":{{json .Created}}}"#,
                     id,
                 ])?;
                 let rows = rows(&details)?;
@@ -209,6 +249,11 @@ pub(super) fn list(
                         .trim_start_matches('/')
                         .into(),
                     bytes: row["Size"].as_u64(),
+                    timestamp: if row["State"].as_str() == Some("created") {
+                        measurement::timestamp(row.get("CreatedAt"))
+                    } else {
+                        measurement::timestamp(row.get("FinishedAt"))
+                    },
                     parents: Vec::new(),
                 });
             }
@@ -218,12 +263,6 @@ pub(super) fn list(
         return Err(invalid());
     }
     Ok(objects)
-}
-
-// Docker's human-readable kB/MB/GB fields are rounded, not exact byte measurements.
-// Keep them unknown rather than turning a rounded display into false byte precision.
-fn exact_bytes(size: &str) -> Option<u64> {
-    size.strip_suffix('B')?.parse().ok()
 }
 
 pub(super) fn remove_args(kind: DockerKind, id: &str) -> Vec<String> {

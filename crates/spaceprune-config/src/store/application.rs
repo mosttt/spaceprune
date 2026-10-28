@@ -215,7 +215,7 @@ impl ConfigStore {
     }
 }
 
-fn replace_file(source: &Path, destination: &Path) -> Result<(), ConfigStoreError> {
+pub(super) fn replace_file(source: &Path, destination: &Path) -> Result<(), ConfigStoreError> {
     if !destination.exists() {
         return fs::rename(source, destination).map_err(|error| {
             io_error(

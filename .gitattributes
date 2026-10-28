@@ -1,2 +1,6 @@
 # Generated notices retain upstream bytes and reproducible signed package identities.
 THIRD-PARTY-LICENSES-* -text
+
+# Executable scripts must keep valid Unix shebangs across host checkouts.
+*.sh text eol=lf
+*.py text eol=lf

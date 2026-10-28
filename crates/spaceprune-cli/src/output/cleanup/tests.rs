@@ -257,19 +257,26 @@ fn missing_component_cause_is_printed_once_with_affected_items_and_full_json_ret
         })
         .collect();
     let details = failure_details(&report).join("\n");
-    assert_eq!(
-        details
-            .matches(crate::i18n::text(
-                "terminal.reason_authorization_unavailable"
-            ))
-            .count(),
-        1
+    assert!(
+        details.is_empty(),
+        "known causes must not be repeated per file"
     );
-    assert!(!details.contains("signed component missing"));
-    assert_eq!(details.matches("C:/fixture/protected-").count(), 5);
-    assert!(details.contains("18 items"));
-    assert!(!details.contains("expired"));
-    assert!(details.contains("--output json"));
+    let plan = serde_json::from_value(serde_json::json!({
+        "plan_id":"receipt", "scan_id":"scan", "recipe_revision":"revision",
+        "digest":"digest", "config_name":"fixture", "groups":[]
+    }))
+    .unwrap();
+    let summary = unfinished::render(&report, &plan, Theme::default());
+    assert_eq!(
+        summary.lines().count(),
+        2,
+        "one cause and one details link: {summary}"
+    );
+    assert!(summary.contains("18 items"));
+    assert!(summary.contains("unknown size"));
+    assert!(summary.contains("Check the authorization component"));
+    assert!(summary.contains("--output json"));
+    assert!(!summary.contains("C:/fixture/"));
     let json = serde_json::to_value(&report).unwrap();
     assert_eq!(
         json["groups"][0]["result"]["failures"]
