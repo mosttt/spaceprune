@@ -1,5 +1,7 @@
 # CLI reference
 
+The terminal groups unfinished items by cause, with a count, an uncleaned-size estimate and a next step for each group. Partial deletion is stated separately; comparable confirmed bytes are subtracted only once. Busy files do not trigger repeated elevation. Full paths and native diagnostics remain in JSON output. Windows background tool processes use the no-window creation flag while interactive authorization stays visible. Native window colors are optional on Windows 11; older systems retain native decorations.
+
 Files blocked by a confirmed sharing violation are summarized as in use and skipped, without repeating native errors in human output. Close the relevant application and rescan later; cleanup does not force-close it or retry administrator authorization for a sharing violation. Genuine authorization, handler and uncertain-outcome failures remain errors. `--output json` retains original outcomes, failures and exit semantics, plus `unfinished_items` with scan-based uncleaned-size estimates. These logical-content estimates are separate from processed or freed bytes. Partial filesystem estimates subtract confirmed comparable processed bytes; unavailable or inconsistent measurements remain unknown.
 
 This page covers the complete command interface, terminal controls, and common configuration examples. New users should start with the [quick start](../../../README.md#quick-start). See [Configuration reference](CONFIGURATION.md) for all fields, complete personal configuration, and common errors.

@@ -48,7 +48,13 @@ pub(super) fn failure_details(execution: &ExecutionReport) -> Vec<String> {
                     }
                     shown_causes.push(failure.message.as_str());
                 }
-                lines.push(format!("- {}: {}", failure.item_id, failure.message));
+                let reason = unfinished::reason(failure);
+                let message = if reason == "terminal.reason_other" {
+                    failure.message.as_str()
+                } else {
+                    crate::i18n::text(reason)
+                };
+                lines.push(format!("- {}: {message}", failure.item_id));
             }
         }
     }
@@ -317,40 +323,10 @@ pub(super) fn unfinished_details(
     plan: &spaceprune::api::CleanupPlan,
     theme: Theme,
 ) -> String {
-    let items = spaceprune::api::unfinished_cleanup_items(execution, Some(plan));
-    if items.is_empty() {
-        return String::new();
-    }
-    let known = items
-        .iter()
-        .filter_map(|item| item.estimated_bytes)
-        .fold(0u64, u64::saturating_add);
-    let unknown = items
-        .iter()
-        .filter(|item| item.estimated_bytes.is_none())
-        .count();
-    let key = if unknown == 0 {
-        "terminal.uncleaned_approx"
-    } else if known > 0 {
-        "terminal.uncleaned_at_least"
-    } else {
-        "terminal.uncleaned_unknown"
-    };
-    let mut text = crate::i18n::message(
-        key,
-        &[
-            ("size", format_bytes(known)),
-            ("count", unknown.to_string()),
-        ],
-    );
-    text.push('\n');
-    text.push_str(crate::i18n::text("terminal.uncleaned_estimate_note"));
-    if items.iter().any(|item| item.in_use) {
-        text.push('\n');
-        text.push_str(crate::i18n::text("terminal.in_use_help"));
-    }
-    theme.stdout(text, Tone::Muted)
+    unfinished::render(execution, plan, theme)
 }
+
+mod unfinished;
 
 #[cfg(test)]
 mod tests;

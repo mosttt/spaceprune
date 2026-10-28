@@ -74,7 +74,7 @@ impl ProcessTree {
         #[cfg(not(unix))]
         let _ = isolated_group;
         #[cfg(windows)]
-        windows::prepare(command);
+        windows::prepare(command, isolated_group);
         let mut child = command.spawn()?;
         #[cfg(windows)]
         let job = match windows::Job::attach(&child) {

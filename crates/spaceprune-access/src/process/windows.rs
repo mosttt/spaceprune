@@ -15,8 +15,10 @@ use windows_sys::Win32::{
 
 pub(super) struct Job(OwnedHandle);
 
-pub(super) fn prepare(command: &mut Command) {
-    command.creation_flags(CREATE_SUSPENDED);
+pub(super) fn prepare(command: &mut Command, background: bool) {
+    // Captured tool probes must not allocate a console when launched from a GUI host.
+    // Keep the foreground authenticator's terminal behavior separate.
+    command.creation_flags(CREATE_SUSPENDED | if background { CREATE_NO_WINDOW } else { 0 });
 }
 
 impl Job {

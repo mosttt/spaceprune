@@ -257,7 +257,15 @@ fn missing_component_cause_is_printed_once_with_affected_items_and_full_json_ret
         })
         .collect();
     let details = failure_details(&report).join("\n");
-    assert_eq!(details.matches("signed component missing").count(), 1);
+    assert_eq!(
+        details
+            .matches(crate::i18n::text(
+                "terminal.reason_authorization_unavailable"
+            ))
+            .count(),
+        1
+    );
+    assert!(!details.contains("signed component missing"));
     assert_eq!(details.matches("C:/fixture/protected-").count(), 5);
     assert!(details.contains("18 items"));
     assert!(!details.contains("expired"));

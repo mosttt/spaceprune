@@ -49,8 +49,8 @@ pub use spaceprune_platform::{
     install_automation, uninstall_automation,
 };
 pub use spaceprune_plugin_api::{
-    HandlerScanResult, ItemExecution, ItemExecutionStatus, LogicalSizeSummary, PluginError,
-    PluginResult, SizeApplicability, VolumeSpaceChange,
+    HandlerScanResult, ItemExecution, ItemExecutionStatus, ItemFailure, LogicalSizeSummary,
+    PluginError, PluginResult, SizeApplicability, VolumeSpaceChange,
 };
 pub use spaceprune_plugin_api::{
     linux_authorization_interaction, prefer_graphical_linux_authorization,

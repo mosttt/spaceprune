@@ -4,6 +4,12 @@
 
 //! 将 Windows UAC 启动与句柄级只读遍历所需的少量系统调用隔离在桌面宿主之外。
 
+#[cfg(windows)]
+#[allow(unsafe_code)]
+mod window_chrome;
+#[cfg(windows)]
+pub use window_chrome::set_window_chrome_colors;
+
 #[cfg(target_os = "windows")]
 use std::{ffi::OsString, path::Path, sync::atomic::AtomicBool, time::Duration};
 
