@@ -2242,5 +2242,139 @@
   "docker.size_unavailable": [
     "Referenced content and reclaimable space are measured separately; Docker did not provide an independent release estimate.",
     "引用内容与可释放空间分别统计；Docker 未提供可单独释放的空间估算。"
+  ],
+  "mobile_documents.name": [
+    "Authorized documents",
+    "已授权文档"
+  ],
+  "mobile_documents.description": [
+    "Review and clean selected files inside directories you have authorized",
+    "查看并清理你已授权目录内选中的文件"
+  ],
+  "mobile_documents.binding_invalid": [
+    "Native document binding is invalid",
+    "本机文档授权绑定无效"
+  ],
+  "mobile_documents.access_revoked": [
+    "Directory access is unavailable; authorize it again before scanning",
+    "目录访问权限已失效，请重新授权后扫描"
+  ],
+  "mobile_documents.root_scope": [
+    "The authorized directory is a scope, not a cleanup item",
+    "授权目录用于限定范围，不会被删除"
+  ],
+  "mobile_documents.page_large": [
+    "Native document page exceeds the bridge limit",
+    "本机文档分页结果超过限制"
+  ],
+  "mobile_documents.page_invalid": [
+    "Native document metadata has an invalid identity or parent",
+    "本机文档元数据的身份或父级无效"
+  ],
+  "mobile_documents.repeated": [
+    "A repeated document identity was skipped",
+    "已跳过重复出现的文档"
+  ],
+  "mobile_documents.grouping": [
+    "Directories are shown for grouping and are never deleted",
+    "目录仅用于分组展示，不会被删除"
+  ],
+  "mobile_documents.unsupported": [
+    "This document type is not supported for cleanup",
+    "暂不支持清理这种文档类型"
+  ],
+  "mobile_documents.readonly": [
+    "This document is read-only or cannot be deleted",
+    "此文档只读或不支持删除"
+  ],
+  "mobile_documents.matches": [
+    "Matches the reusable document rules",
+    "符合可复用的文档规则"
+  ],
+  "mobile_documents.unknown": ["unknown", "未知"],
+  "mobile_documents.age_unrestricted": ["No age condition", "不限制修改时间"],
+  "mobile_documents.size_unrestricted": ["No size condition", "不限制大小"],
+  "mobile_documents.age_condition": ["Last modified at least {days} days ago (observed: {actual} days)", "至少 {days} 天未修改（实际：{actual} 天）"],
+  "mobile_documents.size_condition": ["At least {bytes} bytes (observed: {actual} bytes)", "大小至少 {bytes} 字节（实际：{actual} 字节）"],
+  "mobile_documents.rule_reason": ["Name matches {patterns}. {age}; {size}. All conditions must match. {result}.", "名称匹配 {patterns}。{age}；{size}。需同时满足全部条件。{result}。"],
+  "mobile_documents.optional": [
+    "Does not meet the default recommendation thresholds",
+    "未达到默认推荐条件"
+  ],
+  "mobile_documents.report_large": [
+    "Document report exceeds the operation's output budget; narrow the rule scope",
+    "文档报告超过本次操作限制，请缩小规则范围"
+  ],
+  "mobile_documents.complete": [
+    "Document metadata scan complete",
+    "文档元数据扫描完成"
+  ],
+  "mobile_documents.pagination": [
+    "Native document pagination did not advance",
+    "本机文档分页未能继续"
+  ],
+  "mobile_documents.stopped": [
+    "Operation stopped before dispatch",
+    "操作已停止，尚未执行删除"
+  ],
+  "mobile_documents.unavailable": [
+    "This document cannot be selected for cleanup",
+    "此文档不能选中清理"
+  ],
+  "mobile_documents.selection_invalid": [
+    "Document selection is invalid",
+    "文档选择无效"
+  ],
+  "mobile_documents.scope_changed": [
+    "Document selection does not match the reusable rule scope",
+    "文档选择与可复用规则范围不一致"
+  ],
+  "mobile_documents.binding_changed": [
+    "The authorized directory binding changed; scan again",
+    "授权目录绑定已更改，请重新扫描"
+  ],
+  "mobile_documents.no_delete_grant": [
+    "The document grant does not permit deletion",
+    "当前文档授权不允许删除"
+  ],
+  "mobile_documents.ancestry_invalid": [
+    "The observed document ancestry is invalid",
+    "已扫描文档的父级关系无效"
+  ],
+  "mobile_documents.parent_absent": [
+    "A parent directory no longer exists; scan again",
+    "父目录已不存在，请重新扫描"
+  ],
+  "mobile_documents.parent_changed": [
+    "A parent directory changed; scan again",
+    "父目录已更改，请重新扫描"
+  ],
+  "mobile_documents.chain_changed": [
+    "Document no longer belongs to its observed directory chain",
+    "文档已不属于扫描时的目录范围"
+  ],
+  "mobile_documents.metadata_changed": [
+    "Document metadata or identity changed; scan again before deleting",
+    "文档元数据或身份已更改，请重新扫描后再删除"
+  ],
+  "mobile_documents.wrong_handler": [
+    "Task does not belong to the mobile documents handler",
+    "任务不属于移动文档处理器"
+  ],
+  "mobile_documents.rule_required": [
+    "Use a nonempty resource slot and at least one include-name pattern",
+    "请指定资源槽及至少一个文件名匹配规则"
+  ],
+  "mobile_documents.name_only": [
+    "Document patterns match names only, without separators",
+    "文档规则只匹配名称，不能包含路径分隔符"
+  ],
+  "mobile_documents.inspecting": [
+    "Inspecting {name}",
+    "正在检查 {name}"
+  ],
+  "mobile_documents.processed": [
+    "Processed {name}",
+    "已处理 {name}"
   ]
 }

@@ -1761,6 +1761,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "spaceprune-plugin-mobile-documents"
+version = "0.1.3"
+dependencies = [
+ "globset",
+ "schemars",
+ "serde",
+ "serde_json",
+ "spaceprune-config",
+ "spaceprune-contracts",
+ "spaceprune-engine",
+ "spaceprune-plugin-api",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
 name = "spaceprune-plugin-snapper"
 version = "0.1.3"
 dependencies = [

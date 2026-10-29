@@ -12,6 +12,7 @@
 | [授权](../reference/NATIVE-AUTHORIZATION.md) | 按需自动准备组件，读取与删除分开，复用有效连接并响应登录撤销。 |
 | [CLI](../usage/CLI.md) | 稳定脚本命令、JSON、动态模块、自选、语言和主题。 |
 | [插件](../reference/PLUGIN-PROTOCOL.md) | 内置／外部目录、共享启停策略与精确生命周期回执。 |
+| [原生文档](MOBILE-DOCUMENTS.md) | 宿主注入原生适配器、可复用资源槽、共享 Engine 与精确文件选择。 |
 | [调度](../build/DEPLOYMENT.md) | Linux systemd、Windows Task Scheduler、macOS LaunchAgent；原生验收按系统分别记录。 |
 | [发行](../build/BUILDING.md) | 公共仓库独立构建，自有代码 MIT，保留第三方许可与必要 Source Form。 |
 

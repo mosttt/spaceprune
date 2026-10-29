@@ -12,12 +12,15 @@ pub const SNAPPER_PLUGIN_ID: &str = "builtin.snapper";
 pub const SYSTEM_LINUX_PLUGIN_ID: &str = "builtin.system-linux";
 /// Reserved identity of the bundled developer-tool lifecycle capability.
 pub const DEVELOPER_TOOLS_PLUGIN_ID: &str = "builtin.developer-tools";
-/// IDs owned by the application, even on platforms where the capability is unavailable.
-pub const BUILTIN_PLUGIN_IDS: [&str; 4] = [
+/// Reserved identity of user-authorized native document access.
+pub const MOBILE_DOCUMENTS_PLUGIN_ID: &str = "builtin.mobile-documents";
+/// IDs owned by the application, including native mobile document access.
+pub const BUILTIN_PLUGIN_IDS: [&str; 5] = [
     FILESYSTEM_PLUGIN_ID,
     SNAPPER_PLUGIN_ID,
     SYSTEM_LINUX_PLUGIN_ID,
     DEVELOPER_TOOLS_PLUGIN_ID,
+    MOBILE_DOCUMENTS_PLUGIN_ID,
 ];
 
 /// Whether an ID belongs exclusively to an application-provided capability.

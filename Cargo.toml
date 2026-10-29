@@ -17,6 +17,7 @@ members = [
     "plugins/system-linux",
     "plugins/developer-tools",
     "plugins/snapper",
+    "plugins/mobile-documents",
 ]
 resolver = "3"
 

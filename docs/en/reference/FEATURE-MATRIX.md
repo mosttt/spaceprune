@@ -12,6 +12,7 @@ The implementation scope follows. [Validation](../development/VALIDATION.md) col
 | [Authorization](../reference/NATIVE-AUTHORIZATION.md) | On-demand component preparation, distinct read/delete rights, valid connections and login revocation. |
 | [CLI](../usage/CLI.md) | Stable script/JSON commands, dynamic modules, selection, languages and themes. |
 | [Plugins](../reference/PLUGIN-PROTOCOL.md) | Built-in/external catalogs, shared enablement and exact lifecycle receipts. |
+| [Native documents](MOBILE-DOCUMENTS.md) | Host-injected document providers, reusable resource slots, shared Engine and exact confirmed file selection. |
 | [Scheduling](../build/DEPLOYMENT.md) | systemd, Task Scheduler and LaunchAgent, with separate native acceptance. |
 | [Distribution](../build/BUILDING.md) | Independent MIT public sources, third-party licenses and required Source Form. |
 
