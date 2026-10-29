@@ -147,6 +147,7 @@ pub(crate) enum RecipeCommand {
 #[derive(Debug)]
 pub(crate) struct ParsedArgs {
     pub(crate) config: Option<PathBuf>,
+    pub(crate) recipe: Option<String>,
     pub(crate) action: Option<Action>,
     pub(crate) yes: bool,
     pub(crate) output: OutputMode,
@@ -242,6 +243,13 @@ fn command(config: Option<&ResolvedConfig>, theme: Theme) -> Command {
         .propagate_version(true)
         .disable_help_subcommand(true)
         .after_help(crate::i18n::text("commands.root_examples"))
+        .arg(
+            Arg::new("recipe")
+                .long("recipe")
+                .value_name("ID")
+                .help(crate::i18n::text("commands.help_recipe_override"))
+                .global(true),
+        )
         .arg(
             Arg::new("config")
                 .long("config")
@@ -699,6 +707,7 @@ fn parsed_args(matches: &ArgMatches, config: Option<&ResolvedConfig>) -> ParsedA
     };
     ParsedArgs {
         config: matches.get_one::<PathBuf>("config").cloned(),
+        recipe: matches.get_one::<String>("recipe").cloned(),
         action,
         yes: matches.get_flag("yes"),
         output,
@@ -882,6 +891,30 @@ mod tests {
             .chain(values.iter().copied())
             .map(OsString::from)
             .collect()
+    }
+
+    #[test]
+    fn schedule_recipe_argument_is_parsed_without_changing_preferences() {
+        let parsed = try_parse(
+            &arguments(&[
+                "--config",
+                "config.toml",
+                "--recipe",
+                "chosen",
+                "--no-progress",
+                "automation",
+                "run",
+                "daily",
+            ]),
+            None,
+            Theme::default(),
+        )
+        .unwrap();
+        assert_eq!(parsed.recipe.as_deref(), Some("chosen"));
+        assert_eq!(
+            parsed.command,
+            CliCommand::Automation(super::AutomationCommand::Run("daily".into()))
+        );
     }
 
     #[test]

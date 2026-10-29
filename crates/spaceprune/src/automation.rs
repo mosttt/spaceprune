@@ -3,7 +3,8 @@
 use serde::{Serialize, Serializer, ser::SerializeStruct};
 
 use crate::api::{
-    CleanupPlan, ExecutionReport, IoFailureKind, IssueLevel, OperationStopReason, ScanReport,
+    CleanupPlan, ExecutionReport, IoFailureKind, IssueLevel, ItemExecutionStatus,
+    OperationStopReason, PermissionOutcome, ScanReport,
 };
 
 /// Final outcome of one automation; readable work can finish while other work needs attention.
@@ -80,6 +81,25 @@ impl AutomationRunStatus {
             }
             if let Some(result) = &group.result {
                 for failure in &result.failures {
+                    let busy_skip = failure
+                        .io_failure
+                        .as_ref()
+                        .is_some_and(|io| io.kind == IoFailureKind::SharingViolation)
+                        && matches!(
+                            failure.authorization,
+                            None | Some(PermissionOutcome::Granted)
+                        )
+                        && result.outcomes.iter().any(|outcome| {
+                            outcome.item_id == failure.item_id
+                                && matches!(
+                                    outcome.status,
+                                    ItemExecutionStatus::Failed
+                                        | ItemExecutionStatus::PartiallyApplied
+                                )
+                        });
+                    if busy_skip {
+                        continue;
+                    }
                     if failure
                         .io_failure
                         .as_ref()

@@ -148,6 +148,8 @@ spaceprune recipe set personal
 
 `spaceprune recipe` interactively previews and selects recipes under `recipes` following `<ID>/<ID>.toml`; Enter saves and Esc cancels. `recipe set <ID>` switches directly and accepts only recipes actually present under the current `recipes` root. `recipe list` shows names, entry paths, and active state. Selection creates a CLI-only override in `config.selection.toml`; it does not change the shared default recipe or automation configuration. Without an override the CLI follows the graphical application’s most recently used recipe, falling back to the shared default. `recipe follow` clears the override. `--config` selects another configuration and its associated selection state. Deleted selections fall back to an existing selection or default.
 
+`--recipe <ID>` overrides the recipe for a single invocation without changing either saved selection. Installed schedules include this argument to keep their original recipe when the shared default changes. A missing explicitly selected recipe is an error; it never falls back to another recipe.
+
 `recipe --output json` directly returns the current recipe ID, name, entry, and configuration path, without opening a picker or writing configuration. `recipe list --output json` returns the list; `recipe set <ID> --output json` explicitly switches and returns the result.
 
 ## Built-in minimal recipe

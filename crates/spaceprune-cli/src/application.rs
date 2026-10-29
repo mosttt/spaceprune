@@ -125,7 +125,9 @@ fn run(
     if matches!(&bootstrap.command, CliCommand::Recipe(_)) {
         return run_recipe_command(&bootstrap, config_store.as_ref(), theme);
     }
-    let config = if matches!(&bootstrap.command, CliCommand::Automation(_)) {
+    let config = if let Some(recipe) = bootstrap.recipe.as_deref() {
+        load_named_recipe(config_path.as_deref(), recipe)?
+    } else if matches!(&bootstrap.command, CliCommand::Automation(_)) {
         load_default_recipe(config_path.as_deref())?
     } else {
         load_config(config_path.as_deref())?
@@ -141,6 +143,14 @@ fn run(
         return run_automation_command(parsed, config, theme);
     }
     cleanup::run(parsed, config, theme)
+}
+
+fn load_named_recipe(path: Option<&Path>, recipe: &str) -> Result<ResolvedConfig> {
+    let store = ConfigStore::discover(path)
+        .ok_or_else(|| anyhow::anyhow!("No application configuration is available"))?;
+    ConfigLoader::new()
+        .load_app_path_with_recipe(store.path(), Some(recipe))
+        .map_err(Into::into)
 }
 
 fn load_config(path: Option<&Path>) -> Result<ResolvedConfig> {
@@ -182,6 +192,12 @@ mod tests {
                 .unwrap();
         }
         store.save_recipe("default").unwrap();
+        let pinned = load_named_recipe(Some(store.path()), "manual").unwrap();
+        assert_eq!(pinned.name, "manual");
+        assert_eq!(pinned.application_recipe.as_deref(), Some("manual"));
+        assert_eq!(store.active_recipe().unwrap().as_deref(), Some("default"));
+        assert!(load_named_recipe(Some(store.path()), "missing").is_err());
+
         store.remember_used_recipe("desktop").unwrap();
         assert_eq!(load_config(Some(store.path())).unwrap().name, "desktop");
         store.save_cli_recipe(Some("manual")).unwrap();

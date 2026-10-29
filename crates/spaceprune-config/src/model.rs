@@ -85,6 +85,9 @@ pub struct ResolvedConfig {
     /// 这是运行时元数据，不属于 Recipe TOML，也不会进入序列化结果。
     #[serde(skip)]
     pub application_source: Option<PathBuf>,
+    /// Recipe selected by the application loader, pinned in scheduled invocations.
+    #[serde(skip)]
+    pub application_recipe: Option<String>,
     /// 用户变量映射文件；未设置时只使用内嵌平台映射。
     #[serde(default, rename = "variable-map")]
     pub variable_map: Option<String>,

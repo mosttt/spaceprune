@@ -132,6 +132,7 @@ impl ConfigLoader {
             .join(format!("{}.toml", app.recipe));
         let mut config = self.load_path(recipe_path)?;
         config.application_source = Some(path);
+        config.application_recipe = Some(app.recipe);
         Ok(config)
     }
 
@@ -183,6 +184,7 @@ impl ConfigLoader {
             usage: definition.usage,
             source: source_name,
             application_source: None,
+            application_recipe: None,
             variable_map: definition.variable_map,
             requires: definition.requires,
             modules: definition.modules,

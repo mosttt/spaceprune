@@ -111,3 +111,18 @@ fn unconfirmed_shutdown_outweighs_cancellation_without_losing_completed_effects(
     assert_eq!(report.execution.failure_count(), 1);
     assert_eq!(serde_json::to_value(&report).unwrap()["status"], "failed");
 }
+
+#[test]
+fn busy_skips_complete_without_counting_retained_items_as_deleted() {
+    let mut report = report();
+    let result = report.execution.groups[0].result.as_mut().unwrap();
+    result.attempted = 2;
+    result.failures.push(serde_json::from_value(json!({"item_id":"busy", "message":"locked", "io_failure":{"kind":"sharing_violation", "os_code":32}})).unwrap());
+    result.outcomes.push(serde_json::from_value(json!({"item_id":"busy", "status":"failed", "reclaimed_bytes":0, "unknown_reclaimed_items":0})).unwrap());
+    assert_eq!(report.status(), AutomationRunStatus::Completed);
+    assert_eq!(report.execution.succeeded(), 1);
+    assert_eq!(report.execution.reclaimed_bytes(), 16);
+    report.execution.groups[0].result.as_mut().unwrap().failures[0].authorization =
+        Some(spaceprune::api::PermissionOutcome::Denied);
+    assert_eq!(report.status(), AutomationRunStatus::Failed);
+}

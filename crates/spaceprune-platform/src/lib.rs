@@ -248,6 +248,9 @@ pub(crate) fn command_arguments(
     if let Some(path) = automation_config_path(config)? {
         arguments.extend(["--config".to_owned(), path.to_string_lossy().into_owned()]);
     }
+    if let Some(recipe) = &config.application_recipe {
+        arguments.extend(["--recipe".to_owned(), recipe.clone()]);
+    }
     arguments.extend([
         "--no-progress".to_owned(),
         "automation".to_owned(),
@@ -307,6 +310,13 @@ mod tests {
         ));
 
         config.application_source = Some("/tmp/Space Prune/config.toml".into());
+        config.application_recipe = Some("chosen-recipe".into());
+        let args = super::command_arguments(&config, "daily", Path::new("runner")).unwrap();
+        assert!(
+            args.windows(2)
+                .any(|pair| pair == ["--recipe", "chosen-recipe"])
+        );
+
         assert_eq!(
             automation_config_path(&config).unwrap(),
             Some(Path::new("/tmp/Space Prune/config.toml"))

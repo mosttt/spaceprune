@@ -1,5 +1,7 @@
 # Current state and remaining work
 
+Scheduled invocations pin their recipe ID with `--recipe`; Windows Task Scheduler, macOS launchd and Linux systemd use the same argument contract. A per-invocation CLI override leaves shared defaults unchanged. Confirmed sharing violations complete automation normally while retained items stay separate from successful deletion counts.
+
 Docker image scanning uses native `UniqueSize` for an exclusive-storage estimate. Build cache uses its size only when explicitly marked unshared; stopped containers use writable-layer size. Missing measurements remain unknown and known zero remains zero. Referenced content and release estimates remain separate. Partial receipts expose processed and unprocessed estimates, with file/subfolder wording. Seventeen Docker and three receipt projection tests passed on Windows.
 
 Core/CLI builds independently under MIT. Start with [development](../build/DEVELOPMENT.md) and [validation](VALIDATION.md) for current checks and acceptance gates.

@@ -1,4 +1,5 @@
 {
+  "commands.help_recipe_override": ["Use this saved recipe for this invocation", "本次运行使用指定的已保存方案"],
   "commands.language_about": [
     "Inspect or change the shared application language",
     "查看或更改共享应用语言"

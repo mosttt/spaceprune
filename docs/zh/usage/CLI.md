@@ -179,6 +179,8 @@ spaceprune recipe set personal
 `recipe set <ID>` 直接切换，且只接受当前 `recipes` 下实际存在的方案；`recipe list` 会显示名称、入口路径和活动状态。
 选择保存在 `config.selection.toml`，只覆盖 CLI 使用的方案，不改变默认方案及自动清理配置。未手动覆盖时，CLI 跟随图形应用最近使用的方案；没有使用记录时采用默认方案。`recipe follow` 恢复跟随；`--config` 选择另一份配置及其对应的选择记录。已删除的方案会回退到仍存在的选择或默认方案。
 `recipe --output json` 直接返回当前方案 ID、名称、入口与配置路径，不打开选择界面、不写配置；
+`--recipe <ID>` 仅覆盖本次命令使用的方案，不改变已保存的选择。安装后的系统计划携带此参数，切换默认方案不会改变已有计划。显式指定的方案不存在时直接报错，不回退到其他方案。
+
 `recipe list --output json` 返回方案列表，`recipe set <ID> --output json` 则明确执行切换并返回结果。
 
 ## 内置最小方案

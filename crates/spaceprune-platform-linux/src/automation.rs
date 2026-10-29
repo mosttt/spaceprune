@@ -27,7 +27,10 @@ pub fn install_automation(
         source,
     })?;
     let units = unit_paths(&directory, automation_id);
-    let config_argument = systemd_config_argument(application_config);
+    let mut config_argument = systemd_config_argument(application_config);
+    if let Some(recipe) = &config.application_recipe {
+        config_argument.push_str(&format!(" --recipe {}", systemd_quote(recipe)));
+    }
     let service = format!(
         "[Unit]\nDescription=SpacePrune automation {automation_id}\n\n[Service]\nType=oneshot\nExecStart={}{} --no-progress automation run {}\n",
         systemd_quote(&runner.to_string_lossy()),
