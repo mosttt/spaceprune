@@ -1,5 +1,7 @@
 # Current state and remaining work
 
+Docker image scanning uses native `UniqueSize` for an exclusive-storage estimate. Build cache uses its size only when explicitly marked unshared; stopped containers use writable-layer size. Missing measurements remain unknown and known zero remains zero. Referenced content and release estimates remain separate. Partial receipts expose processed and unprocessed estimates, with file/subfolder wording. Seventeen Docker and three receipt projection tests passed on Windows.
+
 Core/CLI builds independently under MIT. Start with [development](../build/DEVELOPMENT.md) and [validation](VALIDATION.md) for current checks and acceptance gates.
 
 ## Integrated capabilities

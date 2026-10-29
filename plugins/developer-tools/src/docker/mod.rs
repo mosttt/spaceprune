@@ -233,8 +233,8 @@ impl DockerHandler {
                         location: format!("{} / {}", binding.endpoint, object.id),
                         logical_size_applicability: Default::default(),
                         logical_bytes: object.bytes,
-                        // Shared layers and Desktop VM allocation prevent independent physical estimates.
-                        reclaimable_bytes: None,
+                        // Native unique-layer estimates exclude shared storage and VM allocation.
+                        reclaimable_bytes: object.reclaimable_bytes,
                         modified_at: object.timestamp,
                         recommendation: if recommend.enabled
                             && matches!(self.0, DockerKind::BuildCache | DockerKind::DanglingImages)
@@ -245,9 +245,14 @@ impl DockerHandler {
                             Recommendation::Optional
                         },
                         reason: format!(
-                            "{} {}",
+                            "{} {} {}",
                             policy.explanation(object.bytes, object.timestamp, self.0.time_basis()),
-                            self.0.consequence()
+                            self.0.consequence(),
+                            messages::text(if object.reclaimable_bytes.is_some() {
+                                "docker.size_estimate"
+                            } else {
+                                "docker.size_unavailable"
+                            })
                         ),
                         tags: vec![
                             "docker-lifecycle".into(),

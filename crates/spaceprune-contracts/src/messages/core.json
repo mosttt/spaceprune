@@ -296,8 +296,8 @@
     "正在处理已确认的文件系统项目 {p0}"
   ],
   "filesystem.partially_applied": [
-    "Partially applied ({p0} entries removed): {error}",
-    "已部分执行（移除 {p0} 个目录项）：{error}"
+    "Deleted {p0} files or subfolders; remaining content could not be removed: {error}",
+    "已删除其中 {p0} 个文件或子文件夹，剩余内容未删除：{error}"
   ],
   "filesystem.invalid_item": [
     "Unavailable item or invalid handler",
@@ -2234,5 +2234,13 @@
   "measurement.days": [
     "{days} days",
     "{days} 天"
+  ],
+  "docker.size_estimate": [
+    "Estimated from native Docker storage measurements, excluding shared image layers; actual disk space released may differ.",
+    "按 Docker 原生存储数据估算，镜像不重复计算共享层；实际磁盘释放量可能不同。"
+  ],
+  "docker.size_unavailable": [
+    "Referenced content and reclaimable space are measured separately; Docker did not provide an independent release estimate.",
+    "引用内容与可释放空间分别统计；Docker 未提供可单独释放的空间估算。"
   ]
 }

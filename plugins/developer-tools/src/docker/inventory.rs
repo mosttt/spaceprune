@@ -7,6 +7,7 @@ pub(super) struct Object {
     pub id: String,
     pub name: String,
     pub bytes: Option<u64>,
+    pub reclaimable_bytes: Option<u64>,
     pub timestamp: Option<u64>,
     pub parents: Vec<String>,
 }
@@ -109,6 +110,9 @@ pub(super) fn list_measured(
                     id: id.clone(),
                     name: format!("{} · {id}", description),
                     bytes,
+                    reclaimable_bytes: (row["Shared"].as_bool() == Some(false))
+                        .then_some(bytes)
+                        .flatten(),
                     timestamp,
                     parents: match row.get("Parents") {
                         None | Some(Value::Null) => Vec::new(),
@@ -142,6 +146,24 @@ pub(super) fn list_measured(
                 "--filter",
                 filter,
             ])?;
+            // Native per-image unique layers avoid adding shared layers once per image.
+            // Older engines may omit this optional measurement; enumeration still works.
+            let sizes = include_timestamps
+                .then(|| run(&["system", "df", "--verbose", "--format", "{{json .Images}}"]))
+                .and_then(Result::ok)
+                .and_then(|output| serde_json::from_str::<Vec<Value>>(&output).ok())
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|row| {
+                    Some((
+                        row["ID"].as_str()?.to_owned(),
+                        measurement::bytes(&row["UniqueSize"])?,
+                    ))
+                })
+                .collect::<std::collections::BTreeMap<_, _>>();
+            context.check().map_err(|_| {
+                PluginError::new("operation-stopped", messages::text("docker.cancelled"))
+            })?;
             for id in ids
                 .lines()
                 .filter(|s| !s.is_empty())
@@ -195,6 +217,7 @@ pub(super) fn list_measured(
                     id: id.into(),
                     name: if tags.is_empty() { id.into() } else { tags },
                     bytes: row["Size"].as_u64(),
+                    reclaimable_bytes: sizes.get(id).copied(),
                     timestamp: measurement::timestamp(row.get("CreatedAt")),
                     parents: Vec::new(),
                 });
@@ -249,6 +272,7 @@ pub(super) fn list_measured(
                         .trim_start_matches('/')
                         .into(),
                     bytes: row["Size"].as_u64(),
+                    reclaimable_bytes: row["Size"].as_u64(),
                     timestamp: if row["State"].as_str() == Some("created") {
                         measurement::timestamp(row.get("CreatedAt"))
                     } else {

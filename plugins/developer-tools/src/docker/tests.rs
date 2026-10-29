@@ -464,3 +464,94 @@ fn malformed_existence_results_cannot_confirm_object_absence() {
         );
     }
 }
+
+#[test]
+fn native_unique_layers_are_used_without_substituting_full_image_size() {
+    struct Images(Option<&'static str>);
+    impl Runner for Images {
+        fn run(
+            &self,
+            _: Option<&str>,
+            args: &[&str],
+            _: &OperationContext,
+        ) -> PluginResult<String> {
+            let id = format!("sha256:{}", "a".repeat(64));
+            if args.starts_with(&["image", "ls"]) {
+                return Ok(id);
+            }
+            if args.starts_with(&["system", "df"]) {
+                return self
+                    .0
+                    .map(|size| json!([{"ID":id,"UniqueSize":size}]).to_string())
+                    .ok_or_else(|| PluginError::new("docker-command-failed", "unsupported"));
+            }
+            if args.starts_with(&["container", "ls"]) {
+                return Ok(String::new());
+            }
+            if args.starts_with(&["image", "inspect"]) {
+                return Ok(json!({"ID":id,"Size":8_000_000_000_u64,"Tags":["fixture:latest"],"CreatedAt":"2000-01-01T00:00:00Z"}).to_string());
+            }
+            panic!("Unexpected command {args:?}");
+        }
+    }
+    let binding = Binding {
+        endpoint: "unix:///fixture/docker.sock".into(),
+        engine: "fixture".into(),
+    };
+    for (size, expected) in [
+        (Some("1.5GB"), Some(1_500_000_000)),
+        (Some("0B"), Some(0)),
+        (Some("N/A"), None),
+        (None, None),
+    ] {
+        let result = inventory::list_measured(
+            DockerKind::UnusedImages,
+            &binding,
+            &Images(size),
+            &OperationContext::default(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].bytes, Some(8_000_000_000));
+        assert_eq!(result[0].reclaimable_bytes, expected);
+    }
+}
+
+#[test]
+fn only_explicitly_unshared_build_cache_has_a_reclaimable_estimate() {
+    struct Cache(Option<bool>);
+    impl Runner for Cache {
+        fn run(
+            &self,
+            _: Option<&str>,
+            args: &[&str],
+            _: &OperationContext,
+        ) -> PluginResult<String> {
+            assert!(args.starts_with(&["buildx", "du"]));
+            Ok(
+                json!({"ID":"cacheone","Size":"12MB","Shared":self.0,"Reclaimable":true})
+                    .to_string(),
+            )
+        }
+    }
+    let binding = Binding {
+        endpoint: "unix:///fixture/docker.sock".into(),
+        engine: "fixture".into(),
+    };
+    for (shared, expected) in [
+        (Some(false), Some(12_000_000)),
+        (Some(true), None),
+        (None, None),
+    ] {
+        let result = inventory::list(
+            DockerKind::BuildCache,
+            &binding,
+            &Cache(shared),
+            &OperationContext::default(),
+        )
+        .unwrap();
+        assert_eq!(result[0].bytes, Some(12_000_000));
+        assert_eq!(result[0].reclaimable_bytes, expected);
+    }
+}

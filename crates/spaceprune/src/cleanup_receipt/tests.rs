@@ -40,6 +40,7 @@ fn partial_filesystem_estimates_require_comparable_confirmed_measurements() {
     let items = unfinished_cleanup_items(&report, Some(&plan));
     assert!(items[0].partially_applied);
     assert_eq!(items[0].estimated_bytes, Some(768));
+    assert_eq!(items[0].processed_bytes, Some(256));
     report.groups[0].result.as_mut().unwrap().outcomes[0].reclaimed_estimate = Some(2048);
     assert_eq!(
         unfinished_cleanup_items(&report, Some(&plan))[0].estimated_bytes,

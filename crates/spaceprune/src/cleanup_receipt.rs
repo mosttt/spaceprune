@@ -22,6 +22,8 @@ pub struct UnfinishedCleanupItem {
     pub partially_applied: bool,
     /// Estimated uncleaned logical content, never counted as freed space.
     pub estimated_bytes: Option<u64>,
+    /// Confirmed processed content estimate for a partially completed item.
+    pub processed_bytes: Option<u64>,
 }
 
 /// Project unfinished items using exact plan identities and structured native results.
@@ -98,6 +100,9 @@ pub fn unfinished_cleanup_items(
                 in_use,
                 partially_applied: status == Some(ItemExecutionStatus::PartiallyApplied),
                 estimated_bytes,
+                processed_bytes: outcome
+                    .filter(|value| value.status == ItemExecutionStatus::PartiallyApplied)
+                    .and_then(|value| value.reclaimed_estimate),
             });
         }
     }
