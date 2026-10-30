@@ -4,6 +4,10 @@ Separate existing evidence from native checks still required. Older tests do not
 
 ## Existing evidence
 
+Native Apple Silicon macOS CLI debug builds and `--version`/`--help` startup passed, along with three targeted login-binding tests. Quartz session keys use the SDK's `CFSTR` macro values instead of nonexistent linker symbols; inactive sessions, incomplete login, missing fields and wrong value types cannot acquire a reusable foreground login binding. Terminal monitoring explicitly requests hangup/error events; a disposable pipe test confirms that input remains unread and peer closure is detected. These checks do not establish signed component installation or authorization acceptance.
+
+macOS startup APFS System and Data volumes share one capacity record while retaining both access paths; hidden recovery volumes are excluded from the ordinary local inventory. Two fixture tests cover startup grouping, external/network mounts and unrelated volumes with equal capacity. A native read-only enumeration returned one startup record.
+
 Configuration and real generated-directory fixtures cover multi-file sources, save/reload, recurring matches for new contents, exact selection, exclusions, single-use plans and partial receipts. Failures do not replay deletion; moved-directory restoration never overwrites new contents. Linux native authorization, login revocation, scheduling and Btrfs Snapper authentication/protection/free-space observations have real-environment evidence for those configurations, not every filesystem/platform combination.
 
 The latest Windows-feedback fix passed one filesystem authorization-reconciliation test and ten CLI cleanup-output tests. Eighteen shared permission failures are explained once with at most five locations in human output, while JSON retains all failures. Component-not-started, unconfirmed execution and already-applied partial effects remain distinct.

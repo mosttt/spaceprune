@@ -12,7 +12,7 @@ use core_foundation::{
         CFRunLoop, CFRunLoopSource, CFRunLoopSourceContext, CFRunLoopSourceCreate,
         kCFRunLoopDefaultMode,
     },
-    string::CFStringRef,
+    string::CFString,
 };
 use objc2::rc::autoreleasepool;
 use objc2_app_kit::{
@@ -42,8 +42,6 @@ unsafe extern "C" {
 #[link(name = "CoreGraphics", kind = "framework")]
 unsafe extern "C" {
     fn CGSessionCopyCurrentDictionary() -> CFDictionaryRef;
-    static kCGSessionOnConsoleKey: CFStringRef;
-    static kCGSessionLoginDoneKey: CFStringRef;
 }
 
 #[derive(Clone, Copy)]
@@ -123,9 +121,15 @@ fn graphics_active() -> Result<bool, PermissionOutcome> {
             raw,
         )
     };
-    let value = |key: CFStringRef| {
-        // SAFETY: The dictionary owns its values and each key is a public CoreGraphics constant.
-        let raw = unsafe { CFDictionaryGetValue(dictionary.as_concrete_TypeRef(), key.cast()) };
+    graphics_session_active(&dictionary)
+}
+
+fn graphics_session_active(dictionary: &CFDictionary) -> Result<bool, PermissionOutcome> {
+    let value = |key: &str| {
+        let key = CFString::new(key);
+        // SAFETY: The dictionary owns its values and the CFString key lives through this lookup.
+        let raw =
+            unsafe { CFDictionaryGetValue(dictionary.as_concrete_TypeRef(), key.as_CFTypeRef()) };
         if raw.is_null() || unsafe { CFGetTypeID(raw) != CFBooleanGetTypeID() } {
             Err(PermissionOutcome::AuthorizationUnavailable)
         } else {
@@ -134,7 +138,9 @@ fn graphics_active() -> Result<bool, PermissionOutcome> {
             }))
         }
     };
-    Ok(value(unsafe { kCGSessionOnConsoleKey })? && value(unsafe { kCGSessionLoginDoneKey })?)
+    // CGSession.h defines these keys as CFSTR macros, not exported symbols.
+    // The on-console key's string contains "CGSSession", unlike its macro name.
+    Ok(value("kCGSSessionOnConsoleKey")? && value("kCGSessionLoginDoneKey")?)
 }
 
 struct Monitor {
@@ -227,7 +233,8 @@ fn same_session(original: Session) -> bool {
 fn tty_alive(tty: &File, timeout_ms: i32) -> bool {
     let mut descriptor = libc::pollfd {
         fd: tty.as_raw_fd(),
-        events: 0,
+        // Darwin does not report hangup/error events with an empty requested mask.
+        events: libc::POLLHUP | libc::POLLERR,
         revents: 0,
     };
     // SAFETY: Poll only hangup/error events on an owned controlling-TTY descriptor. Never read input.
@@ -333,6 +340,56 @@ fn keep_alive_source() -> Result<CFRunLoopSource, PermissionOutcome> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn graphics_session_requires_console_and_completed_login() {
+        for (console, logged_in, active) in [
+            (true, true, true),
+            (true, false, false),
+            (false, true, false),
+            (false, false, false),
+        ] {
+            let dictionary = CFDictionary::from_CFType_pairs(&[
+                (
+                    CFString::new("kCGSSessionOnConsoleKey"),
+                    CFBoolean::from(console),
+                ),
+                (
+                    CFString::new("kCGSessionLoginDoneKey"),
+                    CFBoolean::from(logged_in),
+                ),
+            ]);
+            assert_eq!(
+                graphics_session_active(&dictionary.into_untyped()),
+                Ok(active)
+            );
+        }
+    }
+
+    #[test]
+    fn graphics_session_rejects_missing_or_non_boolean_state() {
+        let console = CFString::new("kCGSSessionOnConsoleKey");
+        let login = CFString::new("kCGSessionLoginDoneKey");
+        let enabled = CFBoolean::true_value().as_CFType();
+        let invalid = CFString::new("true").as_CFType();
+        for pairs in [
+            vec![],
+            vec![(console.clone(), enabled.clone())],
+            vec![(login.clone(), enabled.clone())],
+            vec![
+                (console.clone(), invalid.clone()),
+                (login.clone(), enabled.clone()),
+            ],
+            vec![(console, enabled), (login, invalid)],
+        ] {
+            let dictionary = CFDictionary::from_CFType_pairs(&pairs);
+            assert_eq!(
+                graphics_session_active(&dictionary.into_untyped()),
+                Err(PermissionOutcome::AuthorizationUnavailable)
+            );
+        }
+    }
+
     #[test]
     fn terminal_hangup_is_observed_without_consuming_input() {
         use std::{
