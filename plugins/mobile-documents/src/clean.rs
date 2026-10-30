@@ -119,7 +119,15 @@ fn prepare(
         || selection.document.kind != DocumentKind::File
         || selection.document.id == selection.binding.root_id
         || !rules.included(&selection.document.name)
-        || (!rules.rules.recursive && !selection.ancestors.is_empty())
+        || selection.ancestors.len() < rules.rules.relative_directory.len()
+        || !selection
+            .ancestors
+            .iter()
+            .map(|entry| &entry.name)
+            .zip(&rules.rules.relative_directory)
+            .all(|(actual, expected)| actual == expected)
+        || (!rules.rules.recursive
+            && selection.ancestors.len() != rules.rules.relative_directory.len())
     {
         return Err(invalid(spaceprune_plugin_api::messages::text(
             "mobile_documents.scope_changed",

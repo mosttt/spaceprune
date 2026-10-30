@@ -13,6 +13,7 @@ platforms = ["android"]
 
 [modules.documents.tasks.logs.options]
 resource = "saved-logs"
+relative-directory = ["logs"]
 recursive = true
 include-names = ["*.log"]
 exclude-names = ["keep-*"]
@@ -26,4 +27,6 @@ The native adapter must revalidate the binding, current ancestry, document ident
 
 Logical bytes processed do not promise an identical change in free disk space. Android document providers need not supply sizes, timestamps, atomic compare-and-delete or cancellable deletion; hosts must preserve those distinctions in receipts. The provider contract can support other native storage systems without altering the upper-level selection and execution semantics.
 
-Run `cargo test --locked -p spaceprune-plugin-mobile-documents` for nine Engine/provider fixtures covering matching, exclusions, unknown metadata, revoked/rebound grants, changed ancestors, exact selection, cancellation and uncertainty. Native UI/provider acceptance belongs to the embedding host; these fixtures alone do not establish Android or iOS device support.
+Run `cargo test --locked -p spaceprune-plugin-mobile-documents` for ten Engine/provider fixtures covering matching, exclusions, unknown metadata, revoked/rebound grants, changed ancestors, exact selection, cancellation and uncertainty. Native UI/provider acceptance belongs to the embedding host; these fixtures alone do not establish Android or iOS device support.
+
+`relative-directory` is an optional sequence of literal directory names below the authorized resource root. It never accepts absolute paths, `..`, or separators. The scanner follows only that relative scope; cleanup rechecks every observed ancestor, including its identity and name. A changed ancestor invalidates the old selection. This keeps recurring subdirectory rules portable without sharing document identifiers.

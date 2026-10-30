@@ -108,6 +108,16 @@ pub(super) fn scan(
                 if rules.excluded(&document.name) {
                     continue;
                 }
+                if ancestors.len() < rules.rules.relative_directory.len() {
+                    if document.kind == DocumentKind::Directory
+                        && document.name == rules.rules.relative_directory[ancestors.len()]
+                    {
+                        let mut next = ancestors.clone();
+                        next.push(document.clone());
+                        queue.push_back((document.id, parent_item.clone(), next));
+                    }
+                    continue;
+                }
                 let directory = document.kind == DocumentKind::Directory;
                 if !directory && !rules.included(&document.name) {
                     continue;

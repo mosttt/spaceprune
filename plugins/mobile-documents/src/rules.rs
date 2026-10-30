@@ -11,6 +11,9 @@ use spaceprune_plugin_api::{PluginError, PluginResult, TaskRequest};
 pub struct DocumentRules {
     /// Portable slot name; each installation explicitly binds it to a granted directory.
     pub resource: String,
+    /// Literal directory names below the locally bound root; never a URI or document identity.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub relative_directory: Vec<String>,
     /// Visit descendants when true; false examines only direct children of the selected root.
     #[serde(default = "yes")]
     pub recursive: bool,
@@ -56,6 +59,12 @@ impl CompiledRules {
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'-' | b'_' | b'.'))
             || rules.include_names.is_empty()
+            || rules.relative_directory.len() > 128
+            || rules.relative_directory.iter().any(|name| {
+                name.is_empty()
+                    || matches!(name.as_str(), "." | "..")
+                    || name.contains(['/', '\\', '\0'])
+            })
         {
             return Err(invalid(spaceprune_plugin_api::messages::text(
                 "mobile_documents.rule_required",

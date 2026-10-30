@@ -235,6 +235,50 @@ fn selected(report: &ScanReport, names: &[&str]) -> BTreeSet<ItemKey> {
 }
 
 #[test]
+fn relative_directory_limits_reusable_rules_and_revalidates_ancestors() {
+    let mut inside = file("inside", "old.log", Some(8));
+    inside.parent_id = "logs".into();
+    let mut deep = file("deep", "nested.log", Some(16));
+    deep.parent_id = "nested".into();
+    let mut nested = directory("nested", "nested");
+    nested.parent_id = "logs".into();
+    let provider = MemoryProvider::new(vec![
+        directory("logs", "logs"),
+        inside,
+        nested,
+        deep,
+        file("outside", "outside.log", Some(32)),
+    ]);
+    let recipe = RECIPE.replace(
+        "recursive = true",
+        "recursive = false\nrelative-directory = [\"logs\"]",
+    );
+    let (engine, _root) = engine(provider.clone(), &recipe);
+    let report = scan(&engine);
+    assert_eq!(report.selectable_keys(), selected(&report, &["old.log"]));
+    assert!(
+        !provider
+            .0
+            .lock()
+            .unwrap()
+            .visited
+            .contains(&"nested".to_owned())
+    );
+    let plan = report.plan_recommended().unwrap();
+    provider
+        .0
+        .lock()
+        .unwrap()
+        .documents
+        .get_mut("logs")
+        .unwrap()
+        .name = "other".into();
+    let outcome = engine.execute(&plan, &NullProgress, &OperationContext::default());
+    assert_eq!(outcome.succeeded(), 0);
+    assert!(provider.0.lock().unwrap().deleted.is_empty());
+}
+
+#[test]
 fn measurement_and_rule_explanations_preserve_unknown_metadata() {
     use spaceprune_plugin_api::{ProgressEvent, ProgressSink, ScanMeasurement, TaskRequest};
     #[derive(Default)]
