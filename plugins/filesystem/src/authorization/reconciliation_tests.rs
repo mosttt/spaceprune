@@ -57,6 +57,7 @@ impl Handler for PartialOrdinary {
                     reclaimed_estimate: self.known_size.then_some(6),
                     reclaimed_lower_bound: 0,
                     failure: Some(ItemFailure {
+                        file_usage: None,
                         authorization: None,
                         item_id: item.id.clone(),
                         message: "Remaining entries require authorization".into(),
@@ -120,6 +121,7 @@ impl CleanupAccess for Authorized {
             reclaimed_estimate: matches!(self.completion, Completion::Confirmed).then_some(9),
             reclaimed_lower_bound: 0,
             failure: lost.then(|| ItemFailure {
+                file_usage: None,
                 authorization: None,
                 item_id: item.id.clone(),
                 io_failure: None,

@@ -192,12 +192,13 @@ pub(super) fn remove(
             result.already_absent = true;
             return Ok(());
         }
-        Err(error) => return Err(error),
+        Err(error) => return Err(crate::error::with_file_usage(error, &root.join(relative))),
     };
     if identity(&selected)? != *expected {
         return Err(changed());
     }
     remove_entry(
+        root,
         selected,
         relative,
         root_identity.device,
@@ -208,6 +209,7 @@ pub(super) fn remove(
 }
 
 fn remove_entry(
+    root: &Path,
     file: File,
     relative: &Path,
     device: u64,
@@ -239,9 +241,22 @@ fn remove_entry(
                 let child = match open_relative(&file, &name, true) {
                     Ok(file) => file,
                     Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
-                    Err(error) => return Err(error),
+                    Err(error) => {
+                        return Err(crate::error::with_file_usage(
+                            error,
+                            &root.join(&child_relative),
+                        ));
+                    }
                 };
-                remove_entry(child, &child_relative, device, excluded, context, result)?;
+                remove_entry(
+                    root,
+                    child,
+                    &child_relative,
+                    device,
+                    excluded,
+                    context,
+                    result,
+                )?;
             }
         }
     }
@@ -259,7 +274,7 @@ fn remove_entry(
             Ok(())
         }
         Err(error) if directory && error.kind() == io::ErrorKind::DirectoryNotEmpty => Ok(()),
-        Err(error) => Err(error),
+        Err(error) => Err(crate::error::with_file_usage(error, &root.join(relative))),
     }
 }
 

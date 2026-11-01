@@ -102,6 +102,23 @@ pub(super) fn render(
             crate::i18n::text(&format!("{reason}_help"))
         );
     }
+    for item in items.iter().filter(|item| item.in_use) {
+        let path = item
+            .file_usage
+            .as_ref()
+            .map_or(item.item_id.as_str(), |usage| usage.path.as_str());
+        let clean = |text: &str| text.chars().filter(|c| !c.is_control()).collect::<String>();
+        let _ = writeln!(text, "  {}", clean(path));
+        if let Some(usage) = &item.file_usage
+            && !usage.processes.is_empty()
+        {
+            for process in &usage.processes {
+                let _ = writeln!(text, "    {} (PID {})", clean(&process.name), process.pid);
+            }
+        } else {
+            let _ = writeln!(text, "    {}", crate::i18n::text("terminal.usage_unknown"));
+        }
+    }
     if !items.is_empty() {
         text.push_str(crate::i18n::text("terminal.receipt_json_details"));
     }

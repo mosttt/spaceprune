@@ -1,8 +1,6 @@
 //! Non-destructive receipt projections; native outcomes remain authoritative.
 
-use crate::api::{
-    CleanupPlanData, ExecutionReport, IoFailureKind, ItemExecutionStatus, PermissionOutcome,
-};
+use crate::api::{CleanupPlanData, ExecutionReport, ItemExecutionStatus};
 use serde::Serialize;
 use std::collections::BTreeMap;
 
@@ -10,6 +8,8 @@ use std::collections::BTreeMap;
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct UnfinishedCleanupItem {
+    /// Display-only file usage observed at failure time; None means unsupported or unavailable.
+    pub file_usage: Option<crate::api::FileUsage>,
     /// Original module identity.
     pub module_id: String,
     /// Original task identity.
@@ -62,17 +62,7 @@ pub fn unfinished_cleanup_items(
         for failure in &result.failures {
             let outcome = outcomes.get(failure.item_id.as_str()).copied();
             let status = outcome.map(|outcome| outcome.status);
-            let in_use = matches!(
-                status,
-                Some(ItemExecutionStatus::Failed | ItemExecutionStatus::PartiallyApplied)
-            ) && failure
-                .io_failure
-                .as_ref()
-                .is_some_and(|io| io.kind == IoFailureKind::SharingViolation)
-                && matches!(
-                    failure.authorization,
-                    None | Some(PermissionOutcome::Granted)
-                );
+            let in_use = status.is_some_and(|status| failure.is_in_use(status));
             let item = planned.get(&(
                 group.module_id.as_str(),
                 group.task_id.as_str(),
@@ -94,6 +84,7 @@ pub fn unfinished_cleanup_items(
                 }
             });
             items.push(UnfinishedCleanupItem {
+                file_usage: in_use.then(|| failure.file_usage.clone()).flatten(),
                 module_id: group.module_id.clone(),
                 task_id: group.task_id.clone(),
                 item_id: failure.item_id.clone(),

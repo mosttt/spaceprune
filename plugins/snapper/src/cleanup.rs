@@ -325,6 +325,7 @@ pub(super) fn clean_batch(
                         reclaimed_estimate: (status == ItemExecutionStatus::Failed).then_some(0),
                         reclaimed_lower_bound: 0,
                         failure: Some(ItemFailure {
+                            file_usage: None,
                             authorization: failure.authorization,
                             io_failure: failure.io_failure.clone(),
                             item_id: entry.item.id.clone(),
@@ -410,6 +411,7 @@ fn fail(
             reclaimed_estimate: Some(0),
             reclaimed_lower_bound: 0,
             failure: Some(ItemFailure {
+                file_usage: None,
                 authorization: failure.authorization,
                 io_failure: failure.io_failure,
                 item_id: item.id.clone(),

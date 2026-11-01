@@ -203,6 +203,7 @@ fn recover_group(
                     previous
                         .and_then(|outcome| outcome.failure.clone())
                         .unwrap_or_else(|| ItemFailure {
+                            file_usage: None,
                             item_id: item.id,
                             authorization: None,
                             io_failure: None,

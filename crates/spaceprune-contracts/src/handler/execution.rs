@@ -6,6 +6,9 @@ use std::collections::BTreeSet;
 /// 单个清理项的执行失败。
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema, PartialEq, Eq)]
 pub struct ItemFailure {
+    /// Best-effort native file usage at failure time, absent on unsupported platforms.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_usage: Option<crate::access::FileUsage>,
     /// Result of an authorization attempt for this item, distinct from its original IO failure.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub authorization: Option<crate::access::PermissionOutcome>,
@@ -16,6 +19,23 @@ pub struct ItemFailure {
     pub item_id: String,
     /// 失败说明。
     pub message: String,
+}
+
+impl ItemFailure {
+    /// A sharing violation is an in-use skip only when no authorization failure overrides it.
+    pub fn is_in_use(&self, status: ItemExecutionStatus) -> bool {
+        matches!(
+            status,
+            ItemExecutionStatus::Failed | ItemExecutionStatus::PartiallyApplied
+        ) && self
+            .io_failure
+            .as_ref()
+            .is_some_and(|io| io.kind == crate::access::IoFailureKind::SharingViolation)
+            && matches!(
+                self.authorization,
+                None | Some(crate::access::PermissionOutcome::Granted)
+            )
+    }
 }
 
 /// Handler 的清理结果。
@@ -301,6 +321,7 @@ mod cleanup_size_tests {
             reclaimed_estimate: None,
             reclaimed_lower_bound: 6,
             failure: Some(ItemFailure {
+                file_usage: None,
                 authorization: None,
                 item_id: "partial".into(),
                 io_failure: None,
@@ -350,6 +371,7 @@ mod cleanup_size_tests {
         result.record_success(Some(8192));
         result.attempted += 1;
         result.failures.push(ItemFailure {
+            file_usage: None,
             authorization: None,
             io_failure: None,
             item_id: "failed-unknown".to_owned(),

@@ -1,4 +1,5 @@
 use super::*;
+use crate::api::PermissionOutcome;
 use serde_json::json;
 
 fn fixture() -> (ExecutionReport, CleanupPlanData) {
@@ -71,4 +72,29 @@ fn uncertain_or_authorization_failures_never_become_benign_skips() {
     assert_eq!(items[0].estimated_bytes, None);
     report.groups[0].result.as_mut().unwrap().outcomes.clear();
     assert!(!unfinished_cleanup_items(&report, Some(&plan))[0].in_use);
+}
+
+#[test]
+fn file_usage_survives_receipts_but_is_not_an_authorization_outcome() {
+    let (mut report, plan) = fixture();
+    let failure = &mut report.groups[0].result.as_mut().unwrap().failures[0];
+    failure.file_usage = Some(crate::api::FileUsage {
+        path: "cache/held.log".into(),
+        processes: vec![crate::api::BlockingProcess {
+            pid: 42,
+            name: "Editor".into(),
+        }],
+    });
+    let items = unfinished_cleanup_items(&report, Some(&plan));
+    assert_eq!(
+        items[0].file_usage.as_ref().unwrap().processes[0].name,
+        "Editor"
+    );
+    report.groups[0].result.as_mut().unwrap().failures[0].authorization =
+        Some(PermissionOutcome::Denied);
+    assert!(
+        unfinished_cleanup_items(&report, Some(&plan))[0]
+            .file_usage
+            .is_none()
+    );
 }

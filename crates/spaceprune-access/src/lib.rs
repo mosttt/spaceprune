@@ -1,6 +1,8 @@
 //! Shared native operation capabilities. This crate has no UI, model, or cloud dependencies.
 
 pub mod error;
+#[cfg(windows)]
+mod file_usage;
 pub mod filesystem;
 #[cfg(target_os = "linux")]
 pub mod go_cache;

@@ -837,7 +837,7 @@ pub(crate) fn display_message(value: &str) -> String {
             tail = &suffix[4..];
         } else if suffix
             .as_bytes()
-            .get(0)
+            .first()
             .is_some_and(u8::is_ascii_alphabetic)
             && suffix.as_bytes().get(1..3) == Some(b":\\")
         {

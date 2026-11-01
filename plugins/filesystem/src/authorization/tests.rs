@@ -123,6 +123,7 @@ fn denied(item: &CleanupItem) -> PluginResult<HandlerCleanResult> {
         reclaimed_estimate: Some(0),
         reclaimed_lower_bound: 0,
         failure: Some(ItemFailure {
+            file_usage: None,
             authorization: None,
             io_failure: Some(spaceprune_access::error::classify(&io::Error::from(
                 io::ErrorKind::PermissionDenied,
@@ -336,6 +337,7 @@ fn partial_permission_retry_uses_original_identity_and_merges_only_remaining_eff
             reclaimed_estimate: Some(6),
             reclaimed_lower_bound: 0,
             failure: Some(ItemFailure {
+                file_usage: None,
                 authorization: None,
                 item_id: items[0].id.clone(),
                 message: "Partial cleanup stopped on access denial".into(),

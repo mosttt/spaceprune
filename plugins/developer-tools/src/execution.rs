@@ -112,6 +112,7 @@ impl DeveloperHandler {
                         }
                     };
                     outcome.failure = Some(ItemFailure {
+                        file_usage: None,
                         authorization: None,
                         io_failure,
                         item_id: item.id.clone(),

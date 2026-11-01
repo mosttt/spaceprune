@@ -370,6 +370,7 @@ impl Session {
                         reclaimed_estimate: None,
                         reclaimed_lower_bound: 0,
                         failure: Some(spaceprune_plugin_api::ItemFailure {
+                            file_usage: None,
                             authorization,
                             item_id: item.id.clone(),
                             io_failure: None,

@@ -1,6 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "BlockingProcess": {
+      "description": "An OS-reported application using a blocked file. This is diagnostic, never authority to stop it.",
+      "properties": {
+        "name": {
+          "description": "Native application or service display name.",
+          "type": "string"
+        },
+        "pid": {
+          "description": "Process identifier observed at failure time; it may be reused later.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "pid"
+      ],
+      "type": "object"
+    },
     "CleanupSizeAccounting": {
       "description": "How a handler's completed selections contribute to a human-facing cleanup summary.",
       "oneOf": [
@@ -19,6 +39,27 @@
           "type": "string"
         }
       ]
+    },
+    "FileUsage": {
+      "description": "Best-effort native explanation for one file which could not be removed.",
+      "properties": {
+        "path": {
+          "description": "Display-only path of the exact blocked file, including a child of a selected directory.",
+          "type": "string"
+        },
+        "processes": {
+          "description": "Processes observed at failure time; an empty list means the OS could not identify them.",
+          "items": {
+            "$ref": "#/definitions/BlockingProcess"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "processes"
+      ],
+      "type": "object"
     },
     "GroupExecutionReport": {
       "description": "一个计划组的执行报告。",
@@ -367,6 +408,17 @@
             }
           ],
           "description": "Result of an authorization attempt for this item, distinct from its original IO failure."
+        },
+        "file_usage": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/FileUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Best-effort native file usage at failure time, absent on unsupported platforms."
         },
         "io_failure": {
           "anyOf": [

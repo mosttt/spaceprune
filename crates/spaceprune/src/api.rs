@@ -13,6 +13,7 @@ pub use crate::system_capabilities::{
     discover_system_capabilities, inspect_system_capability, probe_system_capabilities,
 };
 use crate::{build_engine, build_readonly_engine};
+pub use spaceprune_contracts::access::{BlockingProcess, FileUsage};
 pub use spaceprune_plugin_developer_tools::CapabilityProbe;
 
 pub use crate::native_access::NativeScanAccess;

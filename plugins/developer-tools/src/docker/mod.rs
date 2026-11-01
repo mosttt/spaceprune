@@ -416,6 +416,7 @@ impl DockerHandler {
                             outcome.reclaimed_estimate = None;
                         }
                         outcome.failure = Some(ItemFailure {
+                            file_usage: None,
                             authorization: None,
                             io_failure: None,
                             item_id: item.id.clone(),

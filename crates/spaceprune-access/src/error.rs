@@ -44,6 +44,7 @@ struct NativeFailure {
     failure: IoFailure,
     message: String,
     effects: bool,
+    file_usage: Option<spaceprune_contracts::access::FileUsage>,
 }
 
 impl std::fmt::Display for NativeFailure {
@@ -62,6 +63,7 @@ pub fn failure(kind: IoFailureKind, message: impl Into<String>) -> io::Error {
         },
         message: message.into(),
         effects: false,
+        file_usage: None,
     })
 }
 
@@ -79,6 +81,7 @@ pub(crate) fn failure_with_cause(
         },
         message: message.into(),
         effects: false,
+        file_usage: None,
     })
 }
 
@@ -95,6 +98,7 @@ pub fn failure_after_effects(
         },
         message: message.into(),
         effects: true,
+        file_usage: file_usage(cause),
     })
 }
 
@@ -104,4 +108,29 @@ pub fn has_effects(error: &io::Error) -> bool {
         .get_ref()
         .and_then(|source| source.downcast_ref::<NativeFailure>())
         .is_some_and(|failure| failure.effects)
+}
+
+/// Read display-only file usage captured by the failing native operation.
+pub fn file_usage(error: &io::Error) -> Option<spaceprune_contracts::access::FileUsage> {
+    error
+        .get_ref()
+        .and_then(|source| source.downcast_ref::<NativeFailure>())
+        .and_then(|failure| failure.file_usage.clone())
+}
+
+#[cfg(windows)]
+pub(crate) fn with_file_usage(error: io::Error, path: &std::path::Path) -> io::Error {
+    let failure = classify(&error);
+    if failure.kind != IoFailureKind::SharingViolation {
+        return error;
+    }
+    io::Error::new(
+        error.kind(),
+        NativeFailure {
+            failure,
+            effects: has_effects(&error),
+            message: error.to_string(),
+            file_usage: Some(crate::file_usage::inspect(path)),
+        },
+    )
 }

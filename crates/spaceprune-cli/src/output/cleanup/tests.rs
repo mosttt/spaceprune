@@ -286,3 +286,18 @@ fn missing_component_cause_is_printed_once_with_affected_items_and_full_json_ret
         18
     );
 }
+
+#[test]
+fn in_use_receipt_names_processes_and_keeps_unknown_owner_explicit() {
+    let mut report = execution(0, 0, Some(0));
+    let failure = serde_json::json!({"item_id":"selected-cache", "message":"Locked", "io_failure":{"kind":"sharing_violation","os_code":32}, "file_usage":{"path":"cache/held.log","processes":[{"pid":42,"name":"Editor"}]}});
+    report.groups[0].result.as_mut().unwrap().record_outcome(serde_json::from_value(serde_json::json!({"item_id":"selected-cache","status":"failed","reclaimed_estimate":0,"failure":failure})).unwrap());
+    let plan = serde_json::from_value(serde_json::json!({"plan_id":"receipt","scan_id":"scan","recipe_revision":"r","digest":"d","config_name":"fixture","groups":[]})).unwrap();
+    let text = unfinished::render(&report, &plan, Theme::default());
+    assert!(text.contains("cache/held.log"));
+    assert!(text.contains("Editor (PID 42)"));
+    report.groups[0].result.as_mut().unwrap().failures[0].file_usage = None;
+    assert!(
+        unfinished::render(&report, &plan, Theme::default()).contains("The OS did not identify")
+    );
+}

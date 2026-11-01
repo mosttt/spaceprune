@@ -24,7 +24,7 @@ rustix = { version = "1.1.4", features = ["fs", "process", "time", "thread"] }
 [target.'cfg(windows)'.dependencies]
 spaceprune-windows-elevation = { path = "../spaceprune-windows-elevation" }
 socket2 = "0.6.5"
-windows-sys = { version = "0.61.2", features = ["Wdk_Foundation", "Wdk_Storage_FileSystem", "Win32_System_IO", "Win32_Foundation", "Win32_Storage_FileSystem", "Win32_Security", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Registry", "Win32_System_Performance", "Win32_Graphics_Gdi", "Win32_System_RemoteDesktop", "Win32_System_LibraryLoader", "Win32_UI_WindowsAndMessaging", "Win32_Security_Authentication_Identity", "Win32_Networking_WinSock"] }
+windows-sys = { version = "0.61.2", features = ["Wdk_Foundation", "Wdk_Storage_FileSystem", "Win32_System_RestartManager", "Win32_System_IO", "Win32_Foundation", "Win32_Storage_FileSystem", "Win32_Security", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Registry", "Win32_System_Performance", "Win32_Graphics_Gdi", "Win32_System_RemoteDesktop", "Win32_System_LibraryLoader", "Win32_UI_WindowsAndMessaging", "Win32_Security_Authentication_Identity", "Win32_Networking_WinSock"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus = "5.19.0"

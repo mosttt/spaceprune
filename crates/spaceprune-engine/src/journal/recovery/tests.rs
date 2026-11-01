@@ -35,6 +35,7 @@ fn outcome(id: &str, status: ItemExecutionStatus, bytes: Option<u64>) -> ItemExe
                 | ItemExecutionStatus::NotAttempted
         ))
         .then(|| ItemFailure {
+            file_usage: None,
             item_id: id.into(),
             authorization: None,
             io_failure: None,

@@ -312,6 +312,7 @@ fn cleanup_size_aggregation_counts_only_successes_and_validates_metadata() {
     result.record_success(Some(1024));
     result.attempted += 1;
     result.failures.push(spaceprune_plugin_api::ItemFailure {
+        file_usage: None,
         authorization: None,
         io_failure: None,
         item_id: "failed".to_owned(),

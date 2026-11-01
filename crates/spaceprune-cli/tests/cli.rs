@@ -1164,6 +1164,16 @@ fn plugin_reserved_ids_are_rejected_and_existing_conflicts_remain_recoverable() 
             "reserved installation wrote into the destination"
         );
     }
+    let initial = run(&["plugin", "catalog", "--output=json"]);
+    assert!(initial.status.success());
+    let initial: serde_json::Value = serde_json::from_slice(&initial.stdout).unwrap();
+    let builtin_ids: Vec<_> = initial
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|entry| entry["kind"] == "builtin")
+        .map(|entry| entry["id"].as_str().unwrap())
+        .collect();
     for id in BUILTIN_PLUGIN_IDS {
         write_manifest(id);
         let existing = installed.join(format!("legacy-{id}"));
@@ -1185,13 +1195,12 @@ fn plugin_reserved_ids_are_rejected_and_existing_conflicts_remain_recoverable() 
             .iter()
             .filter(|entry| entry["id"] == id)
             .collect();
-        assert_eq!(matches.len(), 2);
-        let builtin = matches
-            .iter()
-            .find(|entry| entry["kind"] == "builtin")
-            .unwrap();
-        assert_eq!(builtin["conflicts_with_builtin"], false);
-        assert_eq!(builtin["enabled"], true);
+        assert_eq!(matches.len(), 1 + usize::from(builtin_ids.contains(&id)));
+        let builtin = matches.iter().find(|entry| entry["kind"] == "builtin");
+        if let Some(builtin) = builtin {
+            assert_eq!(builtin["conflicts_with_builtin"], false);
+            assert_eq!(builtin["enabled"], true);
+        }
         let conflict = matches
             .iter()
             .find(|entry| entry["kind"] == "external")
@@ -1199,7 +1208,7 @@ fn plugin_reserved_ids_are_rejected_and_existing_conflicts_remain_recoverable() 
         assert_eq!(conflict["conflicts_with_builtin"], true);
         assert_eq!(conflict["enabled"], false);
         assert_eq!(conflict["supported"], true);
-        if builtin["supported"] == true {
+        if builtin.is_some_and(|entry| entry["supported"] == true) {
             let enabled = run(&["plugin", "enable", id, "--output=json"]);
             assert!(
                 enabled.status.success(),

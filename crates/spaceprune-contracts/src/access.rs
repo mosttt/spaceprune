@@ -141,6 +141,25 @@ pub struct IoFailure {
     pub os_code: Option<i32>,
 }
 
+/// Best-effort native explanation for one file which could not be removed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct FileUsage {
+    /// Display-only path of the exact blocked file, including a child of a selected directory.
+    pub path: String,
+    /// Processes observed at failure time; an empty list means the OS could not identify them.
+    pub processes: Vec<BlockingProcess>,
+}
+
+/// An OS-reported application using a blocked file. This is diagnostic, never authority to stop it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
+pub struct BlockingProcess {
+    /// Process identifier observed at failure time; it may be reused later.
+    pub pid: u32,
+    /// Native application or service display name.
+    pub name: String,
+}
+
 /// A lossless local path representation. Display strings must not be used as execution paths.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "encoding", content = "units", rename_all = "snake_case")]

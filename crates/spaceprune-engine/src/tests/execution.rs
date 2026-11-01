@@ -72,6 +72,7 @@ impl Handler for InterruptedHandler {
                 reclaimed_estimate: (!uncertain_receipt).then_some(100),
                 reclaimed_lower_bound: 0,
                 failure: (uncertain_receipt || partial_receipt).then(|| ItemFailure {
+                    file_usage: None,
                     authorization: None,
                     item_id: item.id.clone(),
                     io_failure: None,
@@ -118,6 +119,7 @@ impl Handler for InterruptedHandler {
                         },
                         reclaimed_lower_bound: 0,
                         failure: Some(ItemFailure {
+                            file_usage: None,
                             authorization: None,
                             item_id: item.id.clone(),
                             io_failure: None,

@@ -212,6 +212,7 @@ fn failure(item: &CleanupItem, status: ItemExecutionStatus, message: String) -> 
         },
         reclaimed_lower_bound: 0,
         failure: Some(ItemFailure {
+            file_usage: None,
             item_id: item.id.clone(),
             authorization: None,
             io_failure: None,

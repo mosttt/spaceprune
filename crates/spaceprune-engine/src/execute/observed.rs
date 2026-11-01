@@ -160,6 +160,7 @@ impl<'a> ObservedProgress<'a> {
                     reclaimed_estimate: not_started.then_some(0),
                     reclaimed_lower_bound: 0,
                     failure: (!not_started).then(|| ItemFailure {
+                        file_usage: None,
                         authorization: None,
                         io_failure: None,
                         item_id: item.id.clone(),

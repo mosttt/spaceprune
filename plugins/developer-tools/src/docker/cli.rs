@@ -155,22 +155,6 @@ fn command_error(error: std::io::Error) -> PluginError {
     )
 }
 
-#[cfg(test)]
-mod error_tests {
-    use super::*;
-    #[test]
-    fn interruption_and_timeout_do_not_claim_docker_is_missing() {
-        for (kind, expected) in [
-            (std::io::ErrorKind::Interrupted, "operation-stopped"),
-            (std::io::ErrorKind::TimedOut, "docker-timeout"),
-            (std::io::ErrorKind::NotFound, "docker-unavailable"),
-            (std::io::ErrorKind::PermissionDenied, "docker-access-denied"),
-        ] {
-            assert_eq!(command_error(std::io::Error::from(kind)).code, expected);
-        }
-    }
-}
-
 // Help probes are read-only and do not enumerate objects or bootstrap a builder.
 pub(super) fn interface(
     kind: DockerKind,
@@ -215,4 +199,20 @@ pub(super) fn interface(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod error_tests {
+    use super::*;
+    #[test]
+    fn interruption_and_timeout_do_not_claim_docker_is_missing() {
+        for (kind, expected) in [
+            (std::io::ErrorKind::Interrupted, "operation-stopped"),
+            (std::io::ErrorKind::TimedOut, "docker-timeout"),
+            (std::io::ErrorKind::NotFound, "docker-unavailable"),
+            (std::io::ErrorKind::PermissionDenied, "docker-access-denied"),
+        ] {
+            assert_eq!(command_error(std::io::Error::from(kind)).code, expected);
+        }
+    }
 }

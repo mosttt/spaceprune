@@ -106,6 +106,7 @@ fn clean_observed(
                 (
                     status,
                     Some(ItemFailure {
+                        file_usage: spaceprune_access::error::file_usage(&error),
                         authorization: None,
                         item_id: item.id.clone(),
                         io_failure: Some(cleanup_failure(&error)),

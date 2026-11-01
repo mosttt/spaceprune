@@ -958,5 +958,9 @@
   "terminal.live_cleanup_size": [
     "  Cleaned ~{size} · {unknown} unmeasured",
     "  已清理约 {size} · {unknown} 项待计量"
+  ],
+  "terminal.usage_unknown": [
+    "The OS did not identify the application. Close related apps and scan again.",
+    "系统未提供占用程序；关闭相关程序后可重新扫描。"
   ]
 }
