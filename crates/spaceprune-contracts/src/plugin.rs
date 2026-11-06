@@ -14,13 +14,19 @@ pub const SYSTEM_LINUX_PLUGIN_ID: &str = "builtin.system-linux";
 pub const DEVELOPER_TOOLS_PLUGIN_ID: &str = "builtin.developer-tools";
 /// Reserved identity of user-authorized native document access.
 pub const MOBILE_DOCUMENTS_PLUGIN_ID: &str = "builtin.mobile-documents";
+/// Reserved identity of manual process memory maintenance.
+pub const MEMORY_PLUGIN_ID: &str = "builtin.memory";
+/// Reserved identity of Windows Shell and servicing capabilities.
+pub const SYSTEM_WINDOWS_PLUGIN_ID: &str = "builtin.system-windows";
 /// IDs owned by the application, including native mobile document access.
-pub const BUILTIN_PLUGIN_IDS: [&str; 5] = [
+pub const BUILTIN_PLUGIN_IDS: [&str; 7] = [
     FILESYSTEM_PLUGIN_ID,
     SNAPPER_PLUGIN_ID,
     SYSTEM_LINUX_PLUGIN_ID,
     DEVELOPER_TOOLS_PLUGIN_ID,
     MOBILE_DOCUMENTS_PLUGIN_ID,
+    MEMORY_PLUGIN_ID,
+    SYSTEM_WINDOWS_PLUGIN_ID,
 ];
 
 /// Whether an ID belongs exclusively to an application-provided capability.

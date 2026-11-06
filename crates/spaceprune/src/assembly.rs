@@ -29,6 +29,8 @@ pub(crate) fn build_engine(
         spaceprune_plugin_system_linux::register_system_handlers(&mut registry)?;
     }
     spaceprune_plugin_developer_tools::register(&mut registry)?;
+    #[cfg(windows)]
+    spaceprune_plugin_system_windows::register(&mut registry)?;
 
     context.check()?;
     let host = PluginHost::discover_in_context(context)?;
@@ -70,6 +72,7 @@ pub(crate) fn build_readonly_engine(
         module.tasks.retain(|_, task| {
             task.handler == "builtin.filesystem/paths"
                 || task.handler.starts_with("builtin.system-linux/")
+                || task.handler.starts_with("builtin.system-windows/")
                 || task.handler.starts_with("builtin.developer-tools/")
         });
     }
@@ -77,7 +80,10 @@ pub(crate) fn build_readonly_engine(
     config.requires.plugins.retain(|id, _| {
         matches!(
             id.as_str(),
-            FILESYSTEM_PLUGIN_ID | SYSTEM_LINUX_PLUGIN_ID | DEVELOPER_TOOLS_PLUGIN_ID
+            FILESYSTEM_PLUGIN_ID
+                | SYSTEM_LINUX_PLUGIN_ID
+                | DEVELOPER_TOOLS_PLUGIN_ID
+                | spaceprune_contracts::plugin::SYSTEM_WINDOWS_PLUGIN_ID
         )
     });
 
@@ -88,6 +94,8 @@ pub(crate) fn build_readonly_engine(
         spaceprune_plugin_system_linux::register_system_handlers(&mut registry)?;
     }
     spaceprune_plugin_developer_tools::register(&mut registry)?;
+    #[cfg(windows)]
+    spaceprune_plugin_system_windows::register(&mut registry)?;
     EngineBuilder::new(config)
         .with_registry(registry)
         .with_disabled_plugins(disabled.clone())

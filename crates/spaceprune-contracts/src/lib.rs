@@ -20,6 +20,7 @@ pub mod rule;
 pub mod schema;
 pub mod size_summary;
 pub mod storage;
+pub mod updates;
 
 /// Shared product display messages; execution and machine identifiers remain language independent.
 pub mod messages;

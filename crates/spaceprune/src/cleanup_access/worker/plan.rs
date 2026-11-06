@@ -26,6 +26,8 @@ impl PreparedPlan {
         spaceprune_platform::register_handlers(&mut registry).map_err(io::Error::other)?;
         #[cfg(target_os = "linux")]
         spaceprune_plugin_developer_tools::register(&mut registry).map_err(io::Error::other)?;
+        #[cfg(windows)]
+        spaceprune_plugin_system_windows::register(&mut registry).map_err(io::Error::other)?;
         for group in &mut grant.groups {
             prepare_system_programs(&mut group.request)?;
             registry

@@ -13,3 +13,13 @@
 必要的系统位置或卷映射无法确认时，`query()` 返回 `None`；调用方应报告位置不可用，不能退回到可修改的环境变量猜测系统目录。调用方可缓存成功的系统位置快照，但不能把它当作授权缓存，也不应永久缓存查询失败。
 
 可移植测试验证路径表示、目录分隔边界、盘符/卷区别、异常命名空间及 UTF-16 保留。Windows 专用测试另验证真实 OS 位置、卷 GUID/规范路径、Unicode 大小写、目录迁移及独立进程中的环境变量干扰。交叉编译不代表这些 Windows 原生用例已经运行。
+
+## Windows 维护插件
+
+`builtin.system-windows/recycle-bin` 通过 Shell 枚举当前用户的回收站。执行时绑定用户确认项目的 Shell 身份、所有者及时间，重新枚举后只永久删除该项目；已还原、已改变或后来放入的项目不会被替换清理。失败可能已有部分效果，不自动重试。
+
+`builtin.system-windows/component-store` 使用系统 DISM `/Online /Cleanup-Image /StartComponentCleanup /NoRestart` 清理过时的 Windows 更新组件。需要 UAC 时通过已签名的清理组件（能力协议 6）。不使用 `/ResetBase`，不停止更新服务，不将 SoftwareDistribution、WinSxS 或 CbsTemp 当普通文件删除。维护动作不提供容量估计，完成后可能需要重启；它不代表清空所有下载的更新。两个处理器均默认供用户自行选择。
+
+`builtin.memory` 是独立的 Windows 工作集整理操作，不进入方案或磁盘释放统计。只列出可打开的当前用户非关键进程；选择绑定 PID 和创建时间，调用 `K32EmptyWorkingSet` 时保持进程句柄。不会结束进程或请求管理员权限。显示的是观察到的工作集下降，不保证实际空出等量物理内存，应用可能立即重新加载页面。
+
+`SystemLocations::is_reviewable_cache` 只识别系统目录下的 Temp、SystemTemp 以及 ProgramData 下的 ChocolateyHttpCache。分类不提供权限，不绕过路径身份及重解析点检查，其他系统维护目录继续受保护。

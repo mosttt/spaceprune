@@ -46,6 +46,20 @@ pub fn probe_system_capabilities(
             );
         }
     }
+    #[cfg(windows)]
+    if !policy
+        .disabled()
+        .contains(spaceprune_contracts::plugin::SYSTEM_WINDOWS_PLUGIN_ID)
+    {
+        tasks.extend(
+            spaceprune_plugin_system_windows::discover(context)?
+                .into_iter()
+                .map(|task| spaceprune_plugin_developer_tools::CapabilityProbe {
+                    task,
+                    issue: None,
+                }),
+        );
+    }
     if !policy.disabled().contains(DEVELOPER_TOOLS_PLUGIN_ID) {
         tasks.extend(spaceprune_plugin_developer_tools::probe_tasks(context)?);
     }
@@ -80,6 +94,8 @@ pub fn inspect_system_capability(
         spaceprune_plugin_system_linux::register_system_handlers(&mut registry)?;
     }
     spaceprune_plugin_developer_tools::register(&mut registry)?;
+    #[cfg(windows)]
+    spaceprune_plugin_system_windows::register(&mut registry)?;
     let handler = registry
         .get(&task.handler_id)
         .ok_or_else(|| EngineError::UnknownTask {

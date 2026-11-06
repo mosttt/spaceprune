@@ -210,6 +210,7 @@ impl NativeCleanupAccess {
 
 fn supported(handler: &str) -> bool {
     handler == "builtin.filesystem/paths"
+        || (cfg!(windows) && handler == "builtin.system-windows/component-store")
         || (cfg!(target_os = "linux")
             && (handler == "builtin.snapper/snapshots"
                 || handler.starts_with("builtin.system-linux/")

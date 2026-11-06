@@ -70,6 +70,20 @@ fn catalog<'a>(
 ) -> Vec<PluginCatalogEntry> {
     let mut entries = vec![
         builtin(
+            spaceprune_contracts::plugin::SYSTEM_WINDOWS_PLUGIN_ID,
+            spaceprune_contracts::messages::text("plugins.windows_name"),
+            spaceprune_contracts::messages::text("plugins.windows_description"),
+            &["windows"],
+            &["recycle-bin", "component-store"],
+        ),
+        builtin(
+            spaceprune_contracts::plugin::MEMORY_PLUGIN_ID,
+            spaceprune_contracts::messages::text("plugins.memory_name"),
+            spaceprune_contracts::messages::text("plugins.memory_description"),
+            &["windows"],
+            &[],
+        ),
+        builtin(
             FILESYSTEM_PLUGIN_ID,
             spaceprune_contracts::messages::text("plugins.filesystem_name"),
             spaceprune_contracts::messages::text("plugins.filesystem_description"),

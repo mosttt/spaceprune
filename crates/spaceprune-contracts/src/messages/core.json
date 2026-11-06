@@ -2291,12 +2291,30 @@
     "Matches the reusable document rules",
     "符合可复用的文档规则"
   ],
-  "mobile_documents.unknown": ["unknown", "未知"],
-  "mobile_documents.age_unrestricted": ["No age condition", "不限制修改时间"],
-  "mobile_documents.size_unrestricted": ["No size condition", "不限制大小"],
-  "mobile_documents.age_condition": ["Last modified at least {days} days ago (observed: {actual} days)", "至少 {days} 天未修改（实际：{actual} 天）"],
-  "mobile_documents.size_condition": ["At least {bytes} bytes (observed: {actual} bytes)", "大小至少 {bytes} 字节（实际：{actual} 字节）"],
-  "mobile_documents.rule_reason": ["Name matches {patterns}. {age}; {size}. All conditions must match. {result}.", "名称匹配 {patterns}。{age}；{size}。需同时满足全部条件。{result}。"],
+  "mobile_documents.unknown": [
+    "unknown",
+    "未知"
+  ],
+  "mobile_documents.age_unrestricted": [
+    "No age condition",
+    "不限制修改时间"
+  ],
+  "mobile_documents.size_unrestricted": [
+    "No size condition",
+    "不限制大小"
+  ],
+  "mobile_documents.age_condition": [
+    "Last modified at least {days} days ago (observed: {actual} days)",
+    "至少 {days} 天未修改（实际：{actual} 天）"
+  ],
+  "mobile_documents.size_condition": [
+    "At least {bytes} bytes (observed: {actual} bytes)",
+    "大小至少 {bytes} 字节（实际：{actual} 字节）"
+  ],
+  "mobile_documents.rule_reason": [
+    "Name matches {patterns}. {age}; {size}. All conditions must match. {result}.",
+    "名称匹配 {patterns}。{age}；{size}。需同时满足全部条件。{result}。"
+  ],
   "mobile_documents.optional": [
     "Does not meet the default recommendation thresholds",
     "未达到默认推荐条件"
@@ -2376,5 +2394,41 @@
   "mobile_documents.processed": [
     "Processed {name}",
     "已处理 {name}"
+  ],
+  "plugins.memory_name": [
+    "Process memory",
+    "进程内存"
+  ],
+  "plugins.memory_description": [
+    "View memory usage and release selected process working sets.",
+    "查看内存占用，释放所选进程的工作集。"
+  ],
+  "plugins.windows_name": [
+    "Windows maintenance",
+    "Windows 系统维护"
+  ],
+  "plugins.windows_description": [
+    "Manage selected Recycle Bin items and superseded Windows components through native lifecycle operations.",
+    "通过 Windows 原生机制管理选中的回收站项目和过时组件。"
+  ],
+  "windows.recycle_bin": [
+    "Recycle Bin",
+    "回收站"
+  ],
+  "windows.component_store": [
+    "Windows update and component cleanup",
+    "Windows 更新与组件清理"
+  ],
+  "windows.lifecycle_description": [
+    "Use Windows Shell and servicing APIs for selected resources.",
+    "通过 Windows Shell 和系统维护机制处理所选资源。"
+  ],
+  "windows.recycle_reason": [
+    "Permanently remove this selected recycled item.",
+    "永久移除这个已放入回收站的项目。"
+  ],
+  "windows.component_reason": [
+    "Windows removes eligible superseded components. Size is not estimated. A restart may be required; update services and rollback protection stay under Windows control.",
+    "由 Windows 移除可清理的过时组件，不预估大小。完成后可能需要重启；更新服务和回退保护由 Windows 管理。"
   ]
 }

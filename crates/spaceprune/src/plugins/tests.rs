@@ -49,13 +49,15 @@ fn loaded(recipe: &Path, policy: PolicySnapshot) -> SpacePrune {
 fn catalog_matches_registered_builtin_handlers_without_executing_plugins() {
     let directory = tempfile::tempdir().unwrap();
     let entries = catalog(PluginHost::default().plugins(), &policy(directory.path()));
-    assert_eq!(entries.len(), 4);
+    assert_eq!(entries.len(), 6);
     let mut registry = spaceprune_engine::PluginRegistry::new();
     spaceprune_plugin_filesystem::register(&mut registry).unwrap();
     #[cfg(target_os = "linux")]
     spaceprune_plugin_snapper::register(&mut registry).unwrap();
     spaceprune_platform::register_handlers(&mut registry).unwrap();
     spaceprune_plugin_developer_tools::register(&mut registry).unwrap();
+    #[cfg(windows)]
+    spaceprune_plugin_system_windows::register(&mut registry).unwrap();
     let expected: std::collections::BTreeSet<_> = registry
         .descriptors()
         .into_iter()

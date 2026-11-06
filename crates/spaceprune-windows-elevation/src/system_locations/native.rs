@@ -27,6 +27,7 @@ pub struct SystemLocations {
     system_volume: PathBuf,
     system_volume_aliases: Vec<WindowsPath>,
     protected: Vec<WindowsPath>,
+    reviewable_caches: Vec<WindowsPath>,
 }
 
 impl SystemLocations {
@@ -53,7 +54,20 @@ impl SystemLocations {
         // Known Folder expansion for ProgramData uses the caller's SystemDrive variable.
         // The machine Shell Folders value is already expanded by Windows, so an altered
         // process environment cannot redirect this protection boundary.
-        protected.extend(aliases(&machine_program_data()?)?);
+        let program_data = machine_program_data()?;
+        protected.extend(aliases(&program_data)?);
+        // Only append fixed cache names to OS-owned roots. Do not canonicalize a cache
+        // child into a junction target and accidentally expand its classification.
+        let mut reviewable_caches = Vec::new();
+        for root in [&windows, &canonical_windows] {
+            for name in ["Temp", "SystemTemp"] {
+                reviewable_caches.push(path_units(&root.join(name))?);
+            }
+        }
+        reviewable_caches.push(path_units(&program_data.join("ChocolateyHttpCache"))?);
+        if let Ok(canonical) = fs::canonicalize(&program_data) {
+            reviewable_caches.push(path_units(&canonical.join("ChocolateyHttpCache"))?);
+        }
         // This ID is unavailable to some architectures; the native Program Files ID above is mandatory.
         if let Some(path) = crate::native::known_folder_path_with_flags(
             &FOLDERID_ProgramFilesX64,
@@ -66,6 +80,7 @@ impl SystemLocations {
             system_volume,
             system_volume_aliases,
             protected,
+            reviewable_caches,
         })
     }
 
@@ -98,6 +113,17 @@ impl SystemLocations {
         self.protected
             .iter()
             .any(|root| root.contains(&path, ordinal_equal) != Some(false))
+    }
+
+    /// Fixed disposable-cache locations may be reviewed, without granting access or bypassing
+    /// reparse-point checks. Servicing stores (including CbsTemp and WinSxS) remain protected.
+    pub fn is_reviewable_cache(&self, path: &Path) -> bool {
+        let Some(path) = path_units(path) else {
+            return false;
+        };
+        self.reviewable_caches
+            .iter()
+            .any(|root| root.contains(&path, ordinal_equal) == Some(true))
     }
 }
 
@@ -217,6 +243,13 @@ mod tests {
             windows: PathBuf::from(r"E:\Système"),
             system_volume: PathBuf::from(r"E:\"),
             system_volume_aliases: vec![path_units(Path::new(r"E:\")).unwrap()],
+            reviewable_caches: [
+                r"E:\Système\Temp",
+                r"E:\Système\SystemTemp",
+                r"D:\Machine Data\ChocolateyHttpCache",
+            ]
+            .map(|value| path_units(Path::new(value)).unwrap())
+            .to_vec(),
             protected: [r"E:\Système", r"D:\Installed Apps", r"D:\Machine Data"]
                 .map(|value| path_units(Path::new(value)).unwrap())
                 .to_vec(),
@@ -236,6 +269,22 @@ mod tests {
             r"E:\cache",
         ] {
             assert!(!locations.is_protected(Path::new(path)), "{path}");
+        }
+        for path in [
+            r"E:\Système\Temp\fixture",
+            r"e:\SYSTÈME\systemtemp",
+            r"D:\Machine Data\ChocolateyHttpCache\package",
+        ] {
+            assert!(locations.is_reviewable_cache(Path::new(path)), "{path}");
+        }
+        for path in [
+            r"E:\Système\Temp-old",
+            r"E:\Système\CbsTemp",
+            r"E:\Système\WinSxS",
+            r"D:\Machine Data\Credentials",
+            r"C:\Windows\Temp",
+        ] {
+            assert!(!locations.is_reviewable_cache(Path::new(path)), "{path}");
         }
         assert!(locations.is_system_volume(Path::new(r"\\?\e:\")));
         assert!(!locations.is_system_volume(Path::new(r"D:\")));

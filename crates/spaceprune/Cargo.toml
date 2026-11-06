@@ -12,6 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 spaceprune-plugin-developer-tools = { path = "../../plugins/developer-tools" }
+spaceprune-plugin-memory = { path = "../../plugins/memory" }
 spaceprune-access = { path = "../spaceprune-access" }
 spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
 anyhow.workspace = true
@@ -43,3 +44,6 @@ tempfile.workspace = true
 
 [lints]
 workspace = true
+
+[target.'cfg(windows)'.dependencies.spaceprune-plugin-system-windows]
+path = "../../plugins/system-windows"

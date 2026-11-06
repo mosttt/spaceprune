@@ -18,6 +18,8 @@ members = [
     "plugins/developer-tools",
     "plugins/snapper",
     "plugins/mobile-documents",
+    "plugins/memory",
+    "plugins/system-windows",
 ]
 resolver = "3"
 

@@ -28,13 +28,23 @@ temp_output="${temp_dir}/${OUTPUT_NAME}"
 
 cd -- "${PROJECT_DIR}"
 cargo fetch --locked
+python3 "${SCRIPT_DIR}/stage-license-audit.py" "${temp_dir}/source"
 cargo about generate \
+    --manifest-path "${temp_dir}/source/Cargo.toml" \
     --config "${PROJECT_DIR}/about.toml" \
     --workspace \
     --frozen \
     --fail \
     --output-file "${temp_output}" \
     "${LICENSE_DIR}/about.hbs"
+
+# Keep notices reproducible when registry license files use CRLF.
+python3 - "${temp_output}" <<'PYTHON'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
+PYTHON
 
 if [[ "${mode}" == "generate" ]]; then
     install -m 0644 "${temp_output}" "${OUTPUT_PATH}"

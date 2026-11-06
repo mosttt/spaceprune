@@ -13,3 +13,13 @@ Configured directories may pass through junctions. Existing canonical paths are 
 If required system locations or volume mappings cannot be established, `query()` returns `None`. Callers should report unavailable locations, not fall back to mutable environment variables to guess system directories. Callers may cache a successful snapshot, but must not treat it as cached authorization or permanently cache query failures.
 
 Portable tests cover path representations, directory separators and boundaries, drive/volume distinctions, abnormal namespaces, and UTF-16 preservation. Windows-specific tests also cover actual OS locations, volume GUID/canonical paths, Unicode case comparison, directory relocation, and environment-variable interference in a separate process. Cross-compilation does not establish that those native Windows cases have run.
+
+## Windows maintenance plugins
+
+`builtin.system-windows/recycle-bin` enumerates the current user's Shell Recycle Bin. Cleanup binds each confirmed item's Shell identity, owner and timestamps, re-enumerates before removal, and permanently deletes only that item. Restored, changed or newly recycled objects are not substituted. A failed operation can have partial effects and is not retried automatically.
+
+`builtin.system-windows/component-store` delegates superseded Windows update/component cleanup to the system DISM `/Online /Cleanup-Image /StartComponentCleanup /NoRestart` operation. It uses the signed cleanup component (capability protocol 6) when UAC is needed. It never uses `/ResetBase`, stops update services, or deletes SoftwareDistribution, WinSxS or CbsTemp as files. Size is not applicable to the maintenance action; a restart may be required. It does not empty all downloaded updates. Both handlers default to optional selection.
+
+`builtin.memory` is an explicit Windows working-set operation, separate from Recipes and disk-space totals. Only current-user, noncritical processes that can be opened are listed. Selection binds PID and creation time; the process handle remains open during `K32EmptyWorkingSet`. No process is terminated and no administrator prompt is requested. The reported change is an observed working-set reduction, not guaranteed freed physical RAM; applications can immediately load pages again.
+
+`SystemLocations::is_reviewable_cache` identifies only Windows Temp, SystemTemp and ProgramData ChocolateyHttpCache under OS-owned roots. This classification grants no access and does not bypass canonical identity or reparse-point checks. All other Windows servicing directories remain protected.

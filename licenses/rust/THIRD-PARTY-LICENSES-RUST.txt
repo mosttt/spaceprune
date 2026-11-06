@@ -267,6 +267,11 @@ Version: 0.3.1
 License: Zlib OR Apache-2.0 OR MIT
 Source: https://github.com/madsmtm/objc2
 
+Name: displaydoc
+Version: 0.2.7
+License: MIT OR Apache-2.0
+Source: https://github.com/yaahc/displaydoc
+
 Name: document-features
 Version: 0.2.12
 License: MIT OR Apache-2.0
@@ -337,6 +342,11 @@ Version: 0.2.0
 License: Zlib
 Source: https://github.com/orlp/foldhash
 
+Name: form_urlencoded
+Version: 1.2.2
+License: MIT OR Apache-2.0
+Source: https://github.com/servo/rust-url
+
 Name: futures-core
 Version: 0.3.34
 License: MIT OR Apache-2.0
@@ -397,10 +407,55 @@ Version: 2.4.0
 License: MIT OR Apache-2.0
 Source: https://github.com/chronotope/humantime
 
+Name: icu_collections
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_locale_core
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_normalizer
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_normalizer_data
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_properties
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_properties_data
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: icu_provider
+Version: 2.4.0
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
 Name: ident_case
 Version: 1.0.1
 License: MIT OR Apache-2.0
 Source: https://github.com/TedDriggs/ident_case
+
+Name: idna
+Version: 1.1.0
+License: MIT OR Apache-2.0
+Source: https://github.com/servo/rust-url/
+
+Name: idna_adapter
+Version: 1.2.2
+License: Apache-2.0 OR MIT
+Source: https://github.com/hsivonen/idna_adapter
 
 Name: indexmap
 Version: 2.14.0
@@ -451,6 +506,11 @@ Name: linux-raw-sys
 Version: 0.12.1
 License: Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
 Source: https://github.com/sunfishcode/linux-raw-sys
+
+Name: litemap
+Version: 0.8.3
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
 
 Name: litrs
 Version: 1.0.0
@@ -552,6 +612,11 @@ Version: 0.9.12
 License: MIT OR Apache-2.0
 Source: https://github.com/Amanieu/parking_lot
 
+Name: percent-encoding
+Version: 2.3.2
+License: MIT OR Apache-2.0
+Source: https://github.com/servo/rust-url/
+
 Name: pin-project-lite
 Version: 0.2.17
 License: Apache-2.0 OR MIT
@@ -566,6 +631,11 @@ Name: polling
 Version: 3.11.0
 License: Apache-2.0 OR MIT
 Source: https://github.com/smol-rs/polling
+
+Name: potential_utf
+Version: 0.1.6
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
 
 Name: proc-macro-crate
 Version: 3.5.0
@@ -787,6 +857,11 @@ Version: 0.1.3
 License: MIT
 Source: local path dependency in this source distribution
 
+Name: spaceprune-plugin-developer-tools
+Version: 0.1.3
+License: MIT
+Source: local path dependency in this source distribution
+
 Name: spaceprune-plugin-filesystem
 Version: 0.1.3
 License: MIT
@@ -797,7 +872,27 @@ Version: 0.1.3
 License: MIT
 Source: local path dependency in this source distribution
 
+Name: spaceprune-plugin-memory
+Version: 0.1.3
+License: MIT
+Source: local path dependency in this source distribution
+
+Name: spaceprune-plugin-mobile-documents
+Version: 0.1.3
+License: MIT
+Source: local path dependency in this source distribution
+
 Name: spaceprune-plugin-snapper
+Version: 0.1.3
+License: MIT
+Source: local path dependency in this source distribution
+
+Name: spaceprune-plugin-system-linux
+Version: 0.1.3
+License: MIT
+Source: local path dependency in this source distribution
+
+Name: spaceprune-plugin-system-windows
 Version: 0.1.3
 License: MIT
 Source: local path dependency in this source distribution
@@ -816,6 +911,11 @@ Name: spaceprune-windows-elevation
 Version: 0.1.3
 License: MIT
 Source: local path dependency in this source distribution
+
+Name: stable_deref_trait
+Version: 1.2.1
+License: MIT OR Apache-2.0
+Source: https://github.com/storyyeller/stable_deref_trait
 
 Name: static_assertions
 Version: 1.1.0
@@ -847,6 +947,11 @@ Version: 3.0.3
 License: MIT OR Apache-2.0
 Source: https://github.com/dtolnay/syn
 
+Name: synstructure
+Version: 0.14.0
+License: MIT
+Source: https://github.com/mystor/synstructure
+
 Name: sys-locale
 Version: 0.3.2
 License: MIT OR Apache-2.0
@@ -866,6 +971,11 @@ Name: thiserror-impl
 Version: 2.0.19
 License: MIT OR Apache-2.0
 Source: https://github.com/dtolnay/thiserror
+
+Name: tinystr
+Version: 0.8.5
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
 
 Name: toml
 Version: 1.1.4+spec-1.1.0
@@ -937,10 +1047,25 @@ Version: 0.2.2
 License: MIT OR Apache-2.0
 Source: https://github.com/unicode-rs/unicode-width
 
+Name: url
+Version: 2.5.8
+License: MIT OR Apache-2.0
+Source: https://github.com/servo/rust-url
+
+Name: utf8_iter
+Version: 1.1.0
+License: Apache-2.0 OR MIT
+Source: https://github.com/hsivonen/utf8_iter
+
 Name: utf8parse
 Version: 0.2.2
 License: Apache-2.0 OR MIT
 Source: https://github.com/alacritty/vte
+
+Name: utf_types
+Version: 1.0.0
+License: Apache-2.0 OR MIT
+Source: https://github.com/hsivonen/utf_types
 
 Name: uuid
 Version: 1.28.0
@@ -977,8 +1102,58 @@ Version: 0.1.11
 License: Unlicense OR MIT
 Source: https://github.com/BurntSushi/winapi-util
 
+Name: windows
+Version: 0.61.3
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-collections
+Version: 0.2.0
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-core
+Version: 0.61.2
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-future
+Version: 0.2.1
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-implement
+Version: 0.60.2
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-interface
+Version: 0.59.3
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-link
+Version: 0.1.3
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
 Name: windows-link
 Version: 0.2.1
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-numerics
+Version: 0.2.0
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-result
+Version: 0.3.4
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-strings
+Version: 0.4.2
 License: MIT OR Apache-2.0
 Source: https://github.com/microsoft/windows-rs
 
@@ -994,6 +1169,11 @@ Source: https://github.com/microsoft/windows-rs
 
 Name: windows-targets
 Version: 0.52.6
+License: MIT OR Apache-2.0
+Source: https://github.com/microsoft/windows-rs
+
+Name: windows-threading
+Version: 0.1.0
 License: MIT OR Apache-2.0
 Source: https://github.com/microsoft/windows-rs
 
@@ -1017,6 +1197,21 @@ Version: 0.55.0
 License: MIT
 Source: https://github.com/gentoo90/winreg-rs
 
+Name: writeable
+Version: 0.6.4
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: yoke
+Version: 0.8.4
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: yoke-derive
+Version: 0.8.4
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
 Name: zbus
 Version: 5.19.0
 License: MIT
@@ -1036,6 +1231,31 @@ Name: zcheapstr
 Version: 1.1.0
 License: MIT
 Source: https://github.com/z-galaxy/zcheapstr/
+
+Name: zerofrom
+Version: 0.1.8
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: zerofrom-derive
+Version: 0.1.8
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: zerotrie
+Version: 0.2.5
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: zerovec
+Version: 0.11.9
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
+
+Name: zerovec-derive
+Version: 0.11.7
+License: Unicode-3.0
+Source: https://github.com/unicode-org/icu4x
 
 Name: zmij
 Version: 1.0.23
@@ -1451,6 +1671,76 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
+- form_urlencoded 1.2.2 (https://github.com/servo/rust-url)
+
+Copyright (c) 2013-2016 The rust-url developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the &quot;Software&quot;), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
+- idna 1.1.0 (https://github.com/servo/rust-url/)
+- percent-encoding 2.3.2 (https://github.com/servo/rust-url/)
+- url 2.5.8 (https://github.com/servo/rust-url)
+
+Copyright (c) 2013-2025 The rust-url developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the &quot;Software&quot;), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 
 
 -------------------------------------------------------------------------------
@@ -2164,6 +2454,39 @@ DEALINGS IN THE SOFTWARE.
 License: MIT — MIT License
 Text source: bundled dependency license file
 Used by:
+- stable_deref_trait 1.2.1 (https://github.com/storyyeller/stable_deref_trait)
+
+Copyright (c) 2017 Robert Grosse
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the &quot;Software&quot;), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
 - signal-hook-mio 0.2.5 (https://github.com/vorner/signal-hook)
 - signal-hook-registry 1.4.8 (https://github.com/vorner/signal-hook)
 - signal-hook 0.3.18 (https://github.com/vorner/signal-hook)
@@ -2824,6 +3147,91 @@ DEALINGS IN THE SOFTWARE.
 License: MIT — MIT License
 Text source: bundled dependency license file
 Used by:
+- idna_adapter 1.2.2 (https://github.com/hsivonen/idna_adapter)
+
+Copyright (c) The rust-url developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the &quot;Software&quot;), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
+- synstructure 0.14.0 (https://github.com/mystor/synstructure)
+
+Copyright 2016 Nika Layzell
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
+- utf8_iter 1.1.0 (https://github.com/hsivonen/utf8_iter)
+- utf_types 1.0.0 (https://github.com/hsivonen/utf_types)
+
+Copyright Mozilla Foundation
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the &quot;Software&quot;), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
 - lru 0.18.2 (https://github.com/jeromefroe/lru-rs.git)
 
 MIT License
@@ -3142,36 +3550,6 @@ SOFTWARE.
 -------------------------------------------------------------------------------
 
 License: MIT — MIT License
-Text source: bundled dependency license file
-Used by:
-- spaceprune-contracts 0.1.3 (local path dependency in this source distribution)
-
-MIT License
-
-Copyright (c) 2026 move
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the &quot;Software&quot;), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
--------------------------------------------------------------------------------
-
-License: MIT — MIT License
 Text source: canonical SPDX license text
 Used by:
 - spaceprune 0.1.3 (local path dependency in this source distribution)
@@ -3186,8 +3564,13 @@ Used by:
 - spaceprune-readonly-helper 0.1.3 (local path dependency in this source distribution)
 - spaceprune-readonly-protocol 0.1.3 (local path dependency in this source distribution)
 - spaceprune-windows-elevation 0.1.3 (local path dependency in this source distribution)
+- spaceprune-plugin-developer-tools 0.1.3 (local path dependency in this source distribution)
 - spaceprune-plugin-filesystem 0.1.3 (local path dependency in this source distribution)
+- spaceprune-plugin-memory 0.1.3 (local path dependency in this source distribution)
+- spaceprune-plugin-mobile-documents 0.1.3 (local path dependency in this source distribution)
 - spaceprune-plugin-snapper 0.1.3 (local path dependency in this source distribution)
+- spaceprune-plugin-system-linux 0.1.3 (local path dependency in this source distribution)
+- spaceprune-plugin-system-windows 0.1.3 (local path dependency in this source distribution)
 - block2 0.6.2 (https://github.com/madsmtm/objc2)
 - dispatch2 0.3.1 (https://github.com/madsmtm/objc2)
 - objc2-app-kit 0.3.2 (https://github.com/madsmtm/objc2)
@@ -3195,10 +3578,21 @@ Used by:
 - objc2-encode 4.1.0 (https://github.com/madsmtm/objc2)
 - objc2-foundation 0.3.2 (https://github.com/madsmtm/objc2)
 - objc2 0.6.4 (https://github.com/madsmtm/objc2)
+- windows-collections 0.2.0 (https://github.com/microsoft/windows-rs)
+- windows-core 0.61.2 (https://github.com/microsoft/windows-rs)
+- windows-future 0.2.1 (https://github.com/microsoft/windows-rs)
+- windows-implement 0.60.2 (https://github.com/microsoft/windows-rs)
+- windows-interface 0.59.3 (https://github.com/microsoft/windows-rs)
+- windows-link 0.1.3 (https://github.com/microsoft/windows-rs)
 - windows-link 0.2.1 (https://github.com/microsoft/windows-rs)
+- windows-numerics 0.2.0 (https://github.com/microsoft/windows-rs)
+- windows-result 0.3.4 (https://github.com/microsoft/windows-rs)
+- windows-strings 0.4.2 (https://github.com/microsoft/windows-rs)
 - windows-sys 0.59.0 (https://github.com/microsoft/windows-rs)
 - windows-sys 0.61.2 (https://github.com/microsoft/windows-rs)
 - windows-targets 0.52.6 (https://github.com/microsoft/windows-rs)
+- windows-threading 0.1.0 (https://github.com/microsoft/windows-rs)
+- windows 0.61.3 (https://github.com/microsoft/windows-rs)
 - windows_x86_64_gnu 0.52.6 (https://github.com/microsoft/windows-rs)
 - windows_x86_64_msvc 0.52.6 (https://github.com/microsoft/windows-rs)
 
@@ -3286,6 +3680,36 @@ SOFTWARE.
 License: MIT — MIT License
 Text source: bundled dependency license file
 Used by:
+- spaceprune-contracts 0.1.3 (local path dependency in this source distribution)
+
+MIT License
+
+Copyright (c) 2026 move
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+
+License: MIT — MIT License
+Text source: bundled dependency license file
+Used by:
 - async-recursion 1.1.1 (https://github.com/dcchut/async-recursion)
 
 Permission is hereby granted, free of charge, to any
@@ -3330,6 +3754,7 @@ Used by:
 - blocking 1.7.0 (https://github.com/smol-rs/blocking)
 - concurrent-queue 2.5.0 (https://github.com/smol-rs/concurrent-queue)
 - ctrlc 3.5.2 (https://github.com/Detegr/rust-ctrlc.git)
+- displaydoc 0.2.7 (https://github.com/yaahc/displaydoc)
 - dyn-clone 1.0.20 (https://github.com/dtolnay/dyn-clone)
 - endi 1.1.1 (https://github.com/zeenix/endi)
 - event-listener-strategy 0.5.4 (https://github.com/smol-rs/event-listener-strategy)
@@ -4082,6 +4507,78 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
+
+
+-------------------------------------------------------------------------------
+
+License: Unicode-3.0 — Unicode License v3
+Text source: bundled dependency license file
+Used by:
+- icu_collections 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_locale_core 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_normalizer 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_normalizer_data 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_properties 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_properties_data 2.4.0 (https://github.com/unicode-org/icu4x)
+- icu_provider 2.4.0 (https://github.com/unicode-org/icu4x)
+- litemap 0.8.3 (https://github.com/unicode-org/icu4x)
+- potential_utf 0.1.6 (https://github.com/unicode-org/icu4x)
+- tinystr 0.8.5 (https://github.com/unicode-org/icu4x)
+- writeable 0.6.4 (https://github.com/unicode-org/icu4x)
+- yoke-derive 0.8.4 (https://github.com/unicode-org/icu4x)
+- yoke 0.8.4 (https://github.com/unicode-org/icu4x)
+- zerofrom-derive 0.1.8 (https://github.com/unicode-org/icu4x)
+- zerofrom 0.1.8 (https://github.com/unicode-org/icu4x)
+- zerotrie 0.2.5 (https://github.com/unicode-org/icu4x)
+- zerovec-derive 0.11.7 (https://github.com/unicode-org/icu4x)
+- zerovec 0.11.9 (https://github.com/unicode-org/icu4x)
+
+UNICODE LICENSE V3
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright © 2020-2024 Unicode, Inc.
+
+NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of data files and any associated documentation (the &quot;Data Files&quot;) or
+software and any associated documentation (the &quot;Software&quot;) to deal in the
+Data Files or Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Data Files or Software, and to permit persons to whom the
+Data Files or Software are furnished to do so, provided that either (a)
+this copyright and permission notice appear with all copies of the Data
+Files or Software, or (b) this copyright and permission notice appear in
+associated Documentation.
+
+THE DATA FILES AND SOFTWARE ARE PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+THIRD PARTY RIGHTS.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+FILES OR SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall
+not be used in advertising or otherwise to promote the sale, use or other
+dealings in these Data Files or Software without prior written
+authorization of the copyright holder.
+
+SPDX-License-Identifier: Unicode-3.0
+
+—
+
+Portions of ICU4X may have been adapted from ICU4C and/or ICU4J.
+ICU 1.8.1 to ICU 57.1 © 1995-2016 International Business Machines Corporation and others.
 
 
 -------------------------------------------------------------------------------

@@ -29,6 +29,39 @@ pub use spaceprune_contracts::messages::{display_language, set_display_language}
 pub use spaceprune_contracts::plugin::{BUILTIN_PLUGIN_IDS, is_builtin_plugin_id};
 
 pub use crate::plugins::{PluginCatalogEntry, PluginKind, list_plugin_catalog, set_plugin_enabled};
+pub use spaceprune_plugin_memory::{MemoryRelease, MemorySnapshot, ProcessIdentity, ProcessMemory};
+
+/// Inspect physical memory and eligible processes using the enabled local memory plugin.
+pub fn inspect_memory() -> Result<MemorySnapshot> {
+    let policy = crate::plugins::PolicySnapshot::discover()?;
+    if policy
+        .disabled()
+        .contains(spaceprune_contracts::plugin::MEMORY_PLUGIN_ID)
+    {
+        return Err(EngineError::PluginDisabled(
+            spaceprune_contracts::plugin::MEMORY_PLUGIN_ID.into(),
+        )
+        .into());
+    }
+    let snapshot = spaceprune_plugin_memory::inspect()?;
+    policy.check_current()?;
+    Ok(snapshot)
+}
+
+/// Release only the exact selected process identities; memory is never counted as disk space.
+pub fn release_memory(selected: &[ProcessIdentity]) -> Result<Vec<MemoryRelease>> {
+    let policy = crate::plugins::PolicySnapshot::discover()?;
+    if policy
+        .disabled()
+        .contains(spaceprune_contracts::plugin::MEMORY_PLUGIN_ID)
+    {
+        return Err(EngineError::PluginDisabled(
+            spaceprune_contracts::plugin::MEMORY_PLUGIN_ID.into(),
+        )
+        .into());
+    }
+    Ok(spaceprune_plugin_memory::release(selected)?)
+}
 pub use spaceprune_config::{
     AUTHORIZATION_COMMAND_ID, AUTOMATION_COMMAND_ID, AutomationDefinition, CLEAN_COMMAND_ID,
     ConfigLoader, ConfigStore, ConfigStoreError, DEFAULT_THEME_ID, LANGUAGE_COMMAND_ID, Language,

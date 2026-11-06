@@ -19,7 +19,7 @@ pub const INSTALL_ROOT_NAME: &str = "SpacePruneNative";
 /// Windows login-bound metadata bootstrap/IPC protocol; independent of the request payload schema.
 pub const METADATA_PROTOCOL: u16 = 7;
 /// Windows login-bound cleanup bootstrap/pipe protocol; independent of the confirmed grant schema.
-pub const CLEANUP_PROTOCOL: u16 = 5;
+pub const CLEANUP_PROTOCOL: u16 = 6;
 
 /// Windows Installer architecture; user-controlled paths never select the target location.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

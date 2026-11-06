@@ -21,3 +21,7 @@ Keep ordinary logical size separate from snapshot-volume free-space changes. Sna
 ## Next native checks
 
 Use [Windows packaging](../build/WINDOWS-PACKAGING.md) for trusted installation, automatic component update, UAC accept/deny/cancel, cross-account, links and busy targets. Use [macOS packaging](../build/MACOS-PACKAGING.md) and [ancestor tests](../reference/MACOS-ANCESTRY.md#run-the-native-cases-on-macos) for signing, permissions and APFS/HFS; attribute synchronization and full invalidation coverage also need evidence. Test Docker on disposable Windows/macOS resources without unscoped prune. Mobile library builds do not establish native application acceptance.
+
+## Windows maintenance acceptance (2026-11-06)
+
+A native disposable-process test verified working-set reduction, PID/creation-time mismatch rejection and continued child-process execution. A native Shell test recycled two uniquely named disposable files, rejected a changed identity, deleted only the selected first file, retained the second, and then removed that second fixture. Seven Core plugin-policy tests and the configured-cache classification test passed. No Windows servicing cleanup was executed against the development machine. Actual DISM servicing, restart-needed completion and UAC cancellation still require a disposable Windows VM; compilation is not that acceptance.
