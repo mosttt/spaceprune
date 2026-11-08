@@ -94,12 +94,20 @@ impl Activity {
     fn history_lines(&self, rows: usize) -> Vec<(String, Tone)> {
         self.history
             .iter()
+            .enumerate()
             .skip(self.history.len().saturating_sub(rows))
-            .map(|(elapsed, event)| {
+            .map(|(index, (elapsed, event))| {
+                let active =
+                    index + 1 == self.history.len() && event.phase != ProgressPhase::Complete;
+                let marker = if active { '›' } else { ' ' };
                 (
-                    format!("  {}  {}", duration(*elapsed), event.message),
-                    if event.phase == ProgressPhase::Authorize {
-                        Tone::Warning
+                    format!("{marker} {}  {}", duration(*elapsed), event.message),
+                    if active {
+                        if event.phase == ProgressPhase::Authorize {
+                            Tone::Warning
+                        } else {
+                            Tone::Accent
+                        }
                     } else {
                         Tone::Muted
                     },
@@ -974,8 +982,57 @@ mod tests {
         assert_eq!(history.len(), 5);
         assert!(history[0].0.ends_with("/fixture/3.log"));
         assert!(history[4].0.ends_with("/fixture/7.log"));
+        assert!(
+            history[..4]
+                .iter()
+                .all(|(line, tone)| line.starts_with("  ") && matches!(tone, Tone::Muted))
+        );
+        assert!(history[4].0.starts_with("› "));
+        assert!(matches!(history[4].1, Tone::Accent));
+        assert!(activity.history_lines(0).is_empty());
         assert_eq!(activity.event.as_ref().unwrap().current, Some(7));
         assert_eq!(activity.active_module.as_deref(), Some("cache"));
+    }
+
+    #[test]
+    fn current_activity_moves_on_and_completion_is_not_highlighted_as_running() {
+        for (operation, phase) in [
+            (Operation::Scan, ProgressPhase::Measure),
+            (Operation::Clean, ProgressPhase::Clean),
+        ] {
+            let mut activity = Activity::new(operation, 1);
+            let mut event = ProgressEvent {
+                phase: ProgressPhase::Authorize,
+                module_id: Some("fixture".into()),
+                task_id: Some("cache".into()),
+                handler_id: None,
+                current: None,
+                total: None,
+                message: "Waiting for system authorization".into(),
+            };
+            activity.record(event.clone());
+            let history = activity.history_lines(5);
+            assert!(history[0].0.starts_with("› "));
+            assert!(matches!(history[0].1, Tone::Warning));
+
+            event.phase = phase;
+            event.message = "Working on selected cache".into();
+            activity.record(event.clone());
+            let history = activity.history_lines(5);
+            assert!(matches!(history[0].1, Tone::Muted));
+            assert!(history[1].0.starts_with("› "));
+            assert!(matches!(history[1].1, Tone::Accent));
+
+            event.phase = ProgressPhase::Complete;
+            event.message = "Finished".into();
+            activity.record(event);
+            assert!(
+                activity
+                    .history_lines(5)
+                    .iter()
+                    .all(|(line, tone)| line.starts_with("  ") && matches!(tone, Tone::Muted))
+            );
+        }
     }
 
     #[test]
