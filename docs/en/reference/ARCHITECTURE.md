@@ -29,7 +29,7 @@ The core fixes only the operating modes:
 Module IDs, selectors, tasks, paths, and recommendation rules all come from configuration.
 
 Desktop applications and other hosts provide or load a Recipe through the public library API, then reuse the same validation, scanning, planning, and execution pipeline.
-Core/CLI can be built and run without a model, cloud account, or private repository.
+Core, CLI and built-in plugins build and run independently from this repository.
 
 ## 2. Design principles
 
