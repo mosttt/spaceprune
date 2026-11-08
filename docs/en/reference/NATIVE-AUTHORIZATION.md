@@ -38,3 +38,9 @@ macOS integrates in-process privacy recovery and shared ServiceManagement regist
 For macOS filesystems, `elevation = "auto"` selects the native cleanup service after ordinary deletion encounters EACCES; `never` prohibits retries, and explicit `native` uses the same entry point. EPERM remains an OS policy denial and does not automatically trigger elevation to bypass it.
 
 Combined native installation and permission acceptance across all three platforms remains incomplete. Linux tests and Darwin target checks do not replace runtime evidence from each target system.
+
+## Manual Linux process-memory maintenance
+
+The memory plugin keeps one `builtin.memory` identity, with native Windows and Linux adapters. Linux reads `/proc` statistics and lists inspectable, unprivileged current-user processes. Only an explicit process selection requests authorization and invokes `process_madvise(MADV_PAGEOUT)`. It does not terminate processes, delete data, or use global `drop_caches`.
+
+Selections bind the PID, boot identity and process start time, with a pidfd retaining the actual process. The authorized worker verifies the caller, drops its root identity and retains only `CAP_SYS_NICE`, so the kernel continues enforcing target-access checks. Host cancellation or exit closes the request pipe; the worker stops at the next chunk, under the original deadline. Partial effects are reported per process. Observed resident-memory reductions are not additional system-wide free RAM or disk-cleanup savings; subsequent access may reload pages.

@@ -246,13 +246,43 @@ fn read_pipe(mut pipe: impl Read, stream: usize, sender: mpsc::SyncSender<Chunk>
 
 /// Capture a finite process invocation, respecting the original operation's cancellation signal.
 /// Native commands with uncertain side effects must be reconciled by their domain before retry.
-pub fn capture(mut command: Command, operation: &OperationContext) -> io::Result<Output> {
+pub fn capture(command: Command, operation: &OperationContext) -> io::Result<Output> {
+    capture_open_input(command, None, operation)
+}
+
+/// Send a bounded frame and hold stdin open until completion or cancellation.
+/// Helpers can observe EOF even when the caller cannot signal an elevated child.
+#[cfg(unix)]
+pub fn capture_with_open_stdin(
+    command: Command,
+    input: &[u8],
+    operation: &OperationContext,
+) -> io::Result<Output> {
+    capture_open_input(command, Some(input), operation)
+}
+
+fn capture_open_input(
+    mut command: Command,
+    input: Option<&[u8]>,
+    operation: &OperationContext,
+) -> io::Result<Output> {
     operation.check()?;
     command
-        .stdin(Stdio::null())
+        .stdin(if input.is_some() {
+            Stdio::piped()
+        } else {
+            Stdio::null()
+        })
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
     let mut tree = ProcessTree::spawn(&mut command)?;
+    let input_pipe = tree.child_mut().stdin.take();
+    #[cfg(unix)]
+    let mut input_pipe = input_pipe;
+    #[cfg(unix)]
+    if let Some(bytes) = input {
+        write_pipe(input_pipe.as_mut().expect("piped stdin"), bytes, operation)?;
+    }
     let stdout = tree.child_mut().stdout.take().expect("piped stdout");
     let stderr = tree.child_mut().stderr.take().expect("piped stderr");
     let (sender, receiver) = mpsc::sync_channel(8);
@@ -316,6 +346,8 @@ pub fn capture(mut command: Command, operation: &OperationContext) -> io::Result
             }
         }
     })();
+    // EOF cancels a privileged worker before waiting for its termination.
+    drop(input_pipe);
     let termination = tree.terminate_and_wait();
     drop(receiver);
     let _ = out_reader.join();
@@ -371,6 +403,30 @@ mod tests {
         cancel.join().unwrap();
         assert_eq!(error.kind(), io::ErrorKind::Interrupted);
         assert!(started.elapsed() < Duration::from_secs(2));
+    }
+
+    #[test]
+    fn cancellation_closes_cooperative_input_before_waiting_for_worker_exit() {
+        let directory = tempfile::tempdir().unwrap();
+        let marker = directory.path().join("closed");
+        let mut command = Command::new("/bin/sh");
+        command
+            .args([
+                "-c",
+                "trap '' TERM; read -r first; cat >/dev/null; printf closed > \"$1\"",
+                "fixture",
+            ])
+            .arg(&marker);
+        let context = operation();
+        let cancellation = context.cancellation.clone();
+        let cancel = thread::spawn(move || {
+            thread::sleep(Duration::from_millis(100));
+            cancellation.cancel();
+        });
+        let result = capture_with_open_stdin(command, b"start\n", &context);
+        cancel.join().unwrap();
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::Interrupted);
+        assert_eq!(std::fs::read_to_string(marker).unwrap(), "closed");
     }
 
     #[test]

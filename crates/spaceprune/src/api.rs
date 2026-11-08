@@ -50,6 +50,32 @@ pub fn inspect_memory() -> Result<MemorySnapshot> {
 
 /// Release only the exact selected process identities; memory is never counted as disk space.
 pub fn release_memory(selected: &[ProcessIdentity]) -> Result<Vec<MemoryRelease>> {
+    release_memory_in_context(
+        selected,
+        &OperationContext::new(
+            CancellationToken::default(),
+            spaceprune_access::Interaction::NonInteractive,
+            std::time::Duration::from_secs(180),
+        ),
+    )
+}
+
+/// Release selected memory with explicit host interaction and finite operation authority.
+pub fn release_memory_in_context(
+    selected: &[ProcessIdentity],
+    context: &OperationContext,
+) -> Result<Vec<MemoryRelease>> {
+    anyhow::ensure!(
+        !selected.is_empty()
+            && selected.len() <= 128
+            && selected
+                .iter()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len()
+                == selected.len(),
+        "Select between 1 and 128 distinct processes"
+    );
+    context.check()?;
     let policy = crate::plugins::PolicySnapshot::discover()?;
     if policy
         .disabled()
@@ -60,6 +86,9 @@ pub fn release_memory(selected: &[ProcessIdentity]) -> Result<Vec<MemoryRelease>
         )
         .into());
     }
+    #[cfg(target_os = "linux")]
+    return crate::memory_access::release(selected, context);
+    #[cfg(not(target_os = "linux"))]
     Ok(spaceprune_plugin_memory::release(selected)?)
 }
 pub use spaceprune_config::{

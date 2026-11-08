@@ -2430,5 +2430,29 @@
   "windows.component_reason": [
     "Windows removes eligible superseded components. Size is not estimated. A restart may be required; update services and rollback protection stay under Windows control.",
     "由 Windows 移除可清理的过时组件，不预估大小。完成后可能需要重启；更新服务和回退保护由 Windows 管理。"
+  ],
+  "memory.authorization_required": [
+    "Confirm memory maintenance in the foreground to request system authorization.",
+    "请在前台确认内存维护，以请求系统授权。"
+  ],
+  "memory.helper_unavailable": [
+    "The system component is unavailable. Check system authorization components in Settings.",
+    "系统组件不可用，请在设置中检查系统授权组件。"
+  ],
+  "memory.helper_outdated": [
+    "Update the system authorization components before maintaining process memory.",
+    "请先更新系统授权组件，再进行内存维护。"
+  ],
+  "memory.authorization_unavailable": [
+    "System authorization is unavailable. Check that a system authentication agent is running.",
+    "系统授权不可用，请检查系统身份验证服务是否运行。"
+  ],
+  "memory.result_unconfirmed": [
+    "Memory maintenance could not be confirmed. Refresh the process list before retrying.",
+    "未能确认内存维护结果，请刷新进程列表后重试。"
+  ],
+  "memory.authorization_cancelled": [
+    "Memory maintenance authorization was cancelled.",
+    "已取消内存维护授权。"
   ]
 }

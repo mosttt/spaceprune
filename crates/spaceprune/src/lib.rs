@@ -12,6 +12,8 @@ mod automation;
 #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 mod cleanup_access;
 mod cleanup_receipt;
+#[cfg(target_os = "linux")]
+mod memory_access;
 mod native_access;
 mod plugins;
 mod system_capabilities;
@@ -39,6 +41,10 @@ pub fn run_native_installer_if_requested() -> Option<i32> {
 /// Dispatch the dedicated cleanup helper; application hosts must not call this entry.
 #[doc(hidden)]
 pub fn run_cleanup_helper_if_requested() -> Option<i32> {
+    #[cfg(target_os = "linux")]
+    if let Some(code) = memory_access::run_if_requested() {
+        return Some(code);
+    }
     #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
     return cleanup_access::run_if_requested();
     #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]

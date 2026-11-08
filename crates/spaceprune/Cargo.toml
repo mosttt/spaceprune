@@ -29,6 +29,7 @@ toml.workspace = true
 tempfile.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
+rustix = { version = "1.1.4", features = ["thread", "process"] }
 spaceprune-plugin-system-linux = { path = "../../plugins/linux/system-linux" }
 spaceprune-plugin-snapper = { path = "../../plugins/linux/snapper" }
 

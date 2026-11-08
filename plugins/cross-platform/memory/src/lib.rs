@@ -6,15 +6,21 @@ use std::io;
 
 #[cfg(windows)]
 #[allow(unsafe_code)]
+#[path = "platform/windows.rs"]
 mod native;
+
+#[cfg(target_os = "linux")]
+#[allow(unsafe_code)]
+#[path = "platform/linux.rs"]
+pub mod linux;
 
 /// One process identity; creation time prevents PID reuse from retargeting a selection.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ProcessIdentity {
-    /// Windows process identifier.
+    /// Native process identifier.
     pub pid: u32,
-    /// Exact Windows creation ticks, encoded as text to preserve integer precision in JavaScript.
+    /// Opaque native start identity, encoded as text to preserve integer precision.
     pub started_at: String,
 }
 
@@ -28,7 +34,8 @@ pub struct ProcessMemory {
     pub name: String,
     /// Current physical working set; it can include shared pages.
     pub resident_bytes: u64,
-    /// Current private committed allocation, not a releasable-space estimate.
+    /// Native private memory: committed bytes on Windows, resident private bytes on Linux.
+    /// Neither value is a releasable-space estimate.
     pub private_bytes: u64,
 }
 
@@ -38,19 +45,19 @@ pub struct ProcessMemory {
 pub struct MemorySnapshot {
     /// Installed usable physical memory.
     pub total_bytes: u64,
-    /// Physical memory currently available to Windows.
+    /// Physical memory currently available to the operating system.
     pub available_bytes: u64,
     /// Current-user processes for which the required access is available.
     pub processes: Vec<ProcessMemory>,
 }
 
 /// Result for one exact selection, including failure without retrying another process.
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MemoryRelease {
     /// The originally selected process.
     pub identity: ProcessIdentity,
-    /// Whether Windows accepted the operation.
+    /// Whether the native operation completed without a reported error.
     pub succeeded: bool,
     /// Observed reduction in this process's working set, not guaranteed global freed RAM.
     pub resident_reduction_bytes: Option<u64>,
@@ -62,10 +69,12 @@ pub struct MemoryRelease {
 pub fn inspect() -> io::Result<MemorySnapshot> {
     #[cfg(windows)]
     return native::inspect();
-    #[cfg(not(windows))]
+    #[cfg(target_os = "linux")]
+    return linux::inspect();
+    #[cfg(not(any(windows, target_os = "linux")))]
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
-        "Memory maintenance requires Windows",
+        "Memory maintenance requires Windows or Linux",
     ))
 }
 
@@ -89,9 +98,11 @@ pub fn release(selected: &[ProcessIdentity]) -> io::Result<Vec<MemoryRelease>> {
         .iter()
         .map(|identity| native::release_one(identity))
         .collect());
-    #[cfg(not(windows))]
+    #[cfg(target_os = "linux")]
+    return linux::release_for_user(selected, linux::current_user(), &|| Ok(()));
+    #[cfg(not(any(windows, target_os = "linux")))]
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
-        "Memory maintenance requires Windows",
+        "Memory maintenance requires Windows or Linux",
     ))
 }

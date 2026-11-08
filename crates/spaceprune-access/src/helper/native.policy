@@ -48,4 +48,13 @@
     <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-cleanup-helper</annotate>
     <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-cleanup-session-zh-CN</annotate>
   </action>
+  <action id="com.spaceprune.native-6-4.memory">
+    <description>Maintain selected process memory in SpacePrune</description>
+    <message>Allow SpacePrune to reclaim resident memory from the processes you selected. Their data is preserved; later access may be slower.</message>
+    <description xml:lang="zh_CN">允许 SpacePrune 维护所选进程的内存</description>
+    <message xml:lang="zh_CN">请授权 SpacePrune 回收你选中进程的驻留内存。进程数据会保留，再次访问时可能变慢。</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>no</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/spaceprune/native-6-4/spaceprune-cleanup-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--spaceprune-memory-release-v1</annotate>
+  </action>
 </policyconfig>

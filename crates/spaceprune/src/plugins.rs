@@ -80,7 +80,7 @@ fn catalog<'a>(
             spaceprune_contracts::plugin::MEMORY_PLUGIN_ID,
             spaceprune_contracts::messages::text("plugins.memory_name"),
             spaceprune_contracts::messages::text("plugins.memory_description"),
-            &["windows"],
+            &["windows", "linux"],
             &[],
         ),
         builtin(
