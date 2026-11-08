@@ -194,6 +194,13 @@ fn measure(
                     }
                     value.failure
                 }
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                    measured = true;
+                    available = false;
+                    source.binding = None;
+                    unavailable_reason = Some(messages::text("developer.cache_missing").into());
+                    None
+                }
                 Err(error) => {
                     {
                         available = false;
@@ -348,6 +355,50 @@ mod tests {
 mod developer_tests {
     use super::*;
     use spaceprune_plugin_api::{ItemExecutionStatus, NullProgress};
+
+    #[test]
+    fn missing_cache_is_empty_and_unselectable_then_remeasured_if_created() {
+        for (kind, suffix) in [
+            (Kind::NpmCache, "npm/_cacache"),
+            (Kind::CargoRegistryCache, "cargo/registry/cache"),
+            (Kind::GoBuildCache, "go/build"),
+        ] {
+            let fixture = tempfile::tempdir().unwrap();
+            let root = fixture.path().join(suffix);
+            let task = TaskRequest {
+                module_id: "fixture".into(),
+                task_id: "cache".into(),
+                name: "Cache".into(),
+                handler_id: format!("{PLUGIN_ID}/{}", kind.id()),
+                options: json!({"elevation": "never"}),
+                recommend: json!({}),
+                tags: vec![],
+            };
+            let request = SystemCacheScanRequest {
+                task,
+                source: SystemCacheSource {
+                    action_id: kind.id().into(),
+                    roots: vec![NativePath::from_path(&root)],
+                    binding: None,
+                    program_available: true,
+                },
+            };
+            let empty = inspect(&request, &NullProgress, &OperationContext::default()).unwrap();
+            assert!(empty.issues.is_empty());
+            assert_eq!(empty.items[0].logical_bytes, Some(0));
+            assert_eq!(empty.items[0].reclaimable_bytes, Some(0));
+            assert_eq!(empty.items[0].recommendation, Recommendation::Unavailable);
+            fs::create_dir_all(&root).unwrap();
+            fs::write(root.join("package"), b"fixture").unwrap();
+            let measured = inspect(&request, &NullProgress, &OperationContext::default()).unwrap();
+            assert!(measured.issues.is_empty());
+            assert_eq!(measured.items[0].logical_bytes, Some(7));
+            assert_eq!(
+                measured.items[0].recommendation,
+                Recommendation::Recommended
+            );
+        }
+    }
 
     #[test]
     fn npm_and_cargo_cleanup_preserve_siblings_and_count_actual_removed_bytes() {

@@ -2079,6 +2079,10 @@
     "Could not bind the cache directory: {error}",
     "无法绑定缓存目录身份：{error}"
   ],
+  "developer.cache_missing": [
+    "Cache directory is absent; there is nothing to clean.",
+    "缓存目录不存在，没有可清理内容。"
+  ],
   "developer.cache_selected_unavailable": [
     "The selected item does not match this cache capability.",
     "选定项目与此缓存能力不匹配。"

@@ -308,6 +308,8 @@ builtin.developer-tools/docker-stopped-containers
 
 这些能力存在于程序中，但 `official:minimal` 不调用。使用前应核对配置参考中的专用 Handler 字段及 options。
 
+开发工具缓存目录不存在时，显示 0 B 和无可清理内容，不计为大小未知。权限不足或目录身份变化仍显示诊断；工具以后重新创建缓存时，重新扫描会计量新内容。
+
 ## 9. 外部插件
 
 配置需要未内置 Handler 时：

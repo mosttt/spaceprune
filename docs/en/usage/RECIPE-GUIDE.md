@@ -299,6 +299,8 @@ builtin.developer-tools/docker-stopped-containers
 
 These capabilities are present in the program, but `official:minimal` does not invoke them. Check dedicated-handler fields and options in the configuration reference before use.
 
+A missing developer-tool cache directory is reported as 0 B with no selectable cleanup, rather than an unknown size. Permission failures or a changed directory identity still produce diagnostics; rescanning measures a cache if the tool creates it later.
+
 ## 9. External plugins
 
 When configuration requires a non-built-in handler:
