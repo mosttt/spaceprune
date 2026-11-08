@@ -87,6 +87,29 @@ fn changed() -> io::Error {
     )
 }
 
+/// Read one entry's metadata through held parent descriptors without following any symlink.
+/// This does not read file contents or open special devices for I/O.
+pub fn inspect_entry_metadata(
+    path: &Path,
+    context: &OperationContext,
+) -> io::Result<std::fs::Metadata> {
+    context.check()?;
+    let parent_path = path
+        .parent()
+        .filter(|_| path.file_name().is_some())
+        .ok_or_else(boundary)?;
+    let parent = open_parent(parent_path, context)?;
+    let entry = openat(
+        &parent,
+        path.file_name().unwrap(),
+        OFlags::PATH | OFlags::NOFOLLOW | OFlags::CLOEXEC,
+        Mode::empty(),
+    )?;
+    let metadata = File::from(entry).metadata()?;
+    context.check()?;
+    Ok(metadata)
+}
+
 /// Inspect one native directory, preserving its identity and original operation lifetime.
 /// Ancestors require search access only. Enumeration and statistics stay relative to held descriptors.
 pub fn inspect_directory(

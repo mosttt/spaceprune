@@ -226,6 +226,7 @@ enum HelperOperation {
     MeasureNavigationBoundary,
     ScanFilesystemTask,
     ScanSystemCacheTask,
+    ScanTmpfilesPolicy,
     ScanSnapperTask,
     InspectSnapperTask,
 }
@@ -427,7 +428,9 @@ fn request_root_shape_is_valid(operation: HelperOperation, roots: &[PathBuf]) ->
                 && roots.len() <= 64
                 && roots.iter().all(|root| !root_is_too_broad(root))
         }
-        HelperOperation::ScanSnapperTask | HelperOperation::InspectSnapperTask => roots.is_empty(),
+        HelperOperation::ScanSnapperTask
+        | HelperOperation::InspectSnapperTask
+        | HelperOperation::ScanTmpfilesPolicy => roots.is_empty(),
     }
 }
 
@@ -468,7 +471,9 @@ fn helper_root_is_valid(path: &Path, operation: HelperOperation) -> bool {
             HelperOperation::ScanFilesystemTask | HelperOperation::ScanSystemCacheTask => {
                 !root_is_too_broad(path)
             }
-            HelperOperation::ScanSnapperTask | HelperOperation::InspectSnapperTask => false,
+            HelperOperation::ScanSnapperTask
+            | HelperOperation::InspectSnapperTask
+            | HelperOperation::ScanTmpfilesPolicy => false,
         }
 }
 

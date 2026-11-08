@@ -301,6 +301,14 @@ These capabilities are present in the program, but `official:minimal` does not i
 
 A missing developer-tool cache directory is reported as 0 B with no selectable cleanup, rather than an unknown size. Permission failures or a changed directory identity still produce diagnostics; rescanning measures a cache if the tool creates it later.
 
+### Linux system-resource sizes
+
+Journal scans report the logical file footprint of `/var/log/journal` and `/run/log/journal`; crash dumps report their current directory footprint. These are reference sizes. Retention settings and system expiration rules determine what is actually processed, so the entire footprint is not counted as estimated released space.
+
+Temporary-file scanning runs `systemd-tmpfiles --clean --dry-run` against the installed system policy, then reads candidate file metadata. The native preview applies expiration conditions and exclusions without reading file contents or cleaning anything. It requires systemd 256 or newer. Unsupported versions, insufficient access and incomplete previews report why the size is unavailable; the existing cleanup entry point remains usable. Inspection is bounded by time and output limits and responds to cancellation.
+
+Temporary-file rules may cover separately listed crash dumps. Shared or open files may not release space immediately. These logical reference values are not added repeatedly to reclaimable totals. CLI and other Core hosts consume the same measurements.
+
 ## 9. External plugins
 
 When configuration requires a non-built-in handler:

@@ -6,7 +6,6 @@ use super::*;
 ///
 /// Package-manager selection is resolved now, rather than deferred to another
 /// distribution or tool after the caller presents the observed capability.
-
 pub fn discover_system_tasks(context: &OperationContext) -> io::Result<Vec<TaskRequest>> {
     let mut tasks = Vec::new();
     for kind in [

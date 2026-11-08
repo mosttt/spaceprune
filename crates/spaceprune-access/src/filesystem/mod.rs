@@ -6,7 +6,7 @@ use spaceprune_contracts::messages;
 #[cfg(target_os = "linux")]
 mod inspection;
 #[cfg(target_os = "linux")]
-pub use inspection::{DirectoryInspection, inspect_directory};
+pub use inspection::{DirectoryInspection, inspect_directory, inspect_entry_metadata};
 
 /// Reserved transient execution names must never become candidates after an interrupted run.
 pub fn is_execution_artifact(path: &Path) -> bool {

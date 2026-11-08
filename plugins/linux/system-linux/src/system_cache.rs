@@ -4,6 +4,7 @@ mod command;
 #[cfg(target_os = "linux")]
 pub(crate) mod discovery;
 mod execution;
+pub(crate) mod measurement;
 #[cfg(target_os = "linux")]
 pub(crate) mod scan;
 use command::{ActionFailure, command_exists, effective_uid, run_action};

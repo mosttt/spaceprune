@@ -57,6 +57,8 @@ impl ScanAccess for NativeScanAccess {
                     "builtin.snapper/snapshots"
                         | "builtin.system-linux/package-cache"
                         | "builtin.system-linux/coredumps"
+                        | "builtin.system-linux/journal"
+                        | "builtin.system-linux/tmpfiles"
                         | "builtin.system-linux/go-modcache"
                         | "builtin.developer-tools/go-modcache"
                         | "builtin.developer-tools/go-buildcache"
@@ -94,8 +96,9 @@ impl ScanAccess for NativeScanAccess {
             use spaceprune_access::PermissionOutcome;
             use spaceprune_plugin_api::{HandlerIssue, IssueLevel, ProgressEvent, ProgressPhase};
             #[cfg(target_os = "linux")]
-            let cache = if task.handler_id.starts_with("builtin.system-linux/")
-                || task.handler_id.starts_with("builtin.developer-tools/")
+            let cache = if (task.handler_id.starts_with("builtin.system-linux/")
+                || task.handler_id.starts_with("builtin.developer-tools/"))
+                && task.handler_id != "builtin.system-linux/tmpfiles"
             {
                 let Some(source) =
                     spaceprune_readonly_protocol::client::prepare_system_cache_scan(task, &result)?

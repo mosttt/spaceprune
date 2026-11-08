@@ -76,6 +76,7 @@ fn execute_value(
         request.operation,
         HelperOperation::ScanFilesystemTask
             | HelperOperation::ScanSystemCacheTask
+            | HelperOperation::ScanTmpfilesPolicy
             | HelperOperation::ScanSnapperTask
             | HelperOperation::InspectSnapperTask
     ) {
@@ -247,6 +248,16 @@ fn validate_descriptor(
         }
         #[cfg(not(target_os = "linux"))]
         return Err(HelperError);
+    } else if request.operation == HelperOperation::ScanTmpfilesPolicy {
+        #[cfg(target_os = "linux")]
+        {
+            let task = serde_json::from_value(request.scan_task.clone().ok_or(HelperError)?)
+                .map_err(|_| HelperError)?;
+            spaceprune_plugin_system_linux::validate_tmpfiles_task(&task)
+                .map_err(|_| HelperError)?;
+        }
+        #[cfg(not(target_os = "linux"))]
+        return Err(HelperError);
     } else if matches!(
         request.operation,
         HelperOperation::ScanSnapperTask | HelperOperation::InspectSnapperTask
@@ -286,6 +297,12 @@ fn inspect_task(
     }
     let task: TaskRequest = serde_json::from_value(task).map_err(|error| error.to_string())?;
     match operation {
+        #[cfg(target_os = "linux")]
+        HelperOperation::ScanTmpfilesPolicy => {
+            spaceprune_plugin_system_linux::inspect_tmpfiles_task(&task, &NullProgress, context)
+                .map_err(|error| error.to_string())
+                .and_then(|value| serde_json::to_value(value).map_err(|error| error.to_string()))
+        }
         #[cfg(target_os = "linux")]
         HelperOperation::ScanSnapperTask => snapper::scan(&task, context)
             .and_then(|value| serde_json::to_value(value).map_err(|error| error.to_string())),

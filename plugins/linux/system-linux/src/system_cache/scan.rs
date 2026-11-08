@@ -10,6 +10,7 @@ fn kind(task: &TaskRequest) -> PluginResult<Kind> {
     match task.handler_id.as_str() {
         "builtin.system-linux/package-cache" => Ok(Kind::PackageCache),
         "builtin.system-linux/coredumps" => Ok(Kind::Coredumps),
+        "builtin.system-linux/journal" => Ok(Kind::Journal),
         _ => Err(invalid_source()),
     }
 }
@@ -66,18 +67,28 @@ pub fn validate(request: &SystemCacheScanRequest) -> PluginResult<Vec<PathBuf>> 
         .iter()
         .map(|path| path.to_path_buf().ok_or_else(invalid_source))
         .collect::<PluginResult<_>>()?;
-    if roots.len() != 1
-        || roots.iter().any(|path| {
-            !path.is_absolute()
-                || path.file_name().is_none()
-                || path
-                    .components()
-                    .any(|part| matches!(part, std::path::Component::ParentDir))
-        })
-    {
+    if roots.iter().any(|path| {
+        !path.is_absolute()
+            || path.file_name().is_none()
+            || path
+                .components()
+                .any(|part| matches!(part, std::path::Component::ParentDir))
+    }) {
         return Err(invalid_source());
     }
     match kind {
+        Kind::Journal => {
+            if source.action_id != "systemd-journal"
+                || roots
+                    != [
+                        PathBuf::from("/var/log/journal"),
+                        PathBuf::from("/run/log/journal"),
+                    ]
+                || source.binding.is_some()
+            {
+                return Err(invalid_source());
+            }
+        }
         Kind::Coredumps => {
             if source.action_id != "systemd-coredumps"
                 || roots != [PathBuf::from("/var/lib/systemd/coredump")]
@@ -176,6 +187,7 @@ fn measure(
     let (_, recommend) = parse(task)?;
     let mut bytes = 0_u64;
     let mut measured = false;
+    let mut empty_preview = false;
     let mut issues = Vec::new();
     let available = source.program_available;
     let roots: Vec<_> = source
@@ -183,9 +195,10 @@ fn measure(
         .iter()
         .map(|path| path.to_path_buf().ok_or_else(invalid_source))
         .collect::<PluginResult<_>>()?;
-    if matches!(kind, Kind::PackageCache | Kind::Coredumps) {
+    if available && matches!(kind, Kind::PackageCache | Kind::Journal | Kind::Coredumps) {
         for path in &roots {
-            if context.is_stopped() {
+            if let Err(error) = context.check() {
+                issues.push(issue(path, spaceprune_access::error::classify(&error)));
                 break;
             }
             progress.emit(ProgressEvent {
@@ -206,6 +219,10 @@ fn measure(
                     measured = true;
                     value.failure
                 }
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                    measured = true;
+                    None
+                }
                 Err(error) => Some(spaceprune_access::error::classify(&error)),
             };
             if let Some(failure) = failure {
@@ -213,7 +230,26 @@ fn measure(
             }
         }
     }
-    let (recommendation, reason) = if !available {
+    if available && matches!(kind, Kind::Tmpfiles) {
+        progress.emit(ProgressEvent {
+            phase: ProgressPhase::Measure,
+            module_id: Some(task.module_id.clone()),
+            task_id: Some(task.task_id.clone()),
+            handler_id: Some(task.handler_id.clone()),
+            current: None,
+            total: None,
+            message: messages::text("linux.preview_tmpfiles").into(),
+        });
+        match super::measurement::tmpfiles(context) {
+            Ok(value) => {
+                bytes = value.logical_bytes;
+                empty_preview = value.is_empty;
+                measured = true;
+            }
+            Err(error) => issues.push(error),
+        }
+    }
+    let (recommendation, mut reason) = if !available {
         (
             Recommendation::Unavailable,
             unavailable_reason.unwrap_or_else(|| messages::text("linux.action_unavailable").into()),
@@ -229,12 +265,22 @@ fn measure(
             messages::text("linux.recommend_disabled").into(),
         )
     };
+    if available && matches!(kind, Kind::Journal | Kind::Tmpfiles | Kind::Coredumps) {
+        reason.push_str(". ");
+        reason.push_str(messages::text(match kind {
+            Kind::Journal => "linux.journal_size_reference",
+            Kind::Coredumps => "linux.coredump_size_reference",
+            _ => "linux.tmpfiles_size_reference",
+        }));
+    }
     let complete_bytes = (measured && issues.is_empty()).then_some(bytes);
     if !issues.is_empty() && measured {
         issues[0].message =
             messages::message("linux.measurement_partial", &[("bytes", bytes.to_string())]);
     }
-    let location = if roots.is_empty() {
+    let location = if matches!(kind, Kind::Tmpfiles) {
+        messages::text("linux.tmpfiles_policy_location").into()
+    } else if roots.is_empty() {
         kind.name().into()
     } else {
         roots
@@ -251,7 +297,11 @@ fn measure(
             name: kind.name().into(),
             location,
             logical_bytes: complete_bytes,
-            reclaimable_bytes: complete_bytes,
+            reclaimable_bytes: if matches!(kind, Kind::PackageCache) || empty_preview {
+                complete_bytes
+            } else {
+                None
+            },
             modified_at: None,
             recommendation,
             reason,
@@ -283,6 +333,74 @@ fn issue(path: &Path, failure: IoFailure) -> HandlerIssue {
 mod tests {
     use super::*;
     use spaceprune_plugin_api::NullProgress;
+
+    #[test]
+    fn journal_metadata_is_reference_size_not_a_retention_release_estimate() {
+        let root = tempfile::tempdir().unwrap();
+        fs::write(root.path().join("archived.journal"), b"archive").unwrap();
+        fs::write(root.path().join("active.journal"), b"current").unwrap();
+        let task = TaskRequest {
+            module_id: "logs".into(),
+            task_id: "journal".into(),
+            name: "Logs".into(),
+            handler_id: "builtin.system-linux/journal".into(),
+            options: json!({}),
+            recommend: json!({}),
+            tags: vec![],
+        };
+        let source = SystemCacheSource {
+            action_id: "systemd-journal".into(),
+            roots: vec![
+                NativePath::from_path(root.path()),
+                NativePath::from_path(&root.path().join("absent")),
+            ],
+            binding: None,
+            program_available: true,
+        };
+        let result = measure(
+            Kind::Journal,
+            &task,
+            source.clone(),
+            None,
+            &NullProgress,
+            &OperationContext::default(),
+        )
+        .unwrap();
+        assert!(result.issues.is_empty());
+        assert_eq!(result.items[0].logical_bytes, Some(14));
+        assert_eq!(result.items[0].reclaimable_bytes, None);
+        assert_eq!(
+            fs::read(root.path().join("active.journal")).unwrap(),
+            b"current"
+        );
+        let cancelled = OperationContext::default();
+        cancelled.cancel();
+        let result = measure(
+            Kind::Journal,
+            &task,
+            source,
+            None,
+            &NullProgress,
+            &cancelled,
+        )
+        .unwrap();
+        assert_eq!(result.items[0].logical_bytes, None);
+        assert!(!result.issues.is_empty());
+    }
+
+    #[test]
+    fn journal_authorization_accepts_only_registered_metadata_roots() {
+        let mut request = request(Path::new("/var/log/journal"));
+        request.task.handler_id = "builtin.system-linux/journal".into();
+        request.source.action_id = "systemd-journal".into();
+        request
+            .source
+            .roots
+            .push(NativePath::from_path(Path::new("/run/log/journal")));
+        assert!(validate(&request).is_ok());
+        request.source.roots[1] = NativePath::from_path(Path::new("/home/other"));
+        assert!(validate(&request).is_err());
+    }
 
     fn request(root: &Path) -> SystemCacheScanRequest {
         SystemCacheScanRequest {

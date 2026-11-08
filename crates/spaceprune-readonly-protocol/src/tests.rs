@@ -221,6 +221,35 @@ fn forged_and_expired_request_is_rejected() {
     assert!(read_and_validate_request(&request.request_path, &request.nonce).is_err());
 }
 
+#[cfg(target_os = "linux")]
+#[test]
+fn tmpfiles_policy_request_is_readonly_and_rejects_custom_roots_or_commands() {
+    let mut task = spaceprune_plugin_api::TaskRequest {
+        module_id: "system".into(),
+        task_id: "tmpfiles".into(),
+        name: "Temporary files".into(),
+        handler_id: "builtin.system-linux/tmpfiles".into(),
+        options: serde_json::json!({}),
+        recommend: serde_json::json!({}),
+        tags: vec![],
+    };
+    let request = PreparedRequest::create_tmpfiles_scan("recipe-source-0", &task).unwrap();
+    let mut decoded = read_and_validate_request(&request.request_path, &request.nonce).unwrap();
+    assert_eq!(decoded.operation, HelperOperation::ScanTmpfilesPolicy);
+    assert!(decoded.roots.is_empty());
+    assert!(
+        matches!(client::request_scope(&[], Some(&serde_json::to_value(&task).unwrap())), spaceprune_access::CapabilityScope::System { handler, .. } if handler == task.handler_id)
+    );
+    decoded.roots.push(PathBuf::from("/tmp"));
+    fs::write(&request.request_path, serde_json::to_vec(&decoded).unwrap()).unwrap();
+    assert!(read_and_validate_request(&request.request_path, &request.nonce).is_err());
+    task.options = serde_json::json!({"command": "rm", "config": "/tmp/forged.conf"});
+    assert!(PreparedRequest::create_tmpfiles_scan("recipe-source-0", &task).is_err());
+    task.options = serde_json::json!({});
+    task.handler_id = "builtin.filesystem/paths".into();
+    assert!(PreparedRequest::create_tmpfiles_scan("recipe-source-0", &task).is_err());
+}
+
 #[test]
 fn request_filename_is_bound_to_nonce() {
     let (_temporary, root) = root();

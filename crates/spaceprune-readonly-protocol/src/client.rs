@@ -198,6 +198,10 @@ impl MetadataService {
             "builtin.snapper/snapshots" => {
                 PreparedRequest::create_snapper_scan("recipe-source-0", &task)
             }
+            #[cfg(target_os = "linux")]
+            "builtin.system-linux/tmpfiles" => {
+                PreparedRequest::create_tmpfiles_scan("recipe-source-0", &task)
+            }
             _ => return Err(PermissionOutcome::Unsupported),
         };
         self.scan_request(&task, request, operation, progress)
@@ -527,7 +531,11 @@ pub(super) fn request_scope(
 ) -> CapabilityScope {
     if roots.is_empty() {
         CapabilityScope::System {
-            handler: "builtin.snapper/snapshots".to_owned(),
+            handler: task
+                .and_then(|task| task.get("handler_id"))
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("builtin.snapper/snapshots")
+                .to_owned(),
             objects: task.map(|task| vec![task.to_string()]).unwrap_or_default(),
         }
     } else {

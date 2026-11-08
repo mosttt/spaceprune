@@ -1003,6 +1003,38 @@
     "Go cache contains a nested mount and cannot be cleaned as one directory",
     "Go 缓存包含嵌套挂载，无法作为单个目录清理"
   ],
+  "linux.preview_tmpfiles": [
+    "Checking files eligible under systemd expiration rules",
+    "正在按 systemd 过期规则检查文件"
+  ],
+  "linux.journal_size_reference": [
+    "Size is the current journal directory footprint; retention-based release is not yet known",
+    "大小为当前日志目录的逻辑占用；按保留期限可释放的空间尚未确定"
+  ],
+  "linux.tmpfiles_size_reference": [
+    "Size is the logical size of files in the native expiration preview; locked or shared files may release less space",
+    "大小为系统过期规则预览中的文件逻辑大小；占用中或共享的文件可能释放更少空间"
+  ],
+  "linux.tmpfiles_preview_unsupported": [
+    "This systemd version has no read-only preview (requires 256+); size is unavailable, but cleanup remains available",
+    "此 systemd 版本不支持只读预览（需要 256+）；大小暂不可用，仍可按规则清理"
+  ],
+  "linux.tmpfiles_preview_unrecognized": [
+    "The native preview format could not be measured reliably; size is unknown",
+    "无法可靠计量系统预览结果，大小未知"
+  ],
+  "linux.tmpfiles_preview_incomplete": [
+    "The system expiration preview did not complete; size is unknown. Check access and scan again",
+    "系统过期规则预览未完成，大小未知；请查看访问权限后重新扫描"
+  ],
+  "linux.coredump_size_reference": [
+    "Size is the current crash-dump footprint; cleanup follows the system expiration rules",
+    "大小为当前崩溃转储的逻辑占用；实际清理由系统过期规则决定"
+  ],
+  "linux.tmpfiles_policy_location": [
+    "System tmpfiles expiration policy",
+    "系统 tmpfiles 过期规则"
+  ],
   "linux.recommended": [
     "Recommended by the active configuration",
     "当前配置建议清理"

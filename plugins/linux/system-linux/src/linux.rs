@@ -1,6 +1,7 @@
 mod system_cache;
 #[cfg(target_os = "linux")]
 pub use system_cache::discovery::discover_system_tasks;
+pub use system_cache::measurement::{inspect_tmpfiles_task, validate_tmpfiles_task};
 pub use system_cache::register as register_system_handlers;
 #[cfg(target_os = "linux")]
 pub use system_cache::scan::{

@@ -4,6 +4,8 @@ Separate existing evidence from native checks still required. Older tests do not
 
 ## Existing evidence
 
+Linux system sizing uses isolated fixtures for journal directory footprints, missing directories, cancellation and native systemd expiration previews. Actual `--clean --dry-run` and CLI scans verify exclusions, zero matches and unchanged files. Read-only protocol tests reject custom commands, configurations and roots for the bounded tmpfiles policy request. An unsupported preview never falls back to cleanup.
+
 Native Apple Silicon macOS CLI debug builds and `--version`/`--help` startup passed, along with three targeted login-binding tests. Quartz session keys use the SDK's `CFSTR` macro values instead of nonexistent linker symbols; inactive sessions, incomplete login, missing fields and wrong value types cannot acquire a reusable foreground login binding. Terminal monitoring explicitly requests hangup/error events; a disposable pipe test confirms that input remains unread and peer closure is detected. These checks do not establish signed component installation or authorization acceptance.
 
 macOS startup APFS System and Data volumes share one capacity record while retaining both access paths; hidden recovery volumes are excluded from the ordinary local inventory. Two fixture tests cover startup grouping, external/network mounts and unrelated volumes with equal capacity. A native read-only enumeration returned one startup record.

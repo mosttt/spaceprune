@@ -94,6 +94,21 @@ impl PreparedRequest {
         )
     }
 
+    /// Preview installed systemd cleanup rules without permitting a command or custom configuration.
+    #[cfg(target_os = "linux")]
+    pub fn create_tmpfiles_scan(
+        source_id: &str,
+        task: &spaceprune_plugin_api::TaskRequest,
+    ) -> Result<Self, HelperError> {
+        spaceprune_plugin_system_linux::validate_tmpfiles_task(task).map_err(|_| HelperError)?;
+        Self::create_with_scan(
+            source_id,
+            &[],
+            HelperOperation::ScanTmpfilesPolicy,
+            Some(serde_json::to_value(task).map_err(|_| HelperError)?),
+        )
+    }
+
     /// Keep the invoking user's discovered cache roots and identities during native retry.
     #[cfg(target_os = "linux")]
     pub fn create_system_cache_scan(
