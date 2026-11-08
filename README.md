@@ -50,7 +50,7 @@ Saving a recipe does not delete files. Manual cleanup requires confirmation; ena
 ## Source layout
 
 - `crates/`: the CLI, Core libraries, data contracts and native authorization components.
-- `plugins/`: filesystem, Snapper, Linux system and developer-tools plugins.
+- `plugins/`: built-in plugins grouped under `cross-platform/`, `linux/`, `windows/` and `android/`.
 - `recipes/` and `mappings/`: bundled recipes and platform variable mappings.
 - `scripts/` and `.github/workflows/`: build, packaging and release tooling.
 - `docs/en/` and `docs/zh/`: usage, architecture, build and contribution guides.

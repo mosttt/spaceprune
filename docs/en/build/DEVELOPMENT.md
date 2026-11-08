@@ -16,7 +16,7 @@ spaceprune/
 │   ├── spaceprune-plugin-api/      Handler contract
 │   ├── spaceprune-plugin-host/     External plugin host
 │   └── spaceprune-platform*/      Platform services
-├── plugins/                       Built-in filesystem and Snapper handlers
+├── plugins/                       Built-in plugins grouped by platform
 ├── recipes/                       Embedded recipe resources
 └── mappings/                      Platform variable mappings
 ```

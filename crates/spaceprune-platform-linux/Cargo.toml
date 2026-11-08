@@ -7,7 +7,7 @@ license.workspace = true
 description = "Linux integration for SpacePrune"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
+spaceprune-plugin-system-linux = { path = "../../plugins/linux/system-linux" }
 spaceprune-config = { path = "../spaceprune-config" }
 spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
 thiserror.workspace = true

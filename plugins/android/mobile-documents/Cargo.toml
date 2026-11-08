@@ -7,16 +7,16 @@ license.workspace = true
 description = "User-authorized document rules with a host-injected native provider"
 
 [dependencies]
-spaceprune-contracts = { path = "../../crates/spaceprune-contracts" }
-spaceprune-engine = { path = "../../crates/spaceprune-engine" }
-spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+spaceprune-contracts = { path = "../../../crates/spaceprune-contracts" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
 globset.workspace = true
 schemars = "0.8.22"
 serde.workspace = true
 serde_json.workspace = true
 
 [dev-dependencies]
-spaceprune-config = { path = "../../crates/spaceprune-config" }
+spaceprune-config = { path = "../../../crates/spaceprune-config" }
 tempfile.workspace = true
 toml.workspace = true
 

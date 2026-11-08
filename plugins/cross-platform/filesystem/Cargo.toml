@@ -8,10 +8,10 @@ description = "Built-in filesystem plugin for SpacePrune"
 
 [dependencies]
 schemars = "0.8.22"
-spaceprune-access = { path = "../../crates/spaceprune-access" }
-spaceprune-contracts = { path = "../../crates/spaceprune-contracts" }
-spaceprune-engine = { path = "../../crates/spaceprune-engine" }
-spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+spaceprune-access = { path = "../../../crates/spaceprune-access" }
+spaceprune-contracts = { path = "../../../crates/spaceprune-contracts" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
 globset.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -20,7 +20,7 @@ serde_json.workspace = true
 rustix = { version = "1.1.4", features = ["fs", "process"] }
 
 [dev-dependencies]
-spaceprune-config = { path = "../../crates/spaceprune-config" }
+spaceprune-config = { path = "../../../crates/spaceprune-config" }
 tempfile.workspace = true
 toml.workspace = true
 

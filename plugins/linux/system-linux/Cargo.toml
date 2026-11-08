@@ -7,13 +7,13 @@ license.workspace = true
 description = "Linux package and systemd lifecycle plugin"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-spaceprune-access = { path = "../../crates/spaceprune-access" }
-spaceprune-engine = { path = "../../crates/spaceprune-engine" }
-spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+spaceprune-access = { path = "../../../crates/spaceprune-access" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
 serde.workspace = true
 serde_json.workspace = true
 
-spaceprune-plugin-developer-tools = { path = "../developer-tools" }
+spaceprune-plugin-developer-tools = { path = "../../cross-platform/developer-tools" }
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
 tempfile.workspace = true

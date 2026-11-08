@@ -50,7 +50,7 @@ Linux 源码调试可使用 `./scripts/run-cli.sh`，每次启动前会一起构
 ## 源码布局
 
 - `crates/`：CLI、Core 库、数据合同与原生授权组件。
-- `plugins/`：文件系统、Snapper、Linux 系统和开发工具插件。
+- `plugins/`：按 `cross-platform/`、`linux/`、`windows/`、`android/` 分类的内置插件。
 - `recipes/` 与 `mappings/`：内置方案及平台变量映射。
 - `scripts/` 与 `.github/workflows/`：构建、打包和发布工具。
 - `docs/en/` 与 `docs/zh/`：使用、架构、构建与贡献指南。

@@ -7,9 +7,9 @@ license.workspace = true
 description = "Identity-bound Rust, Go and Node cache lifecycle plugin"
 
 [dependencies]
-spaceprune-access = { path = "../../crates/spaceprune-access" }
-spaceprune-engine = { path = "../../crates/spaceprune-engine" }
-spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+spaceprune-access = { path = "../../../crates/spaceprune-access" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
 serde.workspace = true
 serde_json.workspace = true
 humantime.workspace = true

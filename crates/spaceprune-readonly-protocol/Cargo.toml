@@ -19,10 +19,10 @@ spaceprune-windows-elevation = { path = "../spaceprune-windows-elevation" }
 
 [target.'cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))'.dependencies]
 spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
-spaceprune-plugin-filesystem = { path = "../../plugins/filesystem" }
+spaceprune-plugin-filesystem = { path = "../../plugins/cross-platform/filesystem" }
 [target.'cfg(target_os = "linux")'.dependencies]
-spaceprune-plugin-snapper = { path = "../../plugins/snapper" }
-spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
+spaceprune-plugin-snapper = { path = "../../plugins/linux/snapper" }
+spaceprune-plugin-system-linux = { path = "../../plugins/linux/system-linux" }
 
 [target.'cfg(unix)'.dependencies]
 rustix = { workspace = true, features = ["process"] }

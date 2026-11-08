@@ -91,10 +91,17 @@ spaceprune/
 │  ├─ spaceprune-plugin-api/      Handler execution interfaces, cancellation, progress sink; re-exports public DTOs
 │  └─ spaceprune-plugin-host/     External plugin discovery, installation, process protocol
 ├─ plugins/
-│  ├─ filesystem/
-│  ├─ snapper/
-│  ├─ system-linux/
-│  └─ developer-tools/
+│  ├─ cross-platform/
+│  │  ├─ filesystem/
+│  │  ├─ memory/
+│  │  └─ developer-tools/
+│  ├─ linux/
+│  │  ├─ snapper/
+│  │  └─ system-linux/
+│  ├─ windows/
+│  │  └─ system-windows/
+│  └─ android/
+│     └─ mobile-documents/
 ├─ recipes/
 │  └─ official/
 │     └─ minimal.toml
@@ -106,6 +113,8 @@ spaceprune/
 ```
 
 Other applications integrate through the public Core API and are not members of this Cargo workspace.
+
+Plugin source is grouped by its implemented platform support. A cross-platform domain keeps one plugin with native platform modules; system-specific plugins live in their platform directory. Memory management uses one domain plugin with platform adapters in `cross-platform/memory`; availability follows implemented capabilities and platform declarations. This reorganization does not change crate names, plugin IDs, Handler IDs or recipe semantics. Directory groups do not replace target compilation gates or runtime capability reporting; individual handlers in a cross-platform plugin can support only a subset of systems.
 
 ## 4. Crate dependency direction
 
@@ -457,7 +466,7 @@ The elevated worker revalidates each selection's rules and scan-time file identi
 
 System-cache and Snapper domain commands no longer launch authenticators independently. Reads, cleanup, and automatic preparation of bundled components share the public permission infrastructure while retaining separate capabilities and original operation deadlines. When permissions are needed, current bundled components are applied automatically and the original operation continues after success. See [Native authorization](NATIVE-AUTHORIZATION.md).
 
-`plugins/system-linux` registers (the old Go entry forwards to developer-tools):
+`plugins/linux/system-linux` registers (the old Go entry forwards to developer-tools):
 
 ```text
 builtin.system-linux/package-cache
@@ -563,7 +572,7 @@ On entry, the TUI saves the original title on the terminal title stack and sets 
 
 ## 22. Platform layer
 
-`spaceprune-platform` is the automation facade; `spaceprune-platform-linux` provides systemd automation. Domain logic lives in `plugins/system-linux` and `plugins/developer-tools`; existing public Rust exports are thin compatibility re-exports. `spaceprune-engine` and `spaceprune-config` remain platform-neutral.
+`spaceprune-platform` is the automation facade; `spaceprune-platform-linux` provides systemd automation. Domain logic lives in `plugins/linux/system-linux` and `plugins/cross-platform/developer-tools`; existing public Rust exports are thin compatibility re-exports. `spaceprune-engine` and `spaceprune-config` remain platform-neutral.
 
 Mobile targets build only the library layer, not the desktop CLI, process-plugin host, or Linux-specific capabilities.
 

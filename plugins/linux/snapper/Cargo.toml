@@ -12,9 +12,9 @@ async-io = "2.6.0"
 futures-lite = "2.6.1"
 zbus = { version = "5.19.0", default-features = false, features = ["async-io"] }
 
-spaceprune-access = { path = "../../crates/spaceprune-access" }
-spaceprune-engine = { path = "../../crates/spaceprune-engine" }
-spaceprune-plugin-api = { path = "../../crates/spaceprune-plugin-api" }
+spaceprune-access = { path = "../../../crates/spaceprune-access" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
 serde.workspace = true
 serde_json.workspace = true
 humantime.workspace = true

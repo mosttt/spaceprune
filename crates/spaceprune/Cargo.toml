@@ -11,8 +11,8 @@ name = "spaceprune"
 path = "src/lib.rs"
 
 [dependencies]
-spaceprune-plugin-developer-tools = { path = "../../plugins/developer-tools" }
-spaceprune-plugin-memory = { path = "../../plugins/memory" }
+spaceprune-plugin-developer-tools = { path = "../../plugins/cross-platform/developer-tools" }
+spaceprune-plugin-memory = { path = "../../plugins/cross-platform/memory" }
 spaceprune-access = { path = "../spaceprune-access" }
 spaceprune-plugin-api = { path = "../spaceprune-plugin-api" }
 anyhow.workspace = true
@@ -20,7 +20,7 @@ spaceprune-contracts = { path = "../spaceprune-contracts" }
 spaceprune-config = { path = "../spaceprune-config" }
 spaceprune-engine = { path = "../spaceprune-engine" }
 spaceprune-platform = { path = "../spaceprune-platform" }
-spaceprune-plugin-filesystem = { path = "../../plugins/filesystem" }
+spaceprune-plugin-filesystem = { path = "../../plugins/cross-platform/filesystem" }
 spaceprune-plugin-host = { path = "../spaceprune-plugin-host" }
 semver.workspace = true
 serde.workspace = true
@@ -29,8 +29,8 @@ toml.workspace = true
 tempfile.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
-spaceprune-plugin-system-linux = { path = "../../plugins/system-linux" }
-spaceprune-plugin-snapper = { path = "../../plugins/snapper" }
+spaceprune-plugin-system-linux = { path = "../../plugins/linux/system-linux" }
+spaceprune-plugin-snapper = { path = "../../plugins/linux/snapper" }
 
 [target.'cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))'.dependencies]
 spaceprune-readonly-protocol = { path = "../spaceprune-readonly-protocol" }
@@ -46,4 +46,4 @@ tempfile.workspace = true
 workspace = true
 
 [target.'cfg(windows)'.dependencies.spaceprune-plugin-system-windows]
-path = "../../plugins/system-windows"
+path = "../../plugins/windows/system-windows"

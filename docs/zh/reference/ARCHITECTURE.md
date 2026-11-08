@@ -94,10 +94,17 @@ spaceprune/
 │  ├─ spaceprune-plugin-api/      Handler 执行接口、取消、进度 sink；重导出公共 DTO
 │  └─ spaceprune-plugin-host/     外部插件发现、安装、进程协议
 ├─ plugins/
-│  ├─ filesystem/
-│  ├─ snapper/
-│  ├─ system-linux/
-│  └─ developer-tools/
+│  ├─ cross-platform/
+│  │  ├─ filesystem/
+│  │  ├─ memory/
+│  │  └─ developer-tools/
+│  ├─ linux/
+│  │  ├─ snapper/
+│  │  └─ system-linux/
+│  ├─ windows/
+│  │  └─ system-windows/
+│  └─ android/
+│     └─ mobile-documents/
 ├─ recipes/
 │  └─ official/
 │     └─ minimal.toml
@@ -109,6 +116,8 @@ spaceprune/
 ```
 
 其他应用通过公共 Core API 集成，不属于本 Cargo workspace。
+
+插件按实际支持的平台组织源码。跨平台领域只保留一个插件，在内部用平台模块分离原生实现；系统专属插件放在对应系统目录。内存管理采用一个领域插件、多个平台适配的结构，放在 `cross-platform/memory`；当前可用能力仍以实现和平台声明为准。目录整理不改变 crate 名称、插件 ID、Handler ID 或方案语义。目录分组不代替编译条件和运行时能力报告；跨平台插件也可能只在部分系统提供某个 Handler。
 
 ## 4. crate 依赖方向
 
@@ -526,7 +535,7 @@ Core 的 Linux filesystem 清理支持一次批处理中的按需提权：普通
 系统缓存与 Snapper 领域命令都不再自行启动认证器。读取、清理和随包组件自动准备共享公共权限基础设施，
 仍保留不同能力与原操作期限；需要权限时自动应用当前随包组件，成功后继续原操作。详见[本机权限](NATIVE-AUTHORIZATION.md)。
 
-`plugins/system-linux` 注册（旧 Go 项为 developer-tools 实现的转发入口）：
+`plugins/linux/system-linux` 注册（旧 Go 项为 developer-tools 实现的转发入口）：
 
 ```text
 builtin.system-linux/package-cache
@@ -646,7 +655,7 @@ TUI 时缓存；每帧只构造一次可见行。`Ctrl+C` 在所有界面层统�
 
 ## 22. 平台层
 
-`spaceprune-platform` 是自动化 facade；`spaceprune-platform-linux` 提供 systemd 自动化；领域逻辑属于 `plugins/system-linux` 与 `plugins/developer-tools`。原平台导出仅保留公共 Rust 调用入口的薄转发。
+`spaceprune-platform` 是自动化 facade；`spaceprune-platform-linux` 提供 systemd 自动化；领域逻辑属于 `plugins/linux/system-linux` 与 `plugins/cross-platform/developer-tools`。原平台导出仅保留公共 Rust 调用入口的薄转发。
 `spaceprune-engine` 和 `spaceprune-config` 保持平台中立。
 
 移动目标只编译库层，不编译桌面 CLI、进程插件宿主和 Linux 专用能力。

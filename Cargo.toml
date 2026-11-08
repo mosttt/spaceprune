@@ -13,13 +13,13 @@ members = [
     "crates/spaceprune-platform-linux",
     "crates/spaceprune-plugin-api",
     "crates/spaceprune-plugin-host",
-    "plugins/filesystem",
-    "plugins/system-linux",
-    "plugins/developer-tools",
-    "plugins/snapper",
-    "plugins/mobile-documents",
-    "plugins/memory",
-    "plugins/system-windows",
+    "plugins/cross-platform/filesystem",
+    "plugins/linux/system-linux",
+    "plugins/cross-platform/developer-tools",
+    "plugins/linux/snapper",
+    "plugins/android/mobile-documents",
+    "plugins/cross-platform/memory",
+    "plugins/windows/system-windows",
 ]
 resolver = "3"
 
