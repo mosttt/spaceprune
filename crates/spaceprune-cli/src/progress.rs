@@ -153,7 +153,7 @@ impl Activity {
         } else {
             crate::i18n::text("terminal.ctrlc_stops").to_owned()
         };
-        vec![
+        let mut lines = vec![
             (
                 format!("{} {title} · {}", spinner[frame], duration(elapsed)),
                 if cancelled {
@@ -181,7 +181,11 @@ impl Activity {
                     Tone::Muted
                 },
             ),
-        ]
+        ];
+        for summary in self.domain_size_summaries() {
+            lines.insert(lines.len() - 1, (summary, Tone::Secondary));
+        }
+        lines
     }
 
     fn frame_lines(
@@ -192,7 +196,7 @@ impl Activity {
         height: u16,
     ) -> Vec<(String, Tone)> {
         let mut lines = self.lines(now, cancelled, width);
-        let history_rows = usize::from(height.saturating_sub(8)).min(5);
+        let history_rows = usize::from(height.saturating_sub((lines.len() + 2) as u16)).min(5);
         if history_rows > 0 {
             let mut history = vec![(
                 crate::i18n::text("terminal.recent_activity").to_owned(),
@@ -262,6 +266,50 @@ impl Activity {
                 width.saturating_sub(summary.width())
             )
         )
+    }
+
+    fn domain_size_summaries(&self) -> Vec<String> {
+        if !matches!(self.operation, Operation::Scan) {
+            return Vec::new();
+        }
+        let mut total = spaceprune::api::ScanMeasurement::default();
+        for measurement in self.measurements.values() {
+            total.merge(*measurement);
+        }
+        let mut lines = Vec::new();
+        if total.snapshot_groups > 0 {
+            lines.push(crate::i18n::message(
+                "terminal.live_snapshot_size",
+                &[
+                    (
+                        "size",
+                        measured_domain_size(
+                            total.snapshot_logical_bytes,
+                            total.snapshot_unknown_items,
+                        ),
+                    ),
+                    ("count", total.snapshot_groups.to_string()),
+                    ("unknown", total.snapshot_unknown_items.to_string()),
+                ],
+            ));
+        }
+        if total.memory_process_count > 0 {
+            lines.push(crate::i18n::message(
+                "terminal.live_memory_size",
+                &[
+                    (
+                        "size",
+                        measured_domain_size(
+                            total.memory_resident_bytes,
+                            total.memory_unknown_items,
+                        ),
+                    ),
+                    ("count", total.memory_process_count.to_string()),
+                    ("unknown", total.memory_unknown_items.to_string()),
+                ],
+            ));
+        }
+        lines
     }
 
     fn size_summary(&self) -> String {
@@ -889,6 +937,18 @@ pub(crate) fn display_message(value: &str) -> String {
     result
 }
 
+fn measured_domain_size(bytes: u64, unknown: usize) -> String {
+    if unknown > 0 && bytes == 0 {
+        return crate::i18n::text("terminal.unknown").into();
+    }
+    let size = spaceprune::api::fs::format_bytes(bytes);
+    if unknown > 0 {
+        crate::i18n::message("terminal.at_least", &[("p0", size)])
+    } else {
+        size
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -919,6 +979,36 @@ mod tests {
         assert!(!summary.contains("9.00 KiB"));
         activity.cleanup_sizes.clear();
         assert!(!activity.size_summary().contains("0 B"));
+    }
+
+    #[test]
+    fn live_snapshot_logical_size_never_inflates_content_or_recommendations() {
+        let mut activity = Activity::new(Operation::Scan, 2);
+        activity.measurements.insert(
+            ("files".into(), "cache".into()),
+            spaceprune::api::ScanMeasurement {
+                checked_items: 1,
+                logical_bytes: 1024,
+                recommended_bytes: 512,
+                ..Default::default()
+            },
+        );
+        let key = ("snapshots".into(), "home".into());
+        let snapshot = spaceprune::api::ScanMeasurement {
+            checked_items: 3,
+            snapshot_groups: 2,
+            snapshot_logical_bytes: 1 << 40,
+            snapshot_unknown_items: 1,
+            ..Default::default()
+        };
+        activity.measurements.insert(key.clone(), snapshot);
+        activity.measurements.insert(key, snapshot);
+        let summary = activity.size_summary();
+        assert!(summary.contains("1.00 KiB") && summary.contains("512 B"));
+        assert!(!summary.contains("TiB"));
+        let separate = activity.domain_size_summaries().join(" ");
+        assert!(separate.contains("1.00 TiB") && separate.contains("2 groups"));
+        assert_eq!(measured_domain_size(0, 2), "unknown");
     }
 
     #[test]

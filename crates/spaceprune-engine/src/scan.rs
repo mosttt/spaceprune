@@ -255,7 +255,7 @@ impl Engine {
                 }
                 let mut measurement = spaceprune_plugin_api::ScanMeasurement::default();
                 for item in report.leaf_items() {
-                    measurement.add_item(item);
+                    measurement.add_item_with_accounting(item, report.size_accounting);
                 }
                 progress.record_scan(&task_request, measurement);
                 self.event_bus.emit(

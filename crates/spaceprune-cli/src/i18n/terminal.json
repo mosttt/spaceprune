@@ -978,5 +978,13 @@
   "terminal.memory_transient": [
     "Process memory can return; shared pages are not global freed RAM or disk space.",
     "进程内存可再次增长；共享页面减少不等于系统实际释放内存，不计入磁盘空间。"
+  ],
+  "terminal.live_snapshot_size": [
+    "Snapshot logical size {size} · {count} groups · {unknown} unmeasured (not freed space)",
+    "快照逻辑大小 {size} · {count} 组 · {unknown} 组待计量（非释放量）"
+  ],
+  "terminal.live_memory_size": [
+    "Resident RAM {size} · {count} processes · {unknown} unmeasured",
+    "驻留内存 {size} · {count} 个进程 · {unknown} 项待计量"
   ]
 }
