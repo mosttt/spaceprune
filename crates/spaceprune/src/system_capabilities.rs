@@ -63,6 +63,20 @@ pub fn probe_system_capabilities(
     if !policy.disabled().contains(DEVELOPER_TOOLS_PLUGIN_ID) {
         tasks.extend(spaceprune_plugin_developer_tools::probe_tasks(context)?);
     }
+    #[cfg(any(windows, target_os = "linux"))]
+    if !policy
+        .disabled()
+        .contains(spaceprune_contracts::plugin::MEMORY_PLUGIN_ID)
+    {
+        tasks.extend(
+            spaceprune_plugin_memory::discover_tasks(context)?
+                .into_iter()
+                .map(|task| spaceprune_plugin_developer_tools::CapabilityProbe {
+                    task,
+                    issue: None,
+                }),
+        );
+    }
     policy.check_current()?;
     Ok(tasks)
 }
@@ -89,6 +103,8 @@ pub fn inspect_system_capability(
         return Err(EngineError::PluginDisabled(plugin.into()).into());
     }
     let mut registry = PluginRegistry::new();
+    #[cfg(any(windows, target_os = "linux"))]
+    crate::memory_recipe::register(&mut registry)?;
     #[cfg(target_os = "linux")]
     {
         spaceprune_plugin_system_linux::register_system_handlers(&mut registry)?;

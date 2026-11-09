@@ -67,6 +67,9 @@ impl std::fmt::Display for ItemKey {
 /// 一个任务的扫描报告。
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema, PartialEq)]
 pub struct TaskReport {
+    /// Registered size domain, retained so RAM is not aggregated into disk estimates.
+    #[serde(default)]
+    pub size_accounting: CleanupSizeAccounting,
     /// 模块 ID。
     pub module_id: String,
     /// 任务 ID。
@@ -121,6 +124,9 @@ impl TaskReport {
 
     /// 返回推荐叶子项目的预计可释放空间。
     pub fn recommended_bytes(&self) -> u64 {
+        if self.size_accounting == CleanupSizeAccounting::MemoryBytes {
+            return 0;
+        }
         self.leaf_items()
             .into_iter()
             .filter(|item| item.recommendation == Recommendation::Recommended)
@@ -130,6 +136,9 @@ impl TaskReport {
 
     /// 返回预计可释放容量未知的推荐叶子项目数。
     pub fn unknown_recommended_items(&self) -> usize {
+        if self.size_accounting == CleanupSizeAccounting::MemoryBytes {
+            return 0;
+        }
         self.leaf_items()
             .into_iter()
             .filter(|item| item.recommendation == Recommendation::Recommended)
@@ -395,6 +404,7 @@ impl ExecutionReport {
     pub fn reclaimed_bytes(&self) -> u64 {
         self.groups
             .iter()
+            .filter(|group| group.size_accounting != CleanupSizeAccounting::MemoryBytes)
             .filter_map(|group| group.result.as_ref())
             .map(|result| result.reclaimed_bytes)
             .fold(0, u64::saturating_add)
@@ -404,6 +414,7 @@ impl ExecutionReport {
     pub fn unknown_reclaimed_items(&self) -> usize {
         self.groups
             .iter()
+            .filter(|group| group.size_accounting != CleanupSizeAccounting::MemoryBytes)
             .filter_map(|group| group.result.as_ref())
             .map(HandlerCleanResult::unknown_reclaimed_items)
             .fold(0, usize::saturating_add)

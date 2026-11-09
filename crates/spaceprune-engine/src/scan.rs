@@ -217,6 +217,7 @@ impl Engine {
                 });
 
                 let mut report = TaskReport {
+                    size_accounting: handler.descriptor().size_accounting,
                     module_id: module_id.to_owned(),
                     task_id: task_id.to_owned(),
                     name: task.name.clone(),
@@ -359,6 +360,7 @@ mod tests {
             tags: vec![],
         };
         TaskReport {
+            size_accounting: Default::default(),
             module_id: request.module_id.clone(),
             task_id: id.into(),
             name: id.into(),

@@ -1,8 +1,11 @@
-//! Explicit process working-set maintenance, separate from disk cleanup and Recipes.
+//! Identity-bound process working-set maintenance, accounted separately from disk cleanup.
 #![deny(missing_docs)]
 
 use serde::{Deserialize, Serialize};
 use std::io;
+
+mod recipe;
+pub use recipe::{ReleaseAccess, register};
 
 #[cfg(windows)]
 #[allow(unsafe_code)]
@@ -24,6 +27,16 @@ pub struct ProcessIdentity {
     pub started_at: String,
 }
 
+/// A process selection bound to both its lifetime and executable, never its basename alone.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BoundProcess {
+    /// PID and native start identity observed during this scan.
+    pub identity: ProcessIdentity,
+    /// Exact executable path observed for this process.
+    pub executable: String,
+}
+
 /// A readable process owned by the current user.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,6 +45,8 @@ pub struct ProcessMemory {
     pub identity: ProcessIdentity,
     /// Executable basename.
     pub name: String,
+    /// Executable path when readable and representable as Unicode; required for reusable rules.
+    pub executable: Option<String>,
     /// Current physical working set; it can include shared pages.
     pub resident_bytes: u64,
     /// Native private memory: committed bytes on Windows, resident private bytes on Linux.
@@ -59,6 +74,9 @@ pub struct MemoryRelease {
     pub identity: ProcessIdentity,
     /// Whether the native operation completed without a reported error.
     pub succeeded: bool,
+    /// Whether any native advice was applied, even if a later step failed.
+    #[serde(default)]
+    pub applied: bool,
     /// Observed reduction in this process's working set, not guaranteed global freed RAM.
     pub resident_reduction_bytes: Option<u64>,
     /// Native error text or identity mismatch, when applicable.
@@ -105,4 +123,91 @@ pub fn release(selected: &[ProcessIdentity]) -> io::Result<Vec<MemoryRelease>> {
         io::ErrorKind::Unsupported,
         "Memory maintenance requires Windows or Linux",
     ))
+}
+
+/// Release exact executable-bound selections using only authority already held by this process.
+pub fn release_bound(
+    selected: &[BoundProcess],
+    check: &dyn Fn() -> io::Result<()>,
+) -> io::Result<Vec<MemoryRelease>> {
+    validate_bound(selected)?;
+    #[cfg(windows)]
+    return selected
+        .iter()
+        .map(|selection| {
+            if let Err(error) = check() {
+                return Ok(MemoryRelease {
+                    identity: selection.identity.clone(),
+                    succeeded: false,
+                    applied: false,
+                    resident_reduction_bytes: None,
+                    error: Some(error.to_string()),
+                });
+            }
+            Ok(native::release_matching(
+                &selection.identity,
+                Some(&selection.executable),
+            ))
+        })
+        .collect();
+    #[cfg(target_os = "linux")]
+    return linux::release_bound_for_user(selected, linux::current_user(), check);
+    #[cfg(not(any(windows, target_os = "linux")))]
+    {
+        let _ = check;
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Memory maintenance requires Windows or Linux",
+        ))
+    }
+}
+
+fn validate_bound(selected: &[BoundProcess]) -> io::Result<()> {
+    if selected.is_empty()
+        || selected.len() > 128
+        || selected
+            .iter()
+            .map(|p| &p.identity)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            != selected.len()
+        || selected
+            .iter()
+            .any(|p| !std::path::Path::new(&p.executable).is_absolute())
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Select 1 to 128 distinct executable-bound processes",
+        ));
+    }
+    Ok(())
+}
+
+/// Discover one read-only, executable-bound capability per currently observable application.
+pub fn discover_tasks(
+    context: &spaceprune_access::OperationContext,
+) -> io::Result<Vec<spaceprune_plugin_api::TaskRequest>> {
+    context.check()?;
+    let snapshot = inspect()?;
+    let applications = snapshot
+        .processes
+        .into_iter()
+        .filter_map(|p| p.executable)
+        .collect::<std::collections::BTreeSet<_>>();
+    context.check()?;
+    Ok(applications
+        .into_iter()
+        .map(|executable| spaceprune_plugin_api::TaskRequest {
+            module_id: "system-evidence".into(),
+            task_id: "process-working-set".into(),
+            name: std::path::Path::new(&executable)
+                .file_name()
+                .map(|s| s.to_string_lossy().into_owned())
+                .unwrap_or_else(|| executable.clone()),
+            handler_id: "builtin.memory/process-working-set".into(),
+            options: serde_json::json!({"applications":[executable]}),
+            recommend: serde_json::json!({"enabled":false}),
+            tags: vec!["memory".into()],
+        })
+        .collect())
 }

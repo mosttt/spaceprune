@@ -69,8 +69,30 @@ macOS 管理员 metadata 与 filesystem cleanup 服务已完成代码接线：�
 macOS filesystem 的 `elevation = "auto"` 在普通删除出现 EACCES 后选择原生清理服务，`never` 禁止重试，显式 `native` 也选择同一入口。EPERM 保留系统策略拒绝，不自动尝试提权绕过。
 三平台原生安装与权限组合验证尚未完成，Linux 测试和 Darwin 目标检查不替代目标系统运行证据。
 
-## 手动维护 Linux 进程内存
+## 进程内存维护
 
 内存插件使用同一 `builtin.memory` 标识，Windows 与 Linux 在各自的原生适配器中实现。Linux 读取 `/proc` 的内存统计，只列出当前用户可检查的非特权进程；明确选择进程后，才请求系统授权并使用 `process_madvise(MADV_PAGEOUT)`。它不终止进程、不删除数据，也不使用全局 `drop_caches`。
 
 所选身份包含 PID、系统启动标识和进程启动时间，并用 pidfd 绑定真实进程。授权 worker 验证调用用户后放弃 root 身份，只保留页回收所需的 `CAP_SYS_NICE`，让内核继续检查目标访问权限。宿主关闭或取消会关闭请求管道，worker 在下一处理块停止；原操作期限保持有效。部分效果按进程报告，驻留内存的观测减少量不等于系统新增空闲 RAM，也不计入磁盘清理空间。后续访问可能重新加载页面。
+
+### 可重复使用的内存规则
+
+`builtin.memory/process-working-set` 支持 Windows、Linux。`options.applications` 填写完整可执行文件路径，不填程序简称或 PID。每次扫描重新发现当前用户的进程；执行前绑定并复核本次选中的 PID、启动身份及可执行文件路径。退出或被替换的进程不会重定向；程序未运行时没有可选项。已有手动 PID／启动身份接口继续可用。
+
+```toml
+[modules.memory]
+name = "应用内存"
+
+[modules.memory.tasks.editor]
+name = "编辑器工作集"
+handler = "builtin.memory/process-working-set"
+platforms = ["linux"]
+options.applications = ["/opt/editor/editor"]
+recommend.enabled = true
+```
+
+填写检查结果中的实际程序路径。Windows 使用 TOML 字面字符串，例如 `'C:\Program Files\Editor\editor.exe'`，并设置 `platforms = ["windows"]`。路径区分的是可执行程序，不是共享解释器中运行的每个应用，例如多个 Node 应用使用同一个 `node` 可执行文件；只想整理其中一个应用时，不要选择共享解释器路径。
+
+内存使用独立计量类型 `memory_bytes`。扫描显示驻留工作集，执行结果单独报告观测到的减少量、部分效果和未测得项，不混入磁盘估算。Linux 后台计划仅使用已有权限，无授权时报告失败而不弹窗；Windows 使用当前用户已有进程权限，不调用管理员组件。Linux 规则执行要求支持可执行路径绑定的新 helper，旧组件会被拒绝，不会静默跳过核验。
+
+Windows 适配器已交叉编译；带完整路径的规则仍需 Windows 打包／原生验收。隔离测试覆盖失效身份和伪造选择，不对真实用户进程执行内存维护。

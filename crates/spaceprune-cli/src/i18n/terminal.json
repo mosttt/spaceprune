@@ -962,5 +962,21 @@
   "terminal.usage_unknown": [
     "The OS did not identify the application. Close related apps and scan again.",
     "系统未提供占用程序；关闭相关程序后可重新扫描。"
+  ],
+  "terminal.selection_memory": [
+    "Memory · {count} processes",
+    "内存维护 {count} 个进程"
+  ],
+  "terminal.resident_memory": [
+    "Resident memory: ",
+    "驻留内存："
+  ],
+  "terminal.memory_reduction": [
+    "Observed RAM reduction",
+    "观测到驻留内存减少"
+  ],
+  "terminal.memory_transient": [
+    "Process memory can return; shared pages are not global freed RAM or disk space.",
+    "进程内存可再次增长；共享页面减少不等于系统实际释放内存，不计入磁盘空间。"
   ]
 }

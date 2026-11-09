@@ -176,13 +176,11 @@ pub(super) fn inspect() -> io::Result<MemorySnapshot> {
         let Ok(memory) = counters(&handle) else {
             continue;
         };
-        let mut name = vec![0u16; 32_768];
-        let mut length = name.len() as u32;
-        // SAFETY: The owned process handle and writable UTF-16 buffer remain live for this call.
-        if unsafe { QueryFullProcessImageNameW(handle.0, 0, name.as_mut_ptr(), &mut length) } == 0 {
+        let Ok(path_words) = name_path(&handle) else {
             continue;
-        }
-        let path = String::from_utf16_lossy(&name[..length as usize]);
+        };
+        let executable = String::from_utf16(&path_words).ok();
+        let path = String::from_utf16_lossy(&path_words);
         let name = Path::new(&path)
             .file_name()
             .unwrap_or_default()
@@ -191,6 +189,7 @@ pub(super) fn inspect() -> io::Result<MemorySnapshot> {
         processes.push(ProcessMemory {
             identity,
             name,
+            executable,
             resident_bytes: memory.WorkingSetSize as u64,
             private_bytes: memory.PrivateUsage as u64,
         });
@@ -203,6 +202,22 @@ pub(super) fn inspect() -> io::Result<MemorySnapshot> {
     })
 }
 pub(super) fn release_one(selected: &ProcessIdentity) -> MemoryRelease {
+    release_matching(selected, None)
+}
+
+fn name_path(handle: &Handle) -> io::Result<Vec<u16>> {
+    let mut path = vec![0u16; 32_768];
+    let mut length = path.len() as u32;
+    // SAFETY: The owned process handle and writable buffer remain valid for the native call.
+    check(unsafe { QueryFullProcessImageNameW(handle.0, 0, path.as_mut_ptr(), &mut length) })?;
+    path.truncate(length as usize);
+    Ok(path)
+}
+
+pub(super) fn release_matching(
+    selected: &ProcessIdentity,
+    executable: Option<&str>,
+) -> MemoryRelease {
     let result = (|| -> io::Result<Option<u64>> {
         let handle = eligible(selected.pid)?;
         if identity(&handle, selected.pid)? != *selected {
@@ -210,6 +225,15 @@ pub(super) fn release_one(selected: &ProcessIdentity) -> MemoryRelease {
                 io::ErrorKind::NotFound,
                 "Selected process has exited or changed",
             ));
+        }
+        if let Some(expected) = executable {
+            let observed = String::from_utf16(&name_path(&handle)?).map_err(io::Error::other)?;
+            if observed != expected {
+                return Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "Selected executable has changed",
+                ));
+            }
         }
         let before = counters(&handle)?.WorkingSetSize as u64;
         // SAFETY: Identity, current-user ownership, non-critical status and required rights
@@ -222,6 +246,7 @@ pub(super) fn release_one(selected: &ProcessIdentity) -> MemoryRelease {
     MemoryRelease {
         identity: selected.clone(),
         succeeded: result.is_ok(),
+        applied: result.is_ok(),
         resident_reduction_bytes: result.as_ref().ok().copied().flatten(),
         error: result.err().map(|error| error.to_string()),
     }

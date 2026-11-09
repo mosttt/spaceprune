@@ -39,8 +39,30 @@ For macOS filesystems, `elevation = "auto"` selects the native cleanup service a
 
 Combined native installation and permission acceptance across all three platforms remains incomplete. Linux tests and Darwin target checks do not replace runtime evidence from each target system.
 
-## Manual Linux process-memory maintenance
+## Process-memory maintenance
 
 The memory plugin keeps one `builtin.memory` identity, with native Windows and Linux adapters. Linux reads `/proc` statistics and lists inspectable, unprivileged current-user processes. Only an explicit process selection requests authorization and invokes `process_madvise(MADV_PAGEOUT)`. It does not terminate processes, delete data, or use global `drop_caches`.
 
 Selections bind the PID, boot identity and process start time, with a pidfd retaining the actual process. The authorized worker verifies the caller, drops its root identity and retains only `CAP_SYS_NICE`, so the kernel continues enforcing target-access checks. Host cancellation or exit closes the request pipe; the worker stops at the next chunk, under the original deadline. Partial effects are reported per process. Observed resident-memory reductions are not additional system-wide free RAM or disk-cleanup savings; subsequent access may reload pages.
+
+### Reusable memory rules
+
+`builtin.memory/process-working-set` supports Windows and Linux. Set `options.applications` to exact executable paths, not basenames or PIDs. Each scan resolves current-user processes afresh. Cleanup binds each confirmed process to its PID, start identity and executable path; an exited or replaced process is not retargeted. An application that is not running produces no selection. The existing manual PID/start-identity interface remains available.
+
+```toml
+[modules.memory]
+name = "Application memory"
+
+[modules.memory.tasks.editor]
+name = "Editor working sets"
+handler = "builtin.memory/process-working-set"
+platforms = ["linux"]
+options.applications = ["/opt/editor/editor"]
+recommend.enabled = true
+```
+
+Use the actual executable path reported by inspection; on Windows use a TOML literal such as `'C:\Program Files\Editor\editor.exe'` and `platforms = ["windows"]`. The path identifies the executable, not every app interpreted by a shared runtime (for example, every Node process runs the same `node` executable). Do not use a shared runtime path when you only intend one of its hosted apps.
+
+RAM is a separate accounting domain (`memory_bytes`). Scan results show resident working-set bytes; execution reports preserve observed reductions, partial effects and unmeasured results independently of disk estimates. Linux schedules use existing authority only; missing authorization fails the task without opening a prompt. Windows uses the current user's existing process rights, not an administrator helper. Recipe execution requires the executable-bound Linux helper protocol; an older helper is rejected rather than silently dropping the path check.
+
+The Windows adapter cross-compiles; packaged/native acceptance of executable-bound rules is still required on Windows. Fixture tests cover stale identities and forged selections without maintaining real user processes.

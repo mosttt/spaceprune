@@ -150,6 +150,37 @@ pub(super) fn summary(
             theme.stdout(crate::i18n::text("terminal.content_estimate"), Tone::Muted)
         );
     }
+    if execution
+        .groups
+        .iter()
+        .any(|group| group.size_accounting == spaceprune::api::CleanupSizeAccounting::MemoryBytes)
+    {
+        let _ = writeln!(
+            text,
+            "{}",
+            receipt.row(
+                crate::i18n::text("terminal.memory_reduction"),
+                &format_bytes(summary.memory_reduction_bytes),
+                Tone::Accent
+            )
+        );
+        if summary.memory_unknown_item_count > 0 {
+            let _ = writeln!(
+                text,
+                "{}",
+                receipt.row(
+                    crate::i18n::text("terminal.unknown_size"),
+                    &count(summary.memory_unknown_item_count, "item"),
+                    Tone::Warning
+                )
+            );
+        }
+        let _ = writeln!(
+            text,
+            "  {}",
+            theme.stdout(crate::i18n::text("terminal.memory_transient"), Tone::Muted)
+        );
+    }
     let snapshots = summary.snapshot_group_count;
     if snapshots > 0 || !summary.snapshot_space_changes.is_empty() {
         text.push('\n');

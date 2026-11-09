@@ -6,7 +6,7 @@ use std::{
     os::{fd::AsRawFd, unix::fs::MetadataExt},
 };
 
-pub(super) fn run() -> io::Result<()> {
+pub(super) fn run(bound: bool) -> io::Result<()> {
     if !spaceprune_access::process::is_elevated() {
         return Err(io::ErrorKind::PermissionDenied.into());
     }
@@ -44,6 +44,11 @@ pub(super) fn run() -> io::Result<()> {
     let mut bytes = vec![0; length as usize];
     io::stdin().read_exact(&mut bytes)?;
     let request: Request = serde_json::from_slice(&bytes)?;
+    if bound != !request.executables.is_empty()
+        || (bound && request.executables.len() != request.selected.len())
+    {
+        return Err(io::ErrorKind::InvalidInput.into());
+    }
     let context = OperationContext::from_transfer(
         &request.operation,
         Duration::from_secs(180),
@@ -73,15 +78,27 @@ pub(super) fn run() -> io::Result<()> {
         let _ = io::stdin().read(&mut [0]);
         closed.store(true, std::sync::atomic::Ordering::Release);
     });
-    let results =
-        spaceprune_plugin_memory::linux::release_for_user(&request.selected, owner, &|| {
-            context.check()?;
-            if cancelled.load(std::sync::atomic::Ordering::Acquire) {
-                return Err(io::ErrorKind::Interrupted.into());
-            }
-            // Closing the host also ends the authority of its in-flight operation.
-            fs::read_to_string(format!("/proc/self/fd/{}/status", caller.as_raw_fd())).map(|_| ())
-        })?;
+    let check = || {
+        context.check()?;
+        if cancelled.load(std::sync::atomic::Ordering::Acquire) {
+            return Err(io::ErrorKind::Interrupted.into());
+        }
+        fs::read_to_string(format!("/proc/self/fd/{}/status", caller.as_raw_fd())).map(|_| ())
+    };
+    let results = if bound {
+        let selected = request
+            .selected
+            .iter()
+            .zip(&request.executables)
+            .map(|(identity, executable)| BoundProcess {
+                identity: identity.clone(),
+                executable: executable.clone(),
+            })
+            .collect::<Vec<_>>();
+        spaceprune_plugin_memory::linux::release_bound_for_user(&selected, owner, &check)?
+    } else {
+        spaceprune_plugin_memory::linux::release_for_user(&request.selected, owner, &check)?
+    };
     let response = serde_json::to_vec(&Response {
         operation: context.identity(),
         results,

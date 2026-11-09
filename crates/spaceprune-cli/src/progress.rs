@@ -46,6 +46,7 @@ struct Activity {
     completed_items: BTreeMap<(String, String), usize>,
     measurements: BTreeMap<(String, String), spaceprune::api::ScanMeasurement>,
     cleanup_sizes: BTreeMap<(String, String), (u64, usize)>,
+    memory_sizes: BTreeMap<(String, String), (u64, usize)>,
 }
 
 impl Activity {
@@ -68,6 +69,7 @@ impl Activity {
             completed_items: BTreeMap::new(),
             measurements: BTreeMap::new(),
             cleanup_sizes: BTreeMap::new(),
+            memory_sizes: BTreeMap::new(),
         }
     }
 
@@ -280,20 +282,42 @@ impl Activity {
                     ],
                 )
             }
-            Operation::Clean if !self.cleanup_sizes.is_empty() => {
+            Operation::Clean if !self.cleanup_sizes.is_empty() || !self.memory_sizes.is_empty() => {
                 let (bytes, unknown) = self
                     .cleanup_sizes
                     .values()
                     .fold((0u64, 0usize), |(b, u), (next, missing)| {
                         (b.saturating_add(*next), u.saturating_add(*missing))
                     });
-                crate::i18n::message(
+                let disk = crate::i18n::message(
                     "terminal.live_cleanup_size",
                     &[
                         ("size", format_bytes(bytes)),
                         ("unknown", unknown.to_string()),
                     ],
-                )
+                );
+                if self.memory_sizes.is_empty() {
+                    disk
+                } else {
+                    let (ram, missing) = self.memory_sizes.values().fold(
+                        (0u64, 0usize),
+                        |(b, u), (next, unknown)| {
+                            (b.saturating_add(*next), u.saturating_add(*unknown))
+                        },
+                    );
+                    let memory = format!(
+                        "{} {} · {} {}",
+                        crate::i18n::text("terminal.memory_reduction"),
+                        format_bytes(ram),
+                        missing,
+                        crate::i18n::text("terminal.unknown_size")
+                    );
+                    if self.cleanup_sizes.is_empty() {
+                        memory
+                    } else {
+                        format!("{disk} · {memory}")
+                    }
+                }
             }
             _ => String::new(),
         }
@@ -638,7 +662,7 @@ impl ProgressSink for TextProgress {
         bytes: u64,
         unknown: usize,
     ) {
-        if accounting == spaceprune::api::CleanupSizeAccounting::SnapshotGroups {
+        if accounting != spaceprune::api::CleanupSizeAccounting::ProcessedBytes {
             if let Some(activity) = &mut self
                 .state
                 .0
@@ -649,6 +673,12 @@ impl ProgressSink for TextProgress {
                 activity
                     .completed_items
                     .insert((task.module_id.clone(), task.task_id.clone()), succeeded);
+                if accounting == spaceprune::api::CleanupSizeAccounting::MemoryBytes {
+                    activity.memory_sizes.insert(
+                        (task.module_id.clone(), task.task_id.clone()),
+                        (bytes, unknown),
+                    );
+                }
             }
         } else {
             self.record_cleanup(task, succeeded, bytes, unknown);
@@ -873,6 +903,22 @@ mod tests {
             display_message(r"/home/cache/file \\?\Volume{test}\file"),
             r"/home/cache/file \\?\Volume{test}\file"
         );
+    }
+
+    #[test]
+    fn memory_progress_is_separate_from_processed_disk_bytes() {
+        let mut activity = Activity::new(Operation::Clean, 2);
+        activity
+            .cleanup_sizes
+            .insert(("disk".into(), "files".into()), (1024, 0));
+        activity
+            .memory_sizes
+            .insert(("ram".into(), "process".into()), (8192, 1));
+        let summary = activity.size_summary();
+        assert!(summary.contains("1.00 KiB") && summary.contains("8.00 KiB"));
+        assert!(!summary.contains("9.00 KiB"));
+        activity.cleanup_sizes.clear();
+        assert!(!activity.size_summary().contains("0 B"));
     }
 
     #[test]

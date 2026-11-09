@@ -142,6 +142,23 @@ impl Process {
             started_at: format!("{}:{}", boot.trim(), start_ticks(&stat)?),
         })
     }
+    fn executable(&self) -> io::Result<String> {
+        let path = fs::read_link(format!("/proc/self/fd/{}/exe", self.directory.as_raw_fd()))?;
+        path.to_str()
+            .map(str::to_owned)
+            .ok_or_else(|| io::Error::other("Executable path is not valid Unicode"))
+    }
+    fn check_executable(&self, expected: Option<&str>) -> io::Result<()> {
+        if let Some(expected) = expected
+            && self.executable()? != expected
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "Selected executable has changed",
+            ));
+        }
+        Ok(())
+    }
     fn resident(&self) -> io::Result<u64> {
         status_value(&self.status()?, "VmRSS:")
     }
@@ -175,6 +192,7 @@ pub(super) fn inspect() -> io::Result<MemorySnapshot> {
             Ok(ProcessMemory {
                 identity,
                 name,
+                executable: process.executable().ok(),
                 resident_bytes,
                 private_bytes,
             })
@@ -225,13 +243,40 @@ pub fn release_for_user(
     }
     Ok(selected
         .iter()
-        .map(|identity| release_one(identity, owner, check))
+        .map(|identity| release_one(identity, owner, None, check))
+        .collect())
+}
+
+/// Release current-user selections after checking their executable path on the pinned process.
+pub fn release_bound_for_user(
+    selected: &[BoundProcess],
+    owner: u32,
+    check: &dyn Fn() -> io::Result<()>,
+) -> io::Result<Vec<MemoryRelease>> {
+    super::validate_bound(selected)?;
+    if !can_reclaim() || (current_user() != 0 && current_user() != owner) {
+        return Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "Linux process memory maintenance requires authorized caller capability",
+        ));
+    }
+    Ok(selected
+        .iter()
+        .map(|selection| {
+            release_one(
+                &selection.identity,
+                owner,
+                Some(&selection.executable),
+                check,
+            )
+        })
         .collect())
 }
 
 fn release_one(
     selected: &ProcessIdentity,
     owner: u32,
+    executable: Option<&str>,
     check: &dyn Fn() -> io::Result<()>,
 ) -> MemoryRelease {
     let mut process = None;
@@ -246,6 +291,7 @@ fn release_one(
                 "Selected process has exited or changed",
             ));
         }
+        opened.check_executable(executable)?;
         before = Some(opened.resident()?);
         let regions = ranges(&read_at(&opened.directory, c"maps", 8 * 1024 * 1024)?)?;
         process = Some(opened);
@@ -256,6 +302,7 @@ fn release_one(
                 check()?;
                 opened.check_owner(owner)?;
                 opened.check_alive()?;
+                opened.check_executable(executable)?;
                 let length = (end - address).min(16 * 1024 * 1024);
                 let range = libc::iovec {
                     iov_base: address as *mut libc::c_void,
@@ -297,7 +344,40 @@ fn release_one(
     MemoryRelease {
         identity: selected.clone(),
         succeeded: result.is_ok(),
+        applied: advised,
         resident_reduction_bytes: reduction,
         error: result.err().map(|e| e.to_string()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn stale_identity_and_different_executable_never_advise_disposable_process() {
+        let mut child = std::process::Command::new("sleep")
+            .arg("30")
+            .spawn()
+            .unwrap();
+        let process = Process::open(child.id(), current_user()).unwrap();
+        let identity = process.identity().unwrap();
+        let mut stale = identity.clone();
+        stale.started_at.push_str("-stale");
+        let wrong_identity = release_one(&stale, current_user(), None, &|| Ok(()));
+        let wrong_executable = release_one(
+            &identity,
+            current_user(),
+            Some("/fixture/not-this-executable"),
+            &|| Ok(()),
+        );
+        let alive = child.try_wait().unwrap().is_none();
+        child.kill().unwrap();
+        child.wait().unwrap();
+        assert!(alive);
+        for result in [wrong_identity, wrong_executable] {
+            assert!(!result.succeeded && !result.applied);
+            assert_eq!(result.resident_reduction_bytes, None);
+            assert!(result.error.unwrap().contains("changed"));
+        }
     }
 }

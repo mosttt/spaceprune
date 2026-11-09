@@ -22,6 +22,8 @@ pub(crate) fn build_engine(
     let journal_directory = execution_journal_directory(&config);
     let mut registry = PluginRegistry::new();
     spaceprune_plugin_filesystem::register(&mut registry)?;
+    #[cfg(any(windows, target_os = "linux"))]
+    crate::memory_recipe::register(&mut registry)?;
     #[cfg(target_os = "linux")]
     spaceprune_plugin_snapper::register(&mut registry)?;
     #[cfg(target_os = "linux")]
@@ -74,6 +76,7 @@ pub(crate) fn build_readonly_engine(
                 || task.handler.starts_with("builtin.system-linux/")
                 || task.handler.starts_with("builtin.system-windows/")
                 || task.handler.starts_with("builtin.developer-tools/")
+                || task.handler.starts_with("builtin.memory/")
         });
     }
     config.modules.retain(|_, module| !module.tasks.is_empty());
@@ -83,12 +86,15 @@ pub(crate) fn build_readonly_engine(
             FILESYSTEM_PLUGIN_ID
                 | SYSTEM_LINUX_PLUGIN_ID
                 | DEVELOPER_TOOLS_PLUGIN_ID
+                | spaceprune_contracts::plugin::MEMORY_PLUGIN_ID
                 | spaceprune_contracts::plugin::SYSTEM_WINDOWS_PLUGIN_ID
         )
     });
 
     let mut registry = PluginRegistry::new();
     spaceprune_plugin_filesystem::register(&mut registry)?;
+    #[cfg(any(windows, target_os = "linux"))]
+    crate::memory_recipe::register(&mut registry)?;
     #[cfg(target_os = "linux")]
     {
         spaceprune_plugin_system_linux::register_system_handlers(&mut registry)?;

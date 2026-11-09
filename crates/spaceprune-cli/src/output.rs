@@ -171,6 +171,7 @@ pub(crate) fn print_plan_summary_to(plan: &CleanupPlan, stderr: bool, theme: The
     let unknown = plan
         .groups()
         .iter()
+        .filter(|group| group.handler_id != "builtin.memory/process-working-set")
         .flat_map(|group| &group.items)
         .filter(|item| item.reclaimable_bytes.is_none())
         .count();
@@ -183,6 +184,25 @@ pub(crate) fn print_plan_summary_to(plan: &CleanupPlan, stderr: bool, theme: The
             ("p3", (unknown).to_string()),
         ],
     );
+    let memory = plan
+        .groups()
+        .iter()
+        .filter(|group| group.handler_id == "builtin.memory/process-working-set")
+        .map(|group| group.items.len())
+        .sum::<usize>();
+    let summary = if memory > 0 {
+        let memory_label = crate::i18n::message(
+            "terminal.selection_memory",
+            &[("count", memory.to_string())],
+        );
+        if memory == plan.item_count() {
+            memory_label
+        } else {
+            format!("{summary} · {memory_label}")
+        }
+    } else {
+        summary
+    };
     if stderr {
         eprintln!("{}", theme.stderr(summary, Tone::Accent));
     } else {

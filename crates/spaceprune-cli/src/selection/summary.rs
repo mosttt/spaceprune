@@ -5,7 +5,9 @@ use super::*;
 impl SelectionApp<'_> {
     pub(super) fn selected_summary_spans(&self) -> Vec<Span<'static>> {
         let (known, unknown) = self.selected_estimate();
-        let mut spans = if self.selected.len() > self.snapshot_groups || self.selected.is_empty() {
+        let mut spans = if self.selected.len() > self.snapshot_groups + self.memory_processes
+            || self.selected.is_empty()
+        {
             estimate_spans(known, unknown, self.theme)
         } else {
             Vec::new()
@@ -21,6 +23,18 @@ impl SelectionApp<'_> {
                 crate::i18n::message(
                     "terminal.selection_snapshots",
                     &[("count", self.snapshot_groups.to_string())],
+                ),
+                Style::new().fg(self.theme.module_color().tui()),
+            ));
+        }
+        if self.memory_processes > 0 {
+            if !spans.is_empty() {
+                spans.push(Span::raw("  ·  "));
+            }
+            spans.push(Span::styled(
+                crate::i18n::message(
+                    "terminal.selection_memory",
+                    &[("count", self.memory_processes.to_string())],
                 ),
                 Style::new().fg(self.theme.module_color().tui()),
             ));

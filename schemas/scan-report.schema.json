@@ -92,6 +92,32 @@
       ],
       "type": "object"
     },
+    "CleanupSizeAccounting": {
+      "description": "How a handler's completed selections contribute to a human-facing cleanup summary.",
+      "oneOf": [
+        {
+          "description": "Processed content has a byte estimate; missing estimates remain unknown.",
+          "enum": [
+            "processed_bytes"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Snapshot groups share storage and must be counted separately from byte estimates.",
+          "enum": [
+            "snapshot_groups"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Observed process resident-memory reduction; never part of disk-space totals.",
+          "enum": [
+            "memory_bytes"
+          ],
+          "type": "string"
+        }
+      ]
+    },
     "HandlerIssue": {
       "description": "Handler 报告的一个问题。",
       "properties": {
@@ -411,6 +437,15 @@
             }
           ],
           "description": "传递给 Handler 的完整任务请求。"
+        },
+        "size_accounting": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/CleanupSizeAccounting"
+            }
+          ],
+          "default": "processed_bytes",
+          "description": "Registered size domain, retained so RAM is not aggregated into disk estimates."
         },
         "task_id": {
           "description": "任务 ID。",

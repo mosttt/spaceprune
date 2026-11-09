@@ -103,6 +103,7 @@ struct SelectionApp<'a> {
     view_dirty: bool,
     estimate: (u128, usize),
     snapshot_groups: usize,
+    memory_processes: usize,
     collapsed_modules: BTreeSet<String>,
     collapsed_tasks: BTreeSet<(String, String)>,
     cursor: usize,
@@ -135,6 +136,7 @@ impl<'a> SelectionApp<'a> {
             view_dirty: true,
             estimate: (0, 0),
             snapshot_groups: 0,
+            memory_processes: 0,
             collapsed_modules: BTreeSet::new(),
             collapsed_tasks: BTreeSet::new(),
             cursor: 0,
@@ -316,6 +318,12 @@ impl<'a> SelectionApp<'a> {
                 } else {
                     self.snapshot_groups += 1;
                 }
+            } else if row.item_accounting == Some(CleanupSizeAccounting::MemoryBytes) {
+                if remove {
+                    self.memory_processes -= 1;
+                } else {
+                    self.memory_processes += 1;
+                }
             } else {
                 match (item.reclaimable_bytes, remove) {
                     (Some(bytes), false) => self.estimate.0 += u128::from(bytes),
@@ -432,6 +440,7 @@ impl<'a> SelectionApp<'a> {
     fn refresh_selection(&mut self, selected: impl Fn(&CleanupItem) -> bool) {
         self.estimate = (0, 0);
         self.snapshot_groups = 0;
+        self.memory_processes = 0;
         for row in &mut self.rows {
             row.selected = usize::from(row.item.is_some_and(&selected));
             row.selected_logical_bytes = 0;
@@ -447,6 +456,8 @@ impl<'a> SelectionApp<'a> {
                 );
                 if row.item_accounting == Some(CleanupSizeAccounting::SnapshotGroups) {
                     self.snapshot_groups += 1;
+                } else if row.item_accounting == Some(CleanupSizeAccounting::MemoryBytes) {
+                    self.memory_processes += 1;
                 } else if let Some(bytes) = item.reclaimable_bytes {
                     self.estimate.0 += u128::from(bytes);
                 } else {
@@ -1085,6 +1096,7 @@ mod tests {
                 name: "Application cache".to_owned(),
                 description: "Synthetic scan results".to_owned(),
                 tasks: vec![TaskReport {
+                    size_accounting: Default::default(),
                     module_id: "cache".to_owned(),
                     task_id: "files".to_owned(),
                     name: "Cached files".to_owned(),
@@ -1748,6 +1760,32 @@ mod tests {
             assert!(!text.contains("unknown"));
             assert!(app.selected.is_empty());
         }
+    }
+
+    #[test]
+    fn memory_selection_excludes_ram_from_disk_and_unknown_totals() {
+        let mut report = report_with_items(1);
+        report.modules[0].tasks[0].items[0].logical_bytes = Some(8192);
+        report.modules[0].tasks[0].items[0].reclaimable_bytes = None;
+        let cancellation = CancellationToken::default();
+        let mut app = SelectionApp::with_accounting(
+            &report,
+            &cancellation,
+            Theme::default(),
+            &BTreeMap::from([("test/cache".into(), CleanupSizeAccounting::MemoryBytes)]),
+        );
+        press(&mut app, KeyCode::Char('+'));
+        assert_eq!(app.selected_estimate(), (0, 0));
+        assert_eq!(app.memory_processes, 1);
+        let text = app
+            .selected_summary_spans()
+            .iter()
+            .map(|span| span.content.as_ref())
+            .collect::<String>();
+        assert!(text.contains("Memory"));
+        assert!(!text.contains("unknown") && !text.contains("0 B"));
+        press(&mut app, KeyCode::Char(' '));
+        assert_eq!(app.memory_processes, 0);
     }
 
     #[test]

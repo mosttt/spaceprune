@@ -19,6 +19,7 @@ fn fixture_plan(groups: Vec<PlanGroup>) -> CleanupPlan {
                 name: "fixture".to_owned(),
                 description: String::new(),
                 tasks: vec![spaceprune_engine::TaskReport {
+                    size_accounting: Default::default(),
                     module_id: group.module_id,
                     task_id: group.task_id,
                     name: "fixture".to_owned(),

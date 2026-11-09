@@ -8,6 +8,10 @@ description = "User-selected native process memory maintenance"
 
 [dependencies]
 serde.workspace = true
+serde_json.workspace = true
+spaceprune-access = { path = "../../../crates/spaceprune-access" }
+spaceprune-plugin-api = { path = "../../../crates/spaceprune-plugin-api" }
+spaceprune-engine = { path = "../../../crates/spaceprune-engine" }
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_System_ProcessStatus", "Win32_System_SystemInformation", "Win32_System_Threading"] }

@@ -37,6 +37,13 @@
             "snapshot_groups"
           ],
           "type": "string"
+        },
+        {
+          "description": "Observed process resident-memory reduction; never part of disk-space totals.",
+          "enum": [
+            "memory_bytes"
+          ],
+          "type": "string"
         }
       ]
     },

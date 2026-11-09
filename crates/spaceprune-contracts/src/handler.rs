@@ -49,6 +49,8 @@ pub enum CleanupSizeAccounting {
     ProcessedBytes,
     /// Snapshot groups share storage and must be counted separately from byte estimates.
     SnapshotGroups,
+    /// Observed process resident-memory reduction; never part of disk-space totals.
+    MemoryBytes,
 }
 
 /// Handler 的静态描述。

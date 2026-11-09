@@ -20,6 +20,6 @@
 
 `builtin.system-windows/component-store` 使用系统 DISM `/Online /Cleanup-Image /StartComponentCleanup /NoRestart` 清理过时的 Windows 更新组件。需要 UAC 时通过已签名的清理组件（能力协议 6）。不使用 `/ResetBase`，不停止更新服务，不将 SoftwareDistribution、WinSxS 或 CbsTemp 当普通文件删除。维护动作不提供容量估计，完成后可能需要重启；它不代表清空所有下载的更新。两个处理器均默认供用户自行选择。
 
-`builtin.memory` 是独立的 Windows 工作集整理操作，不进入方案或磁盘释放统计。只列出可打开的当前用户非关键进程；选择绑定 PID 和创建时间，调用 `K32EmptyWorkingSet` 时保持进程句柄。不会结束进程或请求管理员权限。显示的是观察到的工作集下降，不保证实际空出等量物理内存，应用可能立即重新加载页面。
+`builtin.memory` 是独立的 Windows 工作集整理操作，支持手动选择及按可执行路径的方案规则，不进入磁盘释放统计。只列出可打开的当前用户非关键进程；选择绑定 PID 和创建时间，调用 `K32EmptyWorkingSet` 时保持进程句柄。不会结束进程或请求管理员权限。显示的是观察到的工作集下降，不保证实际空出等量物理内存，应用可能立即重新加载页面。
 
 `SystemLocations::is_reviewable_cache` 只识别系统目录下的 Temp、SystemTemp 以及 ProgramData 下的 ChocolateyHttpCache。分类不提供权限，不绕过路径身份及重解析点检查，其他系统维护目录继续受保护。

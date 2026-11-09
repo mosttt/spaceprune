@@ -7,6 +7,15 @@ use serde::{Deserialize, Serialize};
 /// Display totals that keep shared-storage operations out of unknown byte counts.
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema, PartialEq, Eq)]
 pub struct CleanupSizeSummary {
+    /// Observed process resident-memory reduction, separate from disk-space accounting.
+    #[serde(default)]
+    pub memory_reduction_bytes: u64,
+    /// Completed process memory operations, including ones with no measurable reduction.
+    #[serde(default)]
+    pub memory_process_count: usize,
+    /// Memory operations whose resident reduction was not measurable.
+    #[serde(default)]
+    pub memory_unknown_item_count: usize,
     /// Known processed bytes for byte-accounted handlers, not measured freed disk space.
     pub reclaimed_bytes: u64,
     /// Byte-accounted selections whose complete processed-size estimate is unknown.
@@ -36,6 +45,13 @@ impl CleanupSizeSummary {
                 snapshot_group_count: 0,
                 snapshot_already_absent_group_count: 0,
                 snapshot_space_changes: Vec::new(),
+                ..Self::default()
+            },
+            CleanupSizeAccounting::MemoryBytes => Self {
+                memory_reduction_bytes: reclaimed_bytes,
+                memory_process_count: succeeded,
+                memory_unknown_item_count: unknown_size_item_count,
+                ..Self::default()
             },
             CleanupSizeAccounting::SnapshotGroups => Self {
                 snapshot_group_count: succeeded,
@@ -46,6 +62,15 @@ impl CleanupSizeSummary {
 
     /// Accumulate distinct task summaries. Repeated cumulative updates should replace the task first.
     pub fn merge(&mut self, other: &Self) {
+        self.memory_reduction_bytes = self
+            .memory_reduction_bytes
+            .saturating_add(other.memory_reduction_bytes);
+        self.memory_process_count = self
+            .memory_process_count
+            .saturating_add(other.memory_process_count);
+        self.memory_unknown_item_count = self
+            .memory_unknown_item_count
+            .saturating_add(other.memory_unknown_item_count);
         self.reclaimed_bytes = self.reclaimed_bytes.saturating_add(other.reclaimed_bytes);
         self.unknown_size_item_count = self
             .unknown_size_item_count
@@ -115,6 +140,7 @@ mod tests {
             groups: vec![
                 group(CleanupSizeAccounting::ProcessedBytes, 3, 1024, 2),
                 group(CleanupSizeAccounting::SnapshotGroups, 5, 0, 5),
+                group(CleanupSizeAccounting::MemoryBytes, 2, 4096, 1),
             ],
             cancelled: false,
             stop_reason: None,
@@ -123,11 +149,15 @@ mod tests {
         assert_eq!(
             report.size_summary(),
             CleanupSizeSummary {
+                memory_reduction_bytes: 4096,
+                memory_process_count: 2,
+                memory_unknown_item_count: 1,
                 reclaimed_bytes: 1024,
                 unknown_size_item_count: 2,
                 snapshot_group_count: 5,
                 snapshot_already_absent_group_count: 0,
                 snapshot_space_changes: Vec::new(),
+                ..Default::default()
             }
         );
         report.cancelled = true;

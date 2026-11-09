@@ -108,6 +108,7 @@ mod tests {
                     name: "Snapshots".into(),
                     description: String::new(),
                     tasks: vec![spaceprune_engine::TaskReport {
+                        size_accounting: Default::default(),
                         module_id: task.module_id.clone(),
                         task_id: task.task_id.clone(),
                         name: task.name.clone(),

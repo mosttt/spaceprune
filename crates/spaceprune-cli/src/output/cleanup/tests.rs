@@ -301,3 +301,15 @@ fn in_use_receipt_names_processes_and_keeps_unknown_owner_explicit() {
         unfinished::render(&report, &plan, Theme::default()).contains("The OS did not identify")
     );
 }
+
+#[test]
+fn memory_receipt_is_not_presented_as_processed_disk_space() {
+    let mut report = execution(2, 8192, Some(1));
+    report.groups[0].size_accounting = spaceprune::api::CleanupSizeAccounting::MemoryBytes;
+    let text = execution_summary(&report).0;
+    assert!(text.contains("Observed RAM reduction"));
+    assert!(text.contains("8.00 KiB"));
+    assert!(text.contains("not global freed RAM"));
+    assert!(!text.contains("Processed size"));
+    assert_eq!(report.reclaimed_bytes(), 0);
+}

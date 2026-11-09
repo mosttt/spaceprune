@@ -2471,6 +2471,10 @@
     "Windows removes eligible superseded components. Size is not estimated. A restart may be required; update services and rollback protection stay under Windows control.",
     "由 Windows 移除可清理的过时组件，不预估大小。完成后可能需要重启；更新服务和回退保护由 Windows 管理。"
   ],
+  "memory.recipe_transient": [
+    "Release resident memory of the selected application without terminating it. Memory may be loaded again; the observed reduction is not disk space or guaranteed globally freed RAM.",
+    "维护所选应用的驻留内存，不结束进程。内存可能重新载入；观测到的减少量不计入磁盘空间，也不代表系统实际增加同等可用内存。"
+  ],
   "memory.authorization_required": [
     "Confirm memory maintenance in the foreground to request system authorization.",
     "请在前台确认内存维护，以请求系统授权。"

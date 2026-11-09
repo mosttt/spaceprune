@@ -14,6 +14,8 @@ mod cleanup_access;
 mod cleanup_receipt;
 #[cfg(target_os = "linux")]
 mod memory_access;
+#[cfg(any(windows, target_os = "linux"))]
+mod memory_recipe;
 mod native_access;
 mod plugins;
 mod system_capabilities;

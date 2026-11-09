@@ -55,6 +55,22 @@ impl SelectionApp<'_> {
                                 muted,
                             ));
                         }
+                        if row.item_accounting == Some(CleanupSizeAccounting::MemoryBytes) {
+                            lines.push(Line::from(vec![
+                                Span::styled(crate::i18n::text("terminal.resident_memory"), muted),
+                                Span::styled(
+                                    format_logical_size(
+                                        row.logical_bytes,
+                                        row.unknown_logical_items,
+                                    ),
+                                    size_style,
+                                ),
+                            ]));
+                            lines.push(Line::styled(
+                                crate::i18n::text("terminal.memory_transient"),
+                                muted,
+                            ));
+                        }
                         if !not_applicable
                             && row.item_accounting == Some(CleanupSizeAccounting::ProcessedBytes)
                         {
