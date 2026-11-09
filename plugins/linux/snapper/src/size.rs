@@ -23,36 +23,71 @@ pub(super) fn measure_snapshots(
     if numbers.is_empty() || context.is_stopped() {
         return BTreeMap::new();
     }
-    let paths: Vec<_> = numbers
-        .iter()
-        .map(|number| {
-            subvolume
-                .join(".snapshots")
-                .join(number.to_string())
-                .join("snapshot")
-        })
-        .collect();
-    let emit = |phase, message| {
+    let mut values = BTreeMap::new();
+    for (index, number) in numbers.iter().enumerate() {
+        if context.is_stopped() {
+            break;
+        }
+        let path = subvolume
+            .join(".snapshots")
+            .join(number.to_string())
+            .join("snapshot");
         progress.emit(ProgressEvent {
-            phase,
+            phase: ProgressPhase::Measure,
             module_id: Some(task.module_id.clone()),
             task_id: Some(task.task_id.clone()),
             handler_id: Some(task.handler_id.clone()),
-            current: Some(0),
+            current: Some(index),
             total: Some(numbers.len()),
-            message,
+            message: spaceprune_plugin_api::messages::message(
+                "snapper.measure_snapshot",
+                &[
+                    ("config", config.to_owned()),
+                    ("number", number.to_string()),
+                ],
+            ),
         });
-    };
-    emit(
-        ProgressPhase::Measure,
-        spaceprune_plugin_api::messages::message(
-            "snapper.measure_logical",
+        // A failed or disappearing snapshot must not discard successful siblings. Separate
+        // invocations also prevent du from deduplicating hard links across distinct snapshots.
+        let measured = measure_snapshot(&path, options, context);
+        if context.is_stopped() {
+            break;
+        }
+        match measured {
+            Ok(bytes) => {
+                values.insert(*number, bytes);
+            }
+            Err(error) => issues.push(HandlerIssue {
+                code: Some("snapshot-logical-size-unavailable".to_owned()),
+                io_failure: Some(spaceprune_access::error::classify(&error)),
+                level: IssueLevel::Warning,
+                message: spaceprune_plugin_api::messages::message(
+                    "snapper.logical_unknown",
+                    &[("error", format!("{config} #{number}: {error}"))],
+                ),
+                location: Some(path.to_string_lossy().into_owned()),
+            }),
+        }
+    }
+    progress.emit(ProgressEvent {
+        phase: ProgressPhase::Measure,
+        module_id: Some(task.module_id.clone()),
+        task_id: Some(task.task_id.clone()),
+        handler_id: Some(task.handler_id.clone()),
+        current: Some(values.len()),
+        total: Some(numbers.len()),
+        message: spaceprune_plugin_api::messages::message(
+            "snapper.logical_measured",
             &[
-                ("p0", (numbers.len()).to_string()),
-                ("config", (config).to_string()),
+                ("p0", values.len().to_string()),
+                ("config", config.to_owned()),
             ],
         ),
-    );
+    });
+    values
+}
+
+fn measure_snapshot(path: &Path, options: &Options, context: &OperationContext) -> io::Result<u64> {
     let mut measurement = command(&options.du);
     measurement
         .env("LC_ALL", "C")
@@ -64,94 +99,49 @@ pub(super) fn measure_snapshots(
             "--null",
             "--",
         ])
-        .args(&paths);
-    let output = capture_cancellable(measurement, context);
-    if context.is_stopped() {
-        return BTreeMap::new();
+        .arg(path);
+    let output = capture_cancellable(measurement, context)?;
+    if !output.status.success() {
+        return Err(measurement_error(
+            "du",
+            &output.stderr,
+            &[path.to_path_buf()],
+            None,
+            None,
+            context,
+        ));
     }
-    let values = output.and_then(|output| {
-        if !output.status.success() {
-            return Err(measurement_error(
-                "du",
-                &output.stderr,
-                &paths,
-                None,
-                None,
-                context,
-            ));
-        }
-        let mut values = BTreeMap::new();
-        for record in output
-            .stdout
-            .split(|byte| *byte == 0)
-            .filter(|record| !record.is_empty())
-        {
-            let tab = record
-                .iter()
-                .position(|byte| *byte == b'\t')
-                .ok_or_else(|| {
-                    io::Error::other(spaceprune_plugin_api::messages::text(
-                        "snapper.invalid_du_record",
-                    ))
-                })?;
-            let index = paths
-                .iter()
-                .position(|expected| expected.as_os_str().as_encoded_bytes() == &record[tab + 1..])
-                .ok_or_else(|| {
-                    io::Error::other(spaceprune_plugin_api::messages::text(
-                        "snapper.unexpected_du_path",
-                    ))
-                })?;
-            let bytes = std::str::from_utf8(&record[..tab])
-                .map_err(io::Error::other)?
-                .parse::<u64>()
-                .map_err(io::Error::other)?;
-            if values.insert(numbers[index], bytes).is_some() {
-                return Err(io::Error::other(spaceprune_plugin_api::messages::text(
-                    "snapper.duplicate_du_size",
-                )));
-            }
-        }
-        if values.len() != numbers.len() {
-            return Err(io::Error::other(spaceprune_plugin_api::messages::text(
-                "snapper.incomplete_du",
-            )));
-        }
-        Ok(values)
-    });
-    match values {
-        Ok(values) => {
-            progress.emit(ProgressEvent {
-                phase: ProgressPhase::Measure,
-                module_id: Some(task.module_id.clone()),
-                task_id: Some(task.task_id.clone()),
-                handler_id: Some(task.handler_id.clone()),
-                current: Some(values.len()),
-                total: Some(numbers.len()),
-                message: spaceprune_plugin_api::messages::message(
-                    "snapper.logical_measured",
-                    &[
-                        ("p0", (values.len()).to_string()),
-                        ("config", (config).to_string()),
-                    ],
-                ),
-            });
-            values
-        }
-        Err(error) => {
-            issues.push(HandlerIssue {
-                code: None,
-                io_failure: Some(spaceprune_access::error::classify(&error)),
-                level: IssueLevel::Warning,
-                message: spaceprune_plugin_api::messages::message(
-                    "snapper.logical_unknown",
-                    &[("error", (error).to_string())],
-                ),
-                location: Some(subvolume.join(".snapshots").to_string_lossy().into_owned()),
-            });
-            BTreeMap::new()
-        }
+    let mut records = output
+        .stdout
+        .split(|byte| *byte == 0)
+        .filter(|record| !record.is_empty());
+    let record = records.next().ok_or_else(|| {
+        io::Error::other(spaceprune_plugin_api::messages::text(
+            "snapper.incomplete_du",
+        ))
+    })?;
+    if records.next().is_some() {
+        return Err(io::Error::other(spaceprune_plugin_api::messages::text(
+            "snapper.duplicate_du_size",
+        )));
     }
+    let tab = record
+        .iter()
+        .position(|byte| *byte == b'\t')
+        .ok_or_else(|| {
+            io::Error::other(spaceprune_plugin_api::messages::text(
+                "snapper.invalid_du_record",
+            ))
+        })?;
+    if path.as_os_str().as_encoded_bytes() != &record[tab + 1..] {
+        return Err(io::Error::other(spaceprune_plugin_api::messages::text(
+            "snapper.unexpected_du_path",
+        )));
+    }
+    std::str::from_utf8(&record[..tab])
+        .map_err(io::Error::other)?
+        .parse::<u64>()
+        .map_err(io::Error::other)
 }
 
 pub(super) fn capture_cancellable(
@@ -163,6 +153,10 @@ pub(super) fn capture_cancellable(
     operation.budget.line_bytes = operation.budget.line_bytes.min(32 * 1024 * 1024);
     spaceprune_access::process::capture(command, &operation)
 }
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "size/tests.rs"]
+mod isolation_tests;
 
 #[cfg(all(test, target_os = "linux"))]
 mod tests {

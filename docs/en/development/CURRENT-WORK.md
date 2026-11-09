@@ -6,6 +6,8 @@ Docker image scanning uses native `UniqueSize` for an exclusive-storage estimate
 
 Core/CLI builds independently under MIT. Start with [development](../build/DEVELOPMENT.md) and [validation](VALIDATION.md) for current checks and acceptance gates.
 
+Snapper measures snapshots independently and keeps completed sibling sizes when one fails, with item-level diagnostics. Linux disposable-fixture tests cover missing snapshots, child timeouts, incomplete output, hard links across snapshots and symlink boundaries. Logical size remains separate from reclaimable space.
+
 ## Integrated capabilities
 
 Filesystem handles generic file rules. Snapper owns snapshot configuration rules, protection and measurement; the Linux system plugin owns package/systemd lifecycles; developer tools own Go/Cargo/npm and Docker. Plugins provide domain discovery, measurement and consequences instead of hosts guessing from directory names. Go/Cargo/npm caches currently support Linux only. Docker supports Linux/Windows/macOS desktop, not mobile. Probe native interfaces first: skip missing tools and report installed-but-unavailable tools. Docker never deletes volumes or running containers; execution binds the endpoint, Engine and exact object IDs. An object becoming ineligible is not evidence of deletion. See [Docker](../usage/DOCKER.md).

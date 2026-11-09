@@ -153,6 +153,19 @@ pub(super) fn scan(
                         .get(&snapshot.number)
                         .map(|bytes| sum.saturating_add(*bytes))
                 });
+                for snapshot in &group.snapshots {
+                    let path = subvolume
+                        .join(".snapshots")
+                        .join(snapshot.number.to_string())
+                        .join("snapshot");
+                    if let Some(issue) = result.issues.iter().find(|issue| {
+                        issue.code.as_deref() == Some("snapshot-logical-size-unavailable")
+                            && issue.location.as_deref() == Some(path.to_string_lossy().as_ref())
+                    }) {
+                        item.reason.push_str("; ");
+                        item.reason.push_str(&issue.message);
+                    }
+                }
                 item.opaque["size_basis"] = json!("snapshot-apparent-size");
                 item.opaque["reported_used_bytes"] =
                     json!(readonly::group_summary(group).used_bytes);

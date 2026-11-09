@@ -6,6 +6,8 @@ Docker 镜像扫描优先使用原生 `UniqueSize` 作为独占空间估算；�
 
 Core／CLI 可独立构建，自有代码采用 MIT。开发入口见[本地开发](../build/DEVELOPMENT.md)，当前验证范围见[验证状态](VALIDATION.md)。
 
+Snapper 逐个快照计量，单项失败不丢弃其他快照已完成的结果，条目保留具体计量诊断。Linux 隔离目录测试覆盖快照缺失、子进程超时、不完整输出、跨快照硬链接与符号链接边界；可回收空间仍与逻辑大小分开。
+
 ## 已接入的能力
 
 文件系统插件只处理通用文件规则。Snapper 提供配置级快照规则、保护项与快照计量；Linux 系统插件处理软件包和 systemd 生命周期；开发工具插件负责 Go／Cargo／npm 与 Docker。领域发现、计量和清理后果由插件提供，宿主不按目录名称猜测领域。Go／Cargo／npm 缓存当前仅 Linux；Docker 支持 Linux／Windows／macOS 桌面，不在移动端注册。各原生接口先探测，工具缺失不扫描，工具存在但不可用保留诊断。Docker 不删除卷或运行容器，执行绑定端点、Engine 和精确对象 ID，不能把不再可选误当成已删除，见[Docker 使用](../usage/DOCKER.md)。

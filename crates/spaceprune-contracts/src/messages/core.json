@@ -431,6 +431,10 @@
     "Measuring logical file sizes for {p0} {config} snapshots; shared data is included",
     "正在统计 {p0} 个 {config} 快照的文件逻辑大小；包含共享数据"
   ],
+  "snapper.measure_snapshot": [
+    "Measuring logical file size for {config} snapshot #{number}",
+    "正在统计 {config} 快照 #{number} 的文件逻辑大小"
+  ],
   "snapper.logical_measured": [
     "Measured logical file sizes for {p0} {config} snapshots",
     "已统计 {p0} 个 {config} 快照的文件逻辑大小"
