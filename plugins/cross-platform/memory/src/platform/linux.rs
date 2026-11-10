@@ -92,6 +92,18 @@ impl Process {
         Ok(process)
     }
     fn check_alive(&self) -> io::Result<()> {
+        let mut state = libc::pollfd {
+            fd: self.pidfd.as_raw_fd(),
+            events: libc::POLLIN,
+            revents: 0,
+        };
+        // SAFETY: The owned pidfd and writable poll record remain live; zero timeout never waits.
+        if unsafe { libc::poll(&mut state, 1, 0) } < 0 {
+            return Err(io::Error::last_os_error());
+        }
+        if state.revents & (libc::POLLIN | libc::POLLHUP) != 0 {
+            return Err(io::Error::from_raw_os_error(libc::ESRCH));
+        }
         // SAFETY: Signal zero checks liveness/permissions on the owned pidfd; no signal is delivered.
         let result = unsafe {
             libc::syscall(
@@ -153,7 +165,7 @@ impl Process {
             && self.executable()? != expected
         {
             return Err(io::Error::new(
-                io::ErrorKind::NotFound,
+                io::ErrorKind::InvalidInput,
                 "Selected executable has changed",
             ));
         }
@@ -282,20 +294,22 @@ fn release_one(
     let mut process = None;
     let mut before = None;
     let mut advised = false;
+    let mut absent = false;
     let result = (|| -> io::Result<()> {
         check()?;
-        let opened = Process::open(selected.pid, owner)?;
+        process = Some(Process::open(selected.pid, owner).inspect_err(|error| {
+            absent = matches!(error.raw_os_error(), Some(libc::ESRCH | libc::ENOENT));
+        })?);
+        let opened = process.as_ref().unwrap();
         if opened.identity()? != *selected {
             return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "Selected process has exited or changed",
+                io::ErrorKind::InvalidInput,
+                "Selected process identity has changed",
             ));
         }
         opened.check_executable(executable)?;
         before = Some(opened.resident()?);
         let regions = ranges(&read_at(&opened.directory, c"maps", 8 * 1024 * 1024)?)?;
-        process = Some(opened);
-        let opened = process.as_ref().unwrap();
         for (start, end) in regions {
             let mut address = start;
             while address < end {
@@ -341,18 +355,49 @@ fn release_one(
     } else {
         None
     };
+    let already_absent = !advised
+        && result.is_err()
+        && (absent
+            || process.as_ref().is_some_and(|p| {
+                p.check_alive()
+                    .is_err_and(|e| e.raw_os_error() == Some(libc::ESRCH))
+            }));
     MemoryRelease {
         identity: selected.clone(),
+        already_absent,
         succeeded: result.is_ok(),
         applied: advised,
-        resident_reduction_bytes: reduction,
-        error: result.err().map(|e| e.to_string()),
+        resident_reduction_bytes: if already_absent { Some(0) } else { reduction },
+        error: if already_absent {
+            None
+        } else {
+            result.err().map(|e| e.to_string())
+        },
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn exited_process_is_skipped_without_advice_or_claimed_reduction() {
+        let mut child = std::process::Command::new("sleep")
+            .arg("30")
+            .spawn()
+            .unwrap();
+        let identity = Process::open(child.id(), current_user())
+            .unwrap()
+            .identity()
+            .unwrap();
+        child.kill().unwrap();
+        child.wait().unwrap();
+        let result = release_one(&identity, current_user(), None, &|| Ok(()));
+        assert!(result.already_absent);
+        assert!(!result.succeeded && !result.applied);
+        assert_eq!(result.resident_reduction_bytes, Some(0));
+        assert!(result.error.is_none());
+    }
+
     #[test]
     fn stale_identity_and_different_executable_never_advise_disposable_process() {
         let mut child = std::process::Command::new("sleep")
@@ -375,7 +420,7 @@ mod tests {
         child.wait().unwrap();
         assert!(alive);
         for result in [wrong_identity, wrong_executable] {
-            assert!(!result.succeeded && !result.applied);
+            assert!(!result.succeeded && !result.applied && !result.already_absent);
             assert_eq!(result.resident_reduction_bytes, None);
             assert!(result.error.unwrap().contains("changed"));
         }

@@ -164,7 +164,9 @@ impl Handler for MemoryHandler {
             ..Default::default()
         };
         for (item, result) in items.iter().zip(results) {
-            let status = if result.succeeded {
+            let status = if result.already_absent {
+                ItemExecutionStatus::AlreadyAbsent
+            } else if result.succeeded {
                 ItemExecutionStatus::Succeeded
             } else if result.applied {
                 ItemExecutionStatus::PartiallyApplied
@@ -194,7 +196,11 @@ impl Handler for MemoryHandler {
             progress.record_cleanup_with_accounting(
                 task,
                 CleanupSizeAccounting::MemoryBytes,
-                report.succeeded,
+                report
+                    .outcomes
+                    .iter()
+                    .filter(|outcome| outcome.status == ItemExecutionStatus::Succeeded)
+                    .count(),
                 report.reclaimed_bytes,
                 report.unknown_reclaimed_items(),
             );

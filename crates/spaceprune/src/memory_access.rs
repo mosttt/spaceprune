@@ -10,8 +10,8 @@ use std::{
 };
 
 const FLAG: &str = "--spaceprune-memory-release-v1";
-const SUPPORT: &str = "--supports-memory-maintenance-v1";
-const BOUND_SUPPORT: &str = "--supports-bound-memory-maintenance-v1";
+const SUPPORT: &str = "--supports-memory-maintenance-v2";
+const BOUND_SUPPORT: &str = "--supports-bound-memory-maintenance-v2";
 const BOUND_FLAG: &str = "--spaceprune-bound-memory-release-v1";
 const MAX_BYTES: u64 = 64 * 1024;
 

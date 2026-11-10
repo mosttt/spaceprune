@@ -6,7 +6,7 @@ use std::{
     ptr::null_mut,
 };
 use windows_sys::Win32::{
-    Foundation::{CloseHandle, FILETIME, HANDLE},
+    Foundation::{CloseHandle, ERROR_INVALID_PARAMETER, FILETIME, HANDLE, WAIT_OBJECT_0},
     Security::{EqualSid, GetTokenInformation, TOKEN_QUERY, TOKEN_USER, TokenUser},
     System::{
         ProcessStatus::{
@@ -17,7 +17,7 @@ use windows_sys::Win32::{
         Threading::{
             GetCurrentProcess, GetCurrentProcessId, GetProcessTimes, IsProcessCritical,
             OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SET_QUOTA,
-            PROCESS_VM_READ, QueryFullProcessImageNameW,
+            PROCESS_SYNCHRONIZE, PROCESS_VM_READ, QueryFullProcessImageNameW, WaitForSingleObject,
         },
     },
 };
@@ -214,6 +214,18 @@ fn name_path(handle: &Handle) -> io::Result<Vec<u16>> {
     Ok(path)
 }
 
+fn process_absent(pid: u32) -> bool {
+    // SAFETY: This read-only probe never operates on a replacement process.
+    let raw = unsafe { OpenProcess(PROCESS_SYNCHRONIZE, 0, pid) };
+    if raw.is_null() {
+        return pid != 0
+            && io::Error::last_os_error().raw_os_error() == Some(ERROR_INVALID_PARAMETER as i32);
+    }
+    let handle = Handle(raw);
+    // SAFETY: The owned process handle has SYNCHRONIZE access; zero timeout never waits.
+    unsafe { WaitForSingleObject(handle.0, 0) == WAIT_OBJECT_0 }
+}
+
 pub(super) fn release_matching(
     selected: &ProcessIdentity,
     executable: Option<&str>,
@@ -222,15 +234,15 @@ pub(super) fn release_matching(
         let handle = eligible(selected.pid)?;
         if identity(&handle, selected.pid)? != *selected {
             return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "Selected process has exited or changed",
+                io::ErrorKind::InvalidInput,
+                "Selected process identity has changed",
             ));
         }
         if let Some(expected) = executable {
             let observed = String::from_utf16(&name_path(&handle)?).map_err(io::Error::other)?;
             if observed != expected {
                 return Err(io::Error::new(
-                    io::ErrorKind::NotFound,
+                    io::ErrorKind::InvalidInput,
                     "Selected executable has changed",
                 ));
             }
@@ -243,12 +255,22 @@ pub(super) fn release_matching(
             .ok()
             .map(|after| before.saturating_sub(after.WorkingSetSize as u64)))
     })();
+    let already_absent = result.is_err() && process_absent(selected.pid);
     MemoryRelease {
         identity: selected.clone(),
+        already_absent,
         succeeded: result.is_ok(),
         applied: result.is_ok(),
-        resident_reduction_bytes: result.as_ref().ok().copied().flatten(),
-        error: result.err().map(|error| error.to_string()),
+        resident_reduction_bytes: if already_absent {
+            Some(0)
+        } else {
+            result.as_ref().ok().copied().flatten()
+        },
+        error: if already_absent {
+            None
+        } else {
+            result.err().map(|error| error.to_string())
+        },
     }
 }
 
@@ -322,5 +344,11 @@ mod tests {
         let result = release_one(&process.identity);
         assert!(result.succeeded, "{:?}", result.error);
         assert!(fixture.0.try_wait().unwrap().is_none());
+        fixture.0.kill().unwrap();
+        fixture.0.wait().unwrap();
+        let absent = release_one(&process.identity);
+        assert!(absent.already_absent && !absent.succeeded && !absent.applied);
+        assert_eq!(absent.resident_reduction_bytes, Some(0));
+        assert!(absent.error.is_none());
     }
 }

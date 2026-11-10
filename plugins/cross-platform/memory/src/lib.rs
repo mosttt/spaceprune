@@ -74,6 +74,8 @@ pub struct MemoryRelease {
     pub identity: ProcessIdentity,
     /// Whether the native operation completed without a reported error.
     pub succeeded: bool,
+    /// Whether the selected process exited before any native advice was applied.
+    pub already_absent: bool,
     /// Whether any native advice was applied, even if a later step failed.
     #[serde(default)]
     pub applied: bool,
@@ -139,6 +141,7 @@ pub fn release_bound(
                 return Ok(MemoryRelease {
                     identity: selection.identity.clone(),
                     succeeded: false,
+                    already_absent: false,
                     applied: false,
                     resident_reduction_bytes: None,
                     error: Some(error.to_string()),

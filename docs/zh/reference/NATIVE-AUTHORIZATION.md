@@ -77,7 +77,7 @@ macOS filesystem 的 `elevation = "auto"` 在普通删除出现 EACCES 后选择
 
 ### 可重复使用的内存规则
 
-`builtin.memory/process-working-set` 支持 Windows、Linux。`options.applications` 填写完整可执行文件路径，不填程序简称或 PID。每次扫描重新发现当前用户的进程；执行前绑定并复核本次选中的 PID、启动身份及可执行文件路径。退出或被替换的进程不会重定向；程序未运行时没有可选项。已有手动 PID／启动身份接口继续可用。
+`builtin.memory/process-working-set` 支持 Windows、Linux。`options.applications` 填写完整可执行文件路径，不填程序简称或 PID。每次扫描重新发现当前用户的进程；执行前绑定并复核本次选中的 PID、启动身份及可执行文件路径。执行前已退出的进程自动跳过，新增释放量记为零；身份或可执行文件已改变则拒绝操作，不改为操作其他进程。部分释放后发生退出仍保留部分作用回执。程序未运行时没有可选项。已有手动 PID／启动身份接口继续可用。
 
 ```toml
 [modules.memory]

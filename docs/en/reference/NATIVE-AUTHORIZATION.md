@@ -47,7 +47,7 @@ Selections bind the PID, boot identity and process start time, with a pidfd reta
 
 ### Reusable memory rules
 
-`builtin.memory/process-working-set` supports Windows and Linux. Set `options.applications` to exact executable paths, not basenames or PIDs. Each scan resolves current-user processes afresh. Cleanup binds each confirmed process to its PID, start identity and executable path; an exited or replaced process is not retargeted. An application that is not running produces no selection. The existing manual PID/start-identity interface remains available.
+`builtin.memory/process-working-set` supports Windows and Linux. Set `options.applications` to exact executable paths, not basenames or PIDs. Each scan resolves current-user processes afresh. Cleanup binds each confirmed process to its PID, start identity and executable path; a process that exits before maintenance is skipped with zero additional reduction. Changed identities or executables are rejected, never retargeted. An exit after partial maintenance retains the partial-effect receipt. An application that is not running produces no selection. The existing manual PID/start-identity interface remains available.
 
 ```toml
 [modules.memory]

@@ -94,7 +94,19 @@ impl ExecutionReport {
             if let Some(result) = &group.result {
                 summary.merge(&CleanupSizeSummary::from_progress(
                     group.size_accounting,
-                    result.succeeded,
+                    if group.size_accounting == CleanupSizeAccounting::MemoryBytes {
+                        result.succeeded.saturating_sub(
+                            result
+                                .outcomes
+                                .iter()
+                                .filter(|outcome| {
+                                    outcome.status == ItemExecutionStatus::AlreadyAbsent
+                                })
+                                .count(),
+                        )
+                    } else {
+                        result.succeeded
+                    },
                     result.reclaimed_bytes,
                     result.unknown_reclaimed_items(),
                 ));
@@ -160,6 +172,20 @@ mod tests {
                 ..Default::default()
             }
         );
+        report.groups[2]
+            .result
+            .as_mut()
+            .unwrap()
+            .outcomes
+            .push(crate::handler::ItemExecution {
+                item_id: "exited".into(),
+                status: ItemExecutionStatus::AlreadyAbsent,
+                reclaimed_estimate: Some(0),
+                reclaimed_lower_bound: 0,
+                failure: None,
+            });
+        assert_eq!(report.size_summary().memory_process_count, 1);
+        assert_eq!(report.size_summary().memory_reduction_bytes, 4096);
         report.cancelled = true;
         report.groups[1].error = Some("Interrupted after confirmed groups".into());
         assert_eq!(report.size_summary().snapshot_group_count, 5);

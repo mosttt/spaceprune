@@ -128,6 +128,7 @@ fn partial_native_effects_and_unknown_ram_are_preserved() {
             .map(|(i, p)| MemoryRelease {
                 identity: p.identity.clone(),
                 succeeded: i == 0,
+                already_absent: false,
                 applied: i < 2,
                 resident_reduction_bytes: if i == 0 { Some(1024) } else { None },
                 error: if i == 0 {
@@ -159,4 +160,39 @@ fn partial_native_effects_and_unknown_ram_are_preserved() {
     assert_eq!(result.outcomes[2].status, ItemExecutionStatus::Failed);
     assert_eq!(result.reclaimed_bytes, 1024);
     assert_eq!(result.unknown_reclaimed_items(), 1);
+}
+
+#[test]
+fn exited_selection_is_already_absent_and_does_not_add_memory_or_failures() {
+    fn release(
+        selected: &[BoundProcess],
+        _: &dyn ProgressSink,
+        _: &OperationContext,
+    ) -> PluginResult<Vec<MemoryRelease>> {
+        Ok(selected
+            .iter()
+            .map(|p| MemoryRelease {
+                identity: p.identity.clone(),
+                succeeded: false,
+                already_absent: true,
+                applied: false,
+                resident_reduction_bytes: Some(0),
+                error: None,
+            })
+            .collect())
+    }
+    let items = scan_items(&task(), snapshot(vec![process(42, "start", exe("editor"))]))
+        .unwrap()
+        .items;
+    let result = MemoryHandler { release }
+        .clean(&task(), &items, &Sink, &OperationContext::default())
+        .unwrap();
+    assert_eq!(
+        result.outcomes[0].status,
+        ItemExecutionStatus::AlreadyAbsent
+    );
+    assert_eq!(result.reclaimed_bytes, 0);
+    assert_eq!(result.unknown_reclaimed_items(), 0);
+    assert!(result.failures.is_empty());
+    result.validate_selected(&items, false).unwrap();
 }
