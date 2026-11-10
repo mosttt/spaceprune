@@ -31,17 +31,23 @@ pub fn register(
 
 /// Built-in catalog metadata for mobile hosts; desktop catalogs need not advertise this capability.
 pub fn catalog_entry(enabled: bool) -> PluginCatalogEntry {
+    let spec = spaceprune_contracts::plugin::builtin_plugin_spec(MOBILE_DOCUMENTS_PLUGIN_ID)
+        .expect("bundled documents metadata");
     PluginCatalogEntry {
         id: MOBILE_DOCUMENTS_PLUGIN_ID.into(),
         name: spaceprune_plugin_api::messages::text("mobile_documents.name").into(),
         description: spaceprune_plugin_api::messages::text("mobile_documents.description").into(),
-        version: env!("CARGO_PKG_VERSION").into(),
+        version: spec.version.into(),
         kind: PluginKind::Builtin,
-        platforms: vec!["android".into()],
+        platforms: spec
+            .platforms
+            .iter()
+            .map(|platform| (*platform).into())
+            .collect(),
         supported: cfg!(target_os = "android"),
         conflicts_with_builtin: false,
         enabled,
-        handlers: vec![HANDLER_ID.into()],
+        handlers: spec.handler_ids("android"),
         installation: None,
     }
 }

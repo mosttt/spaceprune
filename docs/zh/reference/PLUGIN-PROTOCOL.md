@@ -3,6 +3,8 @@
 外部插件使用 `protocol-version = 3` 的 JSON Lines 进程协议。普通路径规则优先使用
 `builtin.filesystem/paths`；外部插件用于配置无法表达的领域扫描和清理逻辑。
 
+需要只读查看内置能力时，可使用 `spaceprune_contracts::plugin::BUILTIN_PLUGIN_SPECS`：声明包含版本、支持系统与该系统的完整处理器 ID，不启动插件。实际启停、安装状态和授权仍由宿主管理，外部插件从其真实 Manifest 读取元数据。
+
 ## 1. 插件目录
 
 ```text

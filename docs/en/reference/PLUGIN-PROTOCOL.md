@@ -2,6 +2,8 @@
 
 External plugins use the JSON Lines process protocol with `protocol-version = 3`. Prefer `builtin.filesystem/paths` for ordinary path rules. External plugins provide domain-specific scanning and cleanup logic that configuration cannot express.
 
+For read-only built-in discovery, use `spaceprune_contracts::plugin::BUILTIN_PLUGIN_SPECS`. It exposes versions, supported systems and full handler IDs without starting plugins. Hosts still control enablement, installation state and authorization; external metadata comes from the actual plugin manifest.
+
 ## 1. Plugin directory
 
 ```text

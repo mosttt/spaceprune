@@ -68,76 +68,26 @@ fn catalog<'a>(
     plugins: impl IntoIterator<Item = &'a InstalledPlugin>,
     policy: &PolicySnapshot,
 ) -> Vec<PluginCatalogEntry> {
-    let mut entries = vec![
-        builtin(
+    let mut entries = [
+        (
             spaceprune_contracts::plugin::SYSTEM_WINDOWS_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.windows_name"),
-            spaceprune_contracts::messages::text("plugins.windows_description"),
-            &["windows"],
-            &["recycle-bin", "component-store"],
+            "windows",
         ),
+        (spaceprune_contracts::plugin::MEMORY_PLUGIN_ID, "memory"),
+        (FILESYSTEM_PLUGIN_ID, "filesystem"),
+        (SNAPPER_PLUGIN_ID, "snapshots"),
+        (DEVELOPER_TOOLS_PLUGIN_ID, "developer"),
+        (SYSTEM_LINUX_PLUGIN_ID, "system"),
+    ]
+    .into_iter()
+    .map(|(id, message)| {
         builtin(
-            spaceprune_contracts::plugin::MEMORY_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.memory_name"),
-            spaceprune_contracts::messages::text("plugins.memory_description"),
-            &["windows", "linux"],
-            &["process-working-set"],
-        ),
-        builtin(
-            FILESYSTEM_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.filesystem_name"),
-            spaceprune_contracts::messages::text("plugins.filesystem_description"),
-            &[],
-            &["paths"],
-        ),
-        builtin(
-            SNAPPER_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.snapshots_name"),
-            spaceprune_contracts::messages::text("plugins.snapshots_description"),
-            &["linux"],
-            &["snapshots"],
-        ),
-        builtin(
-            DEVELOPER_TOOLS_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.developer_name"),
-            spaceprune_contracts::messages::text("plugins.developer_description"),
-            &["linux", "windows", "macos"],
-            &[
-                "go-modcache",
-                "go-buildcache",
-                "cargo-registry-cache",
-                "npm-cache",
-                "docker-build-cache",
-                "docker-dangling-images",
-                "docker-unused-images",
-                "docker-stopped-containers",
-            ],
-        ),
-        builtin(
-            SYSTEM_LINUX_PLUGIN_ID,
-            spaceprune_contracts::messages::text("plugins.system_name"),
-            spaceprune_contracts::messages::text("plugins.system_description"),
-            &["linux"],
-            &[
-                "package-cache",
-                "journal",
-                "tmpfiles",
-                "coredumps",
-                "go-modcache",
-            ],
-        ),
-    ];
-    #[cfg(not(target_os = "linux"))]
-    {
-        if let Some(developer) = entries
-            .iter_mut()
-            .find(|entry| entry.id == DEVELOPER_TOOLS_PLUGIN_ID)
-        {
-            developer
-                .handlers
-                .retain(|handler| handler.contains("/docker-"));
-        }
-    }
+            id,
+            spaceprune_contracts::messages::text(&format!("plugins.{message}_name")),
+            spaceprune_contracts::messages::text(&format!("plugins.{message}_description")),
+        )
+    })
+    .collect::<Vec<_>>();
     for plugin in plugins {
         entries.push(PluginCatalogEntry {
             id: plugin.manifest.id.clone(),
@@ -170,31 +120,25 @@ fn catalog<'a>(
     entries
 }
 
-fn builtin(
-    id: &str,
-    name: &str,
-    description: &str,
-    platforms: &[&str],
-    handlers: &[&str],
-) -> PluginCatalogEntry {
+fn builtin(id: &str, name: &str, description: &str) -> PluginCatalogEntry {
+    let spec =
+        spaceprune_contracts::plugin::builtin_plugin_spec(id).expect("bundled catalog identity");
+    let platform = spaceprune_config::current_platform();
     PluginCatalogEntry {
         id: id.to_owned(),
         name: name.to_owned(),
         description: description.to_owned(),
-        version: crate::VERSION.to_owned(),
+        version: spec.version.to_owned(),
         kind: PluginKind::Builtin,
         conflicts_with_builtin: false,
-        platforms: platforms
+        platforms: spec
+            .platforms
             .iter()
             .map(|platform| (*platform).to_owned())
             .collect(),
-        supported: platforms.is_empty()
-            || platforms.contains(&spaceprune_config::current_platform()),
+        supported: spec.supports(platform),
         enabled: true,
-        handlers: handlers
-            .iter()
-            .map(|handler| format!("{id}/{handler}"))
-            .collect(),
+        handlers: spec.handler_ids(platform),
         installation: None,
     }
 }

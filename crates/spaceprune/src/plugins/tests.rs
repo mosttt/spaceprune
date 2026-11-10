@@ -52,6 +52,8 @@ fn catalog_matches_registered_builtin_handlers_without_executing_plugins() {
     assert_eq!(entries.len(), 6);
     let mut registry = spaceprune_engine::PluginRegistry::new();
     spaceprune_plugin_filesystem::register(&mut registry).unwrap();
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    crate::memory_recipe::register(&mut registry).unwrap();
     #[cfg(target_os = "linux")]
     spaceprune_plugin_snapper::register(&mut registry).unwrap();
     spaceprune_platform::register_handlers(&mut registry).unwrap();

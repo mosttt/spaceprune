@@ -1,5 +1,8 @@
 //! Public plugin identities and metadata; discovery, validation and execution remain in the host.
 
+mod builtin;
+pub use builtin::{BUILTIN_PLUGIN_SPECS, BuiltinPluginSpec, builtin_plugin_spec};
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -14,7 +17,7 @@ pub const SYSTEM_LINUX_PLUGIN_ID: &str = "builtin.system-linux";
 pub const DEVELOPER_TOOLS_PLUGIN_ID: &str = "builtin.developer-tools";
 /// Reserved identity of user-authorized native document access.
 pub const MOBILE_DOCUMENTS_PLUGIN_ID: &str = "builtin.mobile-documents";
-/// Reserved identity of manual process memory maintenance.
+/// Reserved identity of process memory maintenance.
 pub const MEMORY_PLUGIN_ID: &str = "builtin.memory";
 /// Reserved identity of Windows Shell and servicing capabilities.
 pub const SYSTEM_WINDOWS_PLUGIN_ID: &str = "builtin.system-windows";
